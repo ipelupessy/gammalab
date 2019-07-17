@@ -58,7 +58,7 @@ class Monitor(ReceivingService):
           f, ax = pyplot.subplots()
 
           plot=ax.plot(self.plotdata)
-          ax.set_ylim(-2,2)
+          ax.set_ylim(-0.01,1.1)
         
           self.fig=f
           self.ax=ax

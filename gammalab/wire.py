@@ -9,6 +9,10 @@ class RawWire(Queue):
 class FloatWire(Queue):
     _description="numpy float array"
 
+class PulseWire(Queue):
+    _description="pulses"
+
+
 # Wires are Queues. 
 # Different queues are defined for checking purposes.
 # It is up to the implementation to conform to description.
