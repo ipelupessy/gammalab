@@ -8,20 +8,20 @@ class Raw2Float(ThreadService, SourceService, ReceivingService):
         SourceService.__init__(self)
         ReceivingService.__init__(self)
         ThreadService.__init__(self)
+        self.input_wire=RawWire()
 
     def connect(self, wire):
         assert isinstance(wire, FloatWire)
+        wire.CHANNELS=self.input_wire.CHANNELS
+        wire.RATE=self.input_wire.RATE
+        wire.FORMAT=self.input_wire.FORMAT        
         self.wires.append(wire)
 
     def connect_input(self, service):
-        self.input_wire=RawWire()
         service.connect(self.input_wire)
-        self.CHANNELS=service.CHANNELS
-        self.RATE=service.RATE
-        self.FORMAT=service.FORMAT
 
     def _process_input(self, data):
-        return numpy.frombuffer(data,dtype=self.FORMAT)
+        return numpy.frombuffer(data,dtype=self.input_wire.FORMAT)
 
     def _process(self):
         while not self.done:
@@ -41,18 +41,18 @@ class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
         SourceService.__init__(self)
         ReceivingService.__init__(self)
         ThreadService.__init__(self)
+        self.input_wire=FloatWire()
         self.factor=factor
 
     def connect(self, wire):
         assert isinstance(wire, FloatWire)
+        wire.CHANNELS=self.input_wire.CHANNELS
+        wire.FORMAT=self.input_wire.FORMAT
+        wire.RATE=self.input_wire.RATE/self.factor
         self.wires.append(wire)
 
     def connect_input(self, service):
-        self.input_wire=FloatWire()
         service.connect(self.input_wire)
-        self.CHANNELS=service.CHANNELS
-        self.RATE=service.RATE/self.factor
-        self.FORMAT=service.FORMAT
 
     def _process_input(self, data):
         return numpy.max(data.reshape(-1, self.factor),axis=1)

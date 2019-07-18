@@ -36,10 +36,13 @@ class SourceService(Service):
         try:
           other.connect_input(self)
         except ServiceError as ex:
-          raise ex          
-        except Exception as ex:
-          print ex
-          raise Exception("trying to connect incompatible services")
+          raise ex      
+        except AssertionError as ex:
+          print(ex)
+          raise Exception("Wiring fault! Trying to connect incompatible services")
+        except AttributeError as ex:
+          print(ex)
+          raise Exception("Wiring fault! Wires connected out of order?")
         
 class ReceivingService(Service):
     def __init__(self):

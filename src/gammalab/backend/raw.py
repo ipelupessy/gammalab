@@ -16,9 +16,6 @@ class SaveRaw(ThreadService, ReceivingService):
     def connect_input(self, service):
         self.input_wire=RawWire()
         service.connect(self.input_wire)
-        self.CHANNELS=service.CHANNELS
-        self.RATE=service.RATE
-        self.FORMAT=service.FORMAT
 
     def _process_input(self, data):
         self.output.write(data)

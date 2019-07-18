@@ -8,6 +8,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         SourceService.__init__(self)
         ReceivingService.__init__(self)
         ThreadService.__init__(self)
+        self.input_wire=FloatWire()
         self.threshold=threshold
         self.window=window
 
@@ -16,12 +17,11 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         self.wires.append(wire)
 
     def connect_input(self, service):
-        self.input_wire=FloatWire()
         service.connect(self.input_wire)
-        self.CHANNELS=service.CHANNELS
-        self.RATE=service.RATE
-        self.FORMAT=service.FORMAT
-        self.data=numpy.zeros(self.window, dtype=self.FORMAT)
+
+    def start(self):
+        ThreadService.start(self)
+        self.data=numpy.zeros(self.window, dtype=self.input_wire.FORMAT)
         self.ndata=0
 
     def detect_pulses(self):

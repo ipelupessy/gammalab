@@ -14,6 +14,9 @@ class Noise(ThreadService, SourceService):
 
     def connect(self, wire):
         assert isinstance(wire, RawWire)
+        wire.CHANNELS=self.CHANNELS
+        wire.RATE=self.RATE
+        wire.FORMAT=self.FORMAT
         self.wires.append(wire)
     
     def _samples(self):

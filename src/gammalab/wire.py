@@ -15,4 +15,6 @@ class PulseWire(Queue):
 
 # Wires are Queues. 
 # Different queues are defined for checking purposes.
-# It is up to the implementation to conform to description.
+# data format of the wires is implcit but:
+# wires may carry attributes as means to transfer meta information
+# and this should be only comm between services! 

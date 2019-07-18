@@ -15,9 +15,6 @@ class Playback(ReceivingService):
     def connect_input(self, service):
         self.input_wire=RawWire()      
         service.connect(self.input_wire)
-        self.CHANNELS=service.CHANNELS
-        self.RATE=service.RATE
-        self.FORMAT=service.FORMAT
 
     def _callback(self, in_data, frame_count, time_info, status):
         try:
@@ -29,9 +26,9 @@ class Playback(ReceivingService):
 
     def start(self):
         self.player = self.pyaudio.open(
-                format=pyaudio_format[self.FORMAT],
-                channels=self.CHANNELS,
-                rate=self.RATE,
+                format=pyaudio_format[self.input_wire.FORMAT],
+                channels=self.input_wire.CHANNELS,
+                rate=self.input_wire.RATE,
                 output=True,
                 stream_callback=self._callback
                 )

@@ -22,9 +22,6 @@ class Monitor(ReceivingService):
     def connect_input(self, service):
         self.input_wire=FloatWire()
         service.connect(self.input_wire)
-        self.CHANNELS=service.CHANNELS
-        self.RATE=service.RATE
-        self.FORMAT=service.FORMAT
 
     def update_plot(self,nframe):
         
@@ -53,7 +50,7 @@ class Monitor(ReceivingService):
         return self.plot
   
     def start(self):
-          self.plotdata=numpy.zeros(self.RATE*self.window, dtype=self.FORMAT)
+          self.plotdata=numpy.zeros(self.input_wire.RATE*self.window, dtype=self.input_wire.FORMAT)
           pyplot.ion()
           f, ax = pyplot.subplots()
 
