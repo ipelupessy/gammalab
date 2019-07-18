@@ -12,9 +12,8 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         self.threshold=threshold
         self.window=window
 
-    def connect(self, wire):
+    def output_protocol(self, wire):
         assert isinstance(wire, PulseWire)
-        self.wires.append(wire)
 
     def start(self):
         ThreadService.start(self)

@@ -12,12 +12,11 @@ class Noise(ThreadService, SourceService):
         self.FORMAT="float32"
         self.t0=time.time()
 
-    def connect(self, wire):
+    def output_protocol(self, wire):
         assert isinstance(wire, RawWire)
         wire.CHANNELS=self.CHANNELS
         wire.RATE=self.RATE
         wire.FORMAT=self.FORMAT
-        self.wires.append(wire)
     
     def _samples(self):
         t=time.time()

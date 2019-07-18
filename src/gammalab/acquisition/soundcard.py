@@ -13,13 +13,12 @@ class SoundCard(SourceService):
         self.FORMAT="float32"
         self.pyaudio=pyaudio.PyAudio()
         self.recorder=None
-
-    def connect(self, wire):
+        
+    def output_protocol(self, wire):
         assert isinstance(wire, RawWire)
         wire.CHANNELS=self.CHANNELS
         wire.RATE=self.RATE
         wire.FORMAT=self.FORMAT
-        self.wires.append(wire)
         
     def _callback(self, in_data, frame_count, time_info, status):
         self.send_output(in_data)

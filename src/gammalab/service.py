@@ -25,6 +25,13 @@ class SourceService(Service):
         Service.__init__(self)
         self.wires=[]
 
+    def output_protocol(self):
+        raise Exception("not implemented for %s"%str(self))
+
+    def connect(self, wire):
+        self.output_protocol(wire)
+        self.wires.append(wire)
+
     def send_output(self,data):
         for w in self.wires:
             try:
