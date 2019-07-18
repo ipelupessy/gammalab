@@ -15,13 +15,10 @@ class Monitor(ReceivingService):
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
         ReceivingService.__init__(self)
+        self.input_wire=FloatWire()
         
         self.window=window
         self.stopped=True
-        
-    def connect_input(self, service):
-        self.input_wire=FloatWire()
-        service.connect(self.input_wire)
 
     def update_plot(self,nframe):
         

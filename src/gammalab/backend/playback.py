@@ -8,13 +8,9 @@ pyaudio_format=dict(float32=pyaudio.paFloat32)
 class Playback(ReceivingService):
     def __init__(self):
         ReceivingService.__init__(self)
-        
+        self.input_wire=RawWire()      
         self.pyaudio=pyaudio.PyAudio()
         self.player=None
-
-    def connect_input(self, service):
-        self.input_wire=RawWire()      
-        service.connect(self.input_wire)
 
     def _callback(self, in_data, frame_count, time_info, status):
         try:

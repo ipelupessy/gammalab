@@ -47,8 +47,8 @@ class SourceService(Service):
 class ReceivingService(Service):
     def __init__(self):
         Service.__init__(self)
-    def connect_input(self):
-        raise Exception("not implemented")
+    def connect_input(self, service):
+        service.connect(self.input_wire)
     def receive_input(self, block=True):
         return self.input_wire.get(block, 2)
 

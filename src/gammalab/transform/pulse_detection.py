@@ -16,9 +16,6 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         assert isinstance(wire, PulseWire)
         self.wires.append(wire)
 
-    def connect_input(self, service):
-        service.connect(self.input_wire)
-
     def start(self):
         ThreadService.start(self)
         self.data=numpy.zeros(self.window, dtype=self.input_wire.FORMAT)

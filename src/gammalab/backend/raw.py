@@ -5,6 +5,7 @@ class SaveRaw(ThreadService, ReceivingService):
     def __init__(self, filename=None):
         ReceivingService.__init__(self)
         ThreadService.__init__(self)
+        self.input_wire=RawWire()
         
         if filename is None:
             filename="data.raw"
@@ -12,10 +13,6 @@ class SaveRaw(ThreadService, ReceivingService):
         self.outputfile=filename
         
         self.output=open(self.outputfile, 'w')
-
-    def connect_input(self, service):
-        self.input_wire=RawWire()
-        service.connect(self.input_wire)
 
     def _process_input(self, data):
         self.output.write(data)

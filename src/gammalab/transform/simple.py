@@ -17,9 +17,6 @@ class Raw2Float(ThreadService, SourceService, ReceivingService):
         wire.FORMAT=self.input_wire.FORMAT        
         self.wires.append(wire)
 
-    def connect_input(self, service):
-        service.connect(self.input_wire)
-
     def _process_input(self, data):
         return numpy.frombuffer(data,dtype=self.input_wire.FORMAT)
 
@@ -50,9 +47,6 @@ class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
         wire.FORMAT=self.input_wire.FORMAT
         wire.RATE=self.input_wire.RATE/self.factor
         self.wires.append(wire)
-
-    def connect_input(self, service):
-        service.connect(self.input_wire)
 
     def _process_input(self, data):
         return numpy.max(data.reshape(-1, self.factor),axis=1)
