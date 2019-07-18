@@ -23,7 +23,7 @@ class SaveRaw(ThreadService, ReceivingService):
                 q=self.receive_input()
             except Exception as ex:
                 q=None
-            if q:
+            if q is not None:
                 if not self.stopped:
                     self._process_input(q)
             else:

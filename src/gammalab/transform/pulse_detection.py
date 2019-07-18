@@ -19,6 +19,8 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         ThreadService.start(self)
         self.data=numpy.zeros(self.window, dtype=self.input_wire.FORMAT)
         self.ndata=0
+        self.RATE=self.input_wire.RATE
+        self.itime=0
 
     def detect_pulses(self):
         larger=self.data>=self.threshold
@@ -45,10 +47,11 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         
         pulses=[]
         for start,end in zip(up,down)[:50]:
-            time=start
+            time=start/(1.*self.RATE)+self.itime
             amplitude=numpy.max(self.data[start:end])
             pulses.append((time,amplitude))
             
+        self.itime+=self.window/(1.*self.RATE)
         return pulses
 
     def _process_input(self, data):
