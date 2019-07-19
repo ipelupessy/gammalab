@@ -64,18 +64,6 @@ class Monitor(ReceivingService):
           ani = FuncAnimation(self.fig, self.update_plot, interval=50, blit=True)
           f.canvas.draw()
 
-    def _process(self):
-        while not self.done:
-            try:
-                q=self.receive_input()
-            except Exception as ex:
-                q=None
-            if q:
-                if not self.stopped:
-                    self._process_input(q)
-            else:
-                self.done=True
-
     def stop(self):
         self.stopped=True
       
