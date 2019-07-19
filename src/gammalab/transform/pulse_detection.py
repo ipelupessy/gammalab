@@ -49,6 +49,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         
         pulses=[]
         for start,end in zip(up,down)[:50]:
+          if end-start>5:
             time=start/(1.*self.RATE)+self.itime
             amplitude=numpy.max(self.data[start:end])
             pulses.append((time,amplitude))

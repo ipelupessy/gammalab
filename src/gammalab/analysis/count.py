@@ -19,7 +19,7 @@ class Count(ThreadService, ReceivingService):
         cps10=0
         dt=0
         if total>0:
-            dt=self.all_pulses[-1][0]-self.all_pulses[1][0]
+            dt=self.all_pulses[-1][0]-self.all_pulses[0][0]
             if dt>0:
                 cps=total/dt
         if total>101:
@@ -29,15 +29,3 @@ class Count(ThreadService, ReceivingService):
                 
         print("time {0:f} total pulses {1:d}, cps: {2:f}, current cps (10%) {3:f} \r".format(dt, total, cps, cps10), end="")
         sys.stdout.flush()
-
-    #~ def _process(self):
-        #~ while not self.done:
-            #~ try:
-                #~ q=self.receive_input()
-            #~ except Exception as ex:
-                #~ q=None
-            #~ if q is not None:
-                #~ if not self.stopped:
-                    #~ self._process_input(q)
-            #~ else:
-                #~ self.done=True

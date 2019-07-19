@@ -11,7 +11,7 @@ except:
     HAS_MATPLOTLIB=False
 
 class Monitor(ReceivingService):
-    def __init__(self, window=5):
+    def __init__(self, window=5, vmin=-0.01, vmax=1.1):
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
         ReceivingService.__init__(self)
@@ -19,6 +19,8 @@ class Monitor(ReceivingService):
         
         self.window=window
         self.stopped=True
+        self.vmin=vmin
+        self.vmax=vmax
 
     def update_plot(self,nframe):
         
@@ -52,7 +54,7 @@ class Monitor(ReceivingService):
           f, ax = pyplot.subplots()
 
           plot=ax.plot(self.plotdata)
-          ax.set_ylim(-0.01,1.1)
+          ax.set_ylim(self.vmin,self.vmax)
         
           self.fig=f
           self.ax=ax
