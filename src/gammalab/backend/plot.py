@@ -24,10 +24,10 @@ class Monitor(ReceivingService):
         
         data=[]
         while True:
-            try:
-                data.append(self.receive_input(False))
-            except:
+            _data=self.receive_input(False)
+            if _data is None:
                 break
+            data.append(_data)
         
         if data:
             data=numpy.concatenate(data)

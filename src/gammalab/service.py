@@ -57,7 +57,10 @@ class ReceivingService(Service):
     def connect_input(self, service):
         service.connect(self.input_wire)
     def receive_input(self, block=True):
-        return self.input_wire.get(block, 2)
+        try:
+            return self.input_wire.get(block, 2)
+        except Exception as ex:
+            return None
 
 # multiple input/outputs will be implemented by connecting to/from special attributes:
 # s1.output1.plugs_into(s2)
@@ -69,12 +72,27 @@ class ThreadService(object):
         self.thread=threading.Thread(target=self._process)
 
     def start(self):
+        self.stopped=False
         if not self.thread.is_alive():
             self.thread.start()
-        self.stopped=False
 
     def _process(self):
-        raise Exception("not implemented")
+        while not self.done:
+            if hasattr(self,"receive_input"):
+                data=self.receive_input()
+                if data is None:
+                    self.done=True
+            else:
+                data=None
+
+            # if stopped reveive input, but do not process, nor output
+
+            if not self.stopped and not self.done:
+                data=self.process(data)
+
+            if hasattr(self,"send_output"):
+                if not self.stopped:  
+                    self.send_output(data)
 
     def stop(self):
         self.stopped=True

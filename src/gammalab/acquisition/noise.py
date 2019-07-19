@@ -18,7 +18,8 @@ class Noise(ThreadService, SourceService):
         wire.RATE=self.RATE
         wire.FORMAT=self.FORMAT
     
-    def _samples(self):
+    def process(self, data=None):
+        time.sleep(0.1)
         t=time.time()
         dt=t-self.t0
         self.t0=t
@@ -26,10 +27,4 @@ class Noise(ThreadService, SourceService):
         n=int(numpy.floor(dt*self.RATE))
         data=numpy.random.random(n)
         return data.tobytes()
-        
-    def _process(self):
-        while not self.done:
-            if not self.stopped:
-                data=self._samples()
-                self.send_output(data)
-            time.sleep(0.1)
+

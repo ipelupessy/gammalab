@@ -16,21 +16,8 @@ class Raw2Float(ThreadService, SourceService, ReceivingService):
         wire.RATE=self.input_wire.RATE
         wire.FORMAT=self.input_wire.FORMAT        
 
-    def _process_input(self, data):
+    def process(self, data):
         return numpy.frombuffer(data,dtype=self.input_wire.FORMAT)
-
-    def _process(self):
-        while not self.done:
-            try:
-                inp=self.receive_input()
-            except Exception as ex:
-                inp=None
-            if inp is not None:
-                if not self.stopped:
-                    out=self._process_input(inp)
-                    self.send_output(out)
-            else:
-                self.done=True
 
 class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
     def __init__(self, factor=8):
@@ -46,18 +33,5 @@ class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
         wire.FORMAT=self.input_wire.FORMAT
         wire.RATE=self.input_wire.RATE/self.factor
 
-    def _process_input(self, data):
+    def process(self, data):
         return numpy.max(data.reshape(-1, self.factor),axis=1)
-
-    def _process(self):
-        while not self.done:
-            try:
-                inp=self.receive_input()
-            except Exception as ex:
-                inp=None
-            if inp is not None:
-                if not self.stopped:
-                    out=self._process_input(inp)
-                    self.send_output(out)
-            else:
-                self.done=True

@@ -14,17 +14,5 @@ class SaveRaw(ThreadService, ReceivingService):
         
         self.output=open(self.outputfile, 'w')
 
-    def _process_input(self, data):
+    def process(self, data):
         self.output.write(data)
-
-    def _process(self):
-        while not self.done:
-            try:
-                q=self.receive_input()
-            except Exception as ex:
-                q=None
-            if q is not None:
-                if not self.stopped:
-                    self._process_input(q)
-            else:
-                self.done=True

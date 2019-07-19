@@ -13,9 +13,8 @@ class Playback(ReceivingService):
         self.player=None
 
     def _callback(self, in_data, frame_count, time_info, status):
-        try:
-            data=self.receive_input(block=False)
-        except:
+        data=self.receive_input(block=False)
+        if data is None:
             print("playback buffer underrun")
             data=bytes(0)*4096
         return (data, pyaudio.paContinue)

@@ -16,11 +16,11 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         assert isinstance(wire, PulseWire)
 
     def start(self):
-        ThreadService.start(self)
         self.data=numpy.zeros(self.window, dtype=self.input_wire.FORMAT)
         self.ndata=0
         self.RATE=self.input_wire.RATE
         self.itime=0
+        ThreadService.start(self)
 
     def detect_pulses(self):
         larger=self.data>=self.threshold
@@ -41,9 +41,11 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
           up=up[:-1]
         
         if len(up)!=len(down):
+            print(len(up),len(down), len(data))
+            print(up,down)
             raise Exception("at this point, number of up and down edges must be same")
             
-        print "number of pulses:", len(up)
+        #~ print "number of pulses:", len(up)
         
         pulses=[]
         for start,end in zip(up,down)[:50]:
@@ -54,24 +56,10 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         self.itime+=self.window/(1.*self.RATE)
         return pulses
 
-    def _process_input(self, data):
+    def process(self, data):
         self.data[self.ndata:self.ndata+len(data)]=data
         self.ndata+=len(data)
         if self.ndata>=self.window:
             self.ndata=0
             return self.detect_pulses()
         return None
-
-    def _process(self):
-        while not self.done:
-            try:
-                inp=self.receive_input()
-            except Exception as ex:
-                inp=None
-            if inp is not None:
-                if not self.stopped:
-                    out=self._process_input(inp)
-                    if out is not None:
-                        self.send_output(out)
-            else:
-                self.done=True
