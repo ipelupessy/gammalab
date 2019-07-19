@@ -91,8 +91,11 @@ class ThreadService(object):
                 data=self.process(data)
 
             if hasattr(self,"send_output"):
-                if not self.stopped:  
+                if not self.stopped and data is not None:  
                     self.send_output(data)
+                if self.done==True:
+                    self.send_output(None)
+                  
 
     def stop(self):
         self.stopped=True

@@ -26,25 +26,25 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         larger=self.data>=self.threshold
         smaller=self.data<self.threshold
         
-        up=larger[1:-1]*smaller[:-2]
-        down=larger[1:-1]*smaller[2:]
+        up=smaller[:-1]*larger[1:]
+        down=larger[:-1]*smaller[1:]
         
-        up=numpy.argwhere(up) + 1 #account for shift
-        down=numpy.argwhere(down) + 2 # take 1 extra point
+        up=numpy.argwhere(up) 
+        down=numpy.argwhere(down) 
         
         up=up[:,0]
         down=down[:,0]
-        
+                
         if larger[0]: # discard first down crossing edge
           down=down[1:]
         if larger[-1]: # discard last up crossing edge
           up=up[:-1]
         
         if len(up)!=len(down):
-            print(len(up),len(down), len(data))
-            print(up,down)
             raise Exception("at this point, number of up and down edges must be same")
-            
+       
+        #~ assert numpy.all(up<down)
+        #~ assert numpy.all(up[1:]>down[:-1])
         #~ print "number of pulses:", len(up)
         
         pulses=[]
