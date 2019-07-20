@@ -11,7 +11,7 @@ except:
     HAS_MATPLOTLIB=False
 
 class Histogram(ReceivingService):
-    def __init__(self, nchannels=100, xmin=0, xmax=1.):
+    def __init__(self, nchannels=100, xmin=0, xmax=1., log=True):
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
         ReceivingService.__init__(self)
@@ -22,6 +22,7 @@ class Histogram(ReceivingService):
         self.xmax=xmax
         self.nchannels=nchannels
         self.all_pulses=[]
+        self.log=log
 
     def update_plot(self,nframe):
         
@@ -38,16 +39,14 @@ class Histogram(ReceivingService):
         data=[x[1] for x in self.all_pulses]
         
         self.ax.cla()
-        self.ax.hist(data, bins=self.nchannels, range=(self.xmin,self.xmax))
+        self.ax.hist(data, bins=self.nchannels, range=(self.xmin,self.xmax), log=self.log)
         
         
     def start(self):
           pyplot.ion()
           f, ax = pyplot.subplots()
 
-          plot=ax.hist([], bins=self.nchannels, range=(self.xmin,self.xmax))
-          #~ ax.set_ylim(0,1.)
-          #~ ax.set_xlim(self.xmin,self.xmax)
+          plot=ax.hist([], bins=self.nchannels, range=(self.xmin,self.xmax),log=self.log)
         
           self.fig=f
           self.ax=ax
