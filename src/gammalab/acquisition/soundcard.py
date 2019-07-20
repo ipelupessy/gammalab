@@ -43,6 +43,3 @@ class SoundCard(SourceService):
             self.recorder.close()
 
         self.pyaudio.terminate()
-    
-    #~ def __del__(self):
-        #~ self.close()
