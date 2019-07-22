@@ -6,13 +6,14 @@ import pyaudio
 pyaudio_format=dict(float32=pyaudio.paFloat32)
 
 class SoundCard(SourceService):
-    def __init__(self):
+    def __init__(self, frames_per_buffer=2048):
         SourceService.__init__(self)
         self.CHANNELS=1
         self.RATE=48000
         self.FORMAT="float32"
         self.pyaudio=pyaudio.PyAudio()
         self.recorder=None
+        self.frames_per_buffer=frames_per_buffer
         
     def output_protocol(self, wire):
         assert isinstance(wire, RawWire)
@@ -29,6 +30,7 @@ class SoundCard(SourceService):
                 format=pyaudio_format[self.FORMAT],
                 channels=self.CHANNELS,
                 rate=self.RATE,
+                frames_per_buffer=self.frames_per_buffer,
                 input=True,
                 stream_callback=self._callback
                 )

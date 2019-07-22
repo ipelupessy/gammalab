@@ -6,16 +6,17 @@ import pyaudio
 pyaudio_format=dict(float32=pyaudio.paFloat32)
 
 class Playback(ReceivingService):
-    def __init__(self):
+    def __init__(self, frames_per_buffer=2048):
         ReceivingService.__init__(self)
         self.input_wire=RawWire()      
         self.pyaudio=pyaudio.PyAudio()
         self.player=None
+        self.frames_per_buffer=frames_per_buffer
 
     def _callback(self, in_data, frame_count, time_info, status):
         data=self.receive_input(block=False)
         if data is None:
-            print("playback buffer underrun")
+            #~ print("playback buffer underrun")
             data=bytes(0)*4096
         return (data, pyaudio.paContinue)
 
@@ -24,6 +25,7 @@ class Playback(ReceivingService):
                 format=pyaudio_format[self.input_wire.FORMAT],
                 channels=self.input_wire.CHANNELS,
                 rate=self.input_wire.RATE,
+                frames_per_buffer=self.frames_per_buffer,
                 output=True,
                 stream_callback=self._callback
                 )

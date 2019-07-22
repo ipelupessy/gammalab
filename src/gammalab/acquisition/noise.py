@@ -4,13 +4,14 @@ from ..service import SourceService, ThreadService
 from ..wire import RawWire
 
 class Noise(ThreadService, SourceService):
-    def __init__(self):
+    def __init__(self, frames_per_buffer=2048):
         SourceService.__init__(self)
         ThreadService.__init__(self)
         self.CHANNELS=1
         self.RATE=48000
         self.FORMAT="float32"
         self.t0=time.time()
+        self.frames_per_buffer=frames_per_buffer
 
     def output_protocol(self, wire):
         assert isinstance(wire, RawWire)
@@ -19,7 +20,7 @@ class Noise(ThreadService, SourceService):
         wire.FORMAT=self.FORMAT
     
     def process(self, data=None):
-        time.sleep(0.1)
+        time.sleep(self.frames_per_buffer/(1.*self.RATE))
         t=time.time()
         dt=t-self.t0
         self.t0=t
