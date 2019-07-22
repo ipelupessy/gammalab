@@ -32,7 +32,7 @@ class Count(ThreadService, ReceivingService):
         sys.stdout.flush()
         
     def stop(self):
-        f=open("count.pkl","w")
+        f=open("count.pkl","wb")
         pickle.dump(self.all_pulses,f)
         f.close()
         ThreadService.stop(self)

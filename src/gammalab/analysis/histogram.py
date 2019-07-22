@@ -108,7 +108,7 @@ class Histogram(ReceivingService):
       
     def close(self):
         self.fig.savefig("histogram.png")
-        f=open("histogram.pkl","w")
+        f=open("histogram.pkl","wb")
         pickle.dump((self.hist, self.bins),f)
         f.close()        
         self.stop()

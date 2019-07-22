@@ -49,7 +49,7 @@ class Monitor(ReceivingService):
         return self.plot
   
     def start(self):
-          self.plotdata=numpy.zeros(self.input_wire.RATE*self.window, dtype=self.input_wire.FORMAT)
+          self.plotdata=numpy.zeros(int(self.input_wire.RATE*self.window), dtype=self.input_wire.FORMAT)
           pyplot.ion()
           f, ax = pyplot.subplots()
 

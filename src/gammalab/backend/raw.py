@@ -12,7 +12,7 @@ class SaveRaw(ThreadService, ReceivingService):
         
         self.outputfile=filename
         
-        self.output=open(self.outputfile, 'w')
+        self.output=open(self.outputfile, 'wb')
 
     def process(self, data):
         self.output.write(data)

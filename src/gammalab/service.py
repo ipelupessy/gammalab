@@ -104,3 +104,4 @@ class ThreadService(object):
         self.stop()
         self.done=True
         self.thread.join()
+

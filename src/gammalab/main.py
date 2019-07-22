@@ -2,21 +2,29 @@ from . import all_services
 
 from threading import Timer
 import time
+try:
+    input=raw_input
+except:
+    pass
 
 def startup():
-    #~ print(all_services)
     print("startup")
 
     for s in all_services:
         s.start()
 
 def shutdown():
-    print("shutting down")
+    if all_services:
+        print("shutting down")
 
-    for s in all_services:
-        s.stop()
-        s.close()
-        
+    while all_services:
+        s=all_services.pop()
+        try:
+          s.stop()
+          s.close()
+        except Exception as ex:
+          print(ex)
+
     exit(0)
 
 def main(timeout=None):
@@ -24,12 +32,11 @@ def main(timeout=None):
     startup()
 
     if timeout is not None:
-        print "timer"
         timer=Timer(timeout, shutdown)
         timer.start()
         
     print("running")
-    raw_input()
+    input()
 
     shutdown()
     

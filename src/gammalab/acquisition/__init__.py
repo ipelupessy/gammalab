@@ -1,2 +1,2 @@
-from soundcard import SoundCard
-from noise import Noise
+from .soundcard import SoundCard
+from .noise import Noise
