@@ -25,7 +25,7 @@ class Histogram(ReceivingService):
         self.hist=None
         self.bins=None
         self.log=log
-        self.error_bars=erros_bars
+        self.error_bars=error_bars
 
     def update_plot(self,nframe):
         
