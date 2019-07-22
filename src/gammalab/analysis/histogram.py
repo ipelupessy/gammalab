@@ -12,7 +12,7 @@ except:
     HAS_MATPLOTLIB=False
 
 class Histogram(ReceivingService):
-    def __init__(self, nchannels=100, xmin=0, xmax=1., log=True):
+    def __init__(self, nchannels=100, xmin=0, xmax=1., log=True, error_bars=True):
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
         ReceivingService.__init__(self)
@@ -25,7 +25,7 @@ class Histogram(ReceivingService):
         self.hist=None
         self.bins=None
         self.log=log
-        self.error_bar=True
+        self.error_bars=erros_bars
 
     def update_plot(self,nframe):
         
@@ -60,7 +60,7 @@ class Histogram(ReceivingService):
             self.ax.semilogy(x,y)
         else:
             self.ax.plot(x,y)
-        if self.error_bar:
+        if self.error_bars:
             self.ax.errorbar(
             (self.bins[:-1]+self.bins[1:])/2,
             self.hist,
