@@ -1,5 +1,6 @@
 from __future__ import print_function
 import sys
+import pickle
 
 from ..service import ReceivingService, ThreadService
 from ..wire import PulseWire
@@ -29,3 +30,9 @@ class Count(ThreadService, ReceivingService):
                 
         print("time {0:f} total pulses {1:d}, cps: {2:f}, current cps (10%) {3:f} \r".format(dt, total, cps, cps10), end="")
         sys.stdout.flush()
+        
+    def stop(self):
+        f=open("count.pkl","w")
+        pickle.dump(self.all_pulses,f)
+        f.close()
+        ThreadService.stop(self)
