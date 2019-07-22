@@ -39,11 +39,7 @@ class Histogram(ReceivingService):
         if self.stopped or len(data)==0:
             return
 
-        try:
-          data=[x[1] for x in data]
-        except:
-          print data
-          raise
+        data=[x[1] for x in data]
         
         hist,bins=numpy.histogram(data, bins=self.nchannels, range=(self.xmin,self.xmax))
         
