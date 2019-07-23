@@ -12,7 +12,8 @@ except:
     HAS_MATPLOTLIB=False
 
 class Histogram(ReceivingService):
-    def __init__(self, nchannels=100, xmin=0, xmax=1., log=True, error_bars=True):
+    def __init__(self, nchannels=100, xmin=0, xmax=1., log=True, 
+                    error_bars=True, scale=1.):
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
         ReceivingService.__init__(self)
@@ -22,10 +23,10 @@ class Histogram(ReceivingService):
         self.xmin=xmin
         self.xmax=xmax
         self.nchannels=nchannels
-        self.hist=None
-        self.bins=None
+        self.hist, self.bins=numpy.histogram([0], bins=self.nchannels, range=(0.,1.))
         self.log=log
         self.error_bars=error_bars
+        self.scale=scale
 
     def update_plot(self,nframe):
         
@@ -41,7 +42,7 @@ class Histogram(ReceivingService):
 
         data=[x[1] for x in data]
         
-        hist,bins=numpy.histogram(data, bins=self.nchannels, range=(self.xmin,self.xmax))
+        hist,bins=numpy.histogram(data, bins=self.nchannels, range=(0.,1.))
         
         self.hist=self.hist+hist
         
@@ -69,39 +70,35 @@ class Histogram(ReceivingService):
         
         #~ self.ax.hist(data, bins=self.nchannels, range=(self.xmin,self.xmax), log=self.log)
         self.ax.set_ylabel("counts")
-        self.ax.set_xlabel("level/energy")
+        self.ax.set_xlabel("level" if self.scale==1. else "energy (keV)")
 
         
     def start(self):
-          pyplot.ion()
-          f, ax = pyplot.subplots()
+        pyplot.ion()
+        f, ax = pyplot.subplots()
+      
+        self.fig=f
+        self.ax=ax
+        x=numpy.zeros(2*self.nchannels)
+        y=numpy.zeros(2*self.nchannels)
+        x[::2]=self.bins[:-1]
+        x[1::2]=self.bins[1:]
+        y[::2]=self.hist
+        y[1::2]=self.hist
 
-          hist,bins=numpy.histogram([0.], bins=self.nchannels, range=(self.xmin,self.xmax))
-          
-          self.hist=hist
-          self.bins=bins
+        if self.log:
+            self.ax.semilogy(x,y+1)
+        else:
+            self.ax.plot(x,y)
+        self.ax.set_ylabel("counts")
+        self.ax.set_xlabel("level" if self.scale==1. else "energy (keV)")
         
-          self.fig=f
-          self.ax=ax
-          x=numpy.zeros(2*self.nchannels)
-          y=numpy.zeros(2*self.nchannels)
-          x[::2]=self.bins[:-1]
-          x[1::2]=self.bins[1:]
-          y[::2]=self.hist
-          y[1::2]=self.hist
+        self.stopped=False
+        self.nplot=0
 
-          if self.log:
-              self.ax.semilogy(x,y+1)
-          else:
-              self.ax.plot(x,y)
-          self.ax.set_ylabel("counts")
-          self.ax.set_xlabel("level/energy")
-          
-          self.stopped=False
-          self.nplot=0
 
-          ani = FuncAnimation(self.fig, self.update_plot, interval=200)
-          f.canvas.draw()
+        ani = FuncAnimation(self.fig, self.update_plot, interval=200)
+        f.canvas.draw()
 
     def stop(self):
         self.stopped=True
