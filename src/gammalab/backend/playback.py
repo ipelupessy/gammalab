@@ -41,3 +41,4 @@ class Playback(ReceivingService):
             self.player.close()
 
         self.pyaudio.terminate()
+        

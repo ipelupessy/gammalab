@@ -1,6 +1,7 @@
 from ..service import ReceivingService
 from ..wire import PulseWire
 
+import time
 import numpy
 import pickle
 
@@ -71,14 +72,13 @@ class Histogram(ReceivingService):
         #~ self.ax.hist(data, bins=self.nchannels, range=(self.xmin,self.xmax), log=self.log)
         self.ax.set_ylabel("counts")
         self.ax.set_xlabel("level" if self.scale==1. else "energy (keV)")
+        self.ax.set_xlim(self.xmin,self.xmax)
 
         
     def start(self):
         pyplot.ion()
-        f, ax = pyplot.subplots()
+        self.fig, self.ax = pyplot.subplots()
       
-        self.fig=f
-        self.ax=ax
         x=numpy.zeros(2*self.nchannels)
         y=numpy.zeros(2*self.nchannels)
         x[::2]=self.bins[:-1]
@@ -92,20 +92,21 @@ class Histogram(ReceivingService):
             self.ax.plot(self.scale*x,y)
         self.ax.set_ylabel("counts")
         self.ax.set_xlabel("level" if self.scale==1. else "energy (keV)")
+        self.ax.set_xlim(self.xmin,self.xmax)
         
         self.stopped=False
         self.nplot=0
 
-
-        ani = FuncAnimation(self.fig, self.update_plot, interval=200)
-        f.canvas.draw()
+        ani = FuncAnimation(self.fig, self.update_plot, interval=250)
+        self.fig.canvas.draw()
 
     def stop(self):
         self.stopped=True
       
     def close(self):
+        self.stop()
+        time.sleep(0.3)
         self.fig.savefig("histogram.png")
         f=open("histogram.pkl","wb")
         pickle.dump((self.hist, self.bins),f)
         f.close()        
-        self.stop()

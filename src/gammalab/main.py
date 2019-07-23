@@ -33,6 +33,7 @@ def main(timeout=None):
 
     if timeout is not None:
         timer=Timer(timeout, shutdown)
+        timer.daemon=True
         timer.start()
         
     print("running")
