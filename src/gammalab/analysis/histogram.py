@@ -54,12 +54,12 @@ class Histogram(ReceivingService):
         y[::2]=self.hist
         y[1::2]=self.hist
         if self.log:
-            self.ax.semilogy(x,y)
+            self.ax.semilogy(self.scale*x,y)
         else:
-            self.ax.plot(x,y)
+            self.ax.plot(self.scale*x,y)
         if self.error_bars:
             self.ax.errorbar(
-            (self.bins[:-1]+self.bins[1:])/2,
+            self.scale*(self.bins[:-1]+self.bins[1:])/2,
             self.hist,
             yerr = self.hist**0.5+1,
             marker = '.',
@@ -87,9 +87,9 @@ class Histogram(ReceivingService):
         y[1::2]=self.hist
 
         if self.log:
-            self.ax.semilogy(x,y+1)
+            self.ax.semilogy(self.scale*x,y+1)
         else:
-            self.ax.plot(x,y)
+            self.ax.plot(self.scale*x,y)
         self.ax.set_ylabel("counts")
         self.ax.set_xlabel("level" if self.scale==1. else "energy (keV)")
         
