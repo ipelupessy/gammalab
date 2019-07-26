@@ -18,10 +18,13 @@ Prerequisites
 -------------
 
 You need at least:
+
 - Python 2.7 or 3.6 or later,
 - numpy
 - pyaudio
+
 and recommended is:
+
 - matplotlib
 
 Installation
