@@ -103,18 +103,18 @@ The simplest example of a service is the following::
 
   class Identity(ThreadService, SourceService, ReceivingService):
       def __init__(self):
-          SourceService.__init__(self)
-          ReceivingService.__init__(self)
+         SourceService.__init__(self)
+         ReceivingService.__init__(self)
          ThreadService.__init__(self)
          self.input_wire=RawWire()
          
      def output_protocol(self, wire):
-          assert isinstance(wire, RawWire)
+         assert isinstance(wire, RawWire)
          wire.CHANNELS=self.input_wire.CHANNELS
          wire.RATE=self.input_wire.RATE
          wire.FORMAT=self.input_wire.FORMAT
 
       def process(self, data):
-          return data
+         return data
 
 This service just forwards the input data (a raw byte stream) to its output.
