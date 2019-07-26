@@ -30,9 +30,7 @@ and recommended is:
 Installation
 ------------
 
-  ```bash
   pip install GammaLab
-  ```
 
 Usage
 -----
