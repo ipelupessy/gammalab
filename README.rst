@@ -96,15 +96,15 @@ Development
 
 It is not difficult to program additional services.
 
- A service is a class 
-with at least the methods: ```start`` ```stop``` and ```close```. A service 
-which accepts input should instantiate a "wire" class defining its input 
-and have connect_input and receive_input methods (normally taken care of by 
-deriving from ReceivingService class). If it generates output, the service 
-should have an output_protocol method, which checks the input wire format 
-and propagates any additional information to the wire. It also needs to 
-have some methods normally implemented by deriving from the SourceService 
-class (notably the ```plugs_into``` method). 
+A service is a class with at least the methods: ```start`` ```stop``` and 
+```close```. A service which accepts input should instantiate a "wire" 
+class defining its input and have connect_input and receive_input methods 
+(normally taken care of by deriving from ReceivingService class). If it 
+generates output, the service should have an output_protocol method, which 
+checks the input wire format and propagates any additional information to 
+the wire. It also needs to have some methods normally implemented by 
+deriving from the SourceService class (notably the ```plugs_into``` 
+method). 
 
 Services start up a seperate thread to do their computations. This could 
 also be using some other package's thread (e.g. for soundcard acquisition 
