@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 gammalab-histogram makes a histogram of detected peak heights. 
 """
@@ -20,8 +21,8 @@ def run(threshold=0.003, nchannels=500, xmax=2000., scale=5400., runtime=None, o
     source=SoundCard()
     convert=Raw2Float()
     detect=PulseDetection(threshold=threshold)
-    count=Count()
-    histogram=Histogram(nchannels=nchannels,xmin=0,xmax=xmax, scale=scale)#, outfile=outfile)
+    count=Count(outfile=None)
+    histogram=Histogram(nchannels=nchannels,xmin=0,xmax=xmax, scale=scale, outfile=outfile)
     
     source.plugs_into(convert)
     
@@ -66,7 +67,7 @@ def new_argument_parser():
         '--outfile',
         dest='outfile',
         default=None,
-        help='output file',
+        help='output file root',
     )
     parser.add_argument(
         '--runtime',

@@ -6,11 +6,12 @@ from ..service import ReceivingService, ThreadService
 from ..wire import PulseWire
 
 class Count(ThreadService, ReceivingService):
-    def __init__(self, filename=None):
+    def __init__(self, outfile="count"):
         ReceivingService.__init__(self)
         ThreadService.__init__(self)
         self.input_wire=PulseWire()
         self.all_pulses=[]
+        self.outfile=outfile
         
     def process(self, data):
         if len(data)>0:
@@ -32,7 +33,9 @@ class Count(ThreadService, ReceivingService):
         sys.stdout.flush()
         
     def stop(self):
-        f=open("count.pkl","wb")
-        pickle.dump(self.all_pulses,f)
-        f.close()
-        ThreadService.stop(self)
+        if self.outfile is not None:
+            f=open(self.outfile+".pkl","wb")
+            pickle.dump(self.all_pulses,f)
+            f.close()
+            ThreadService.stop(self)
+    

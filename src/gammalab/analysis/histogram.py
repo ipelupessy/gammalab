@@ -14,7 +14,7 @@ except:
 
 class Histogram(ReceivingService):
     def __init__(self, nchannels=100, xmin=0, xmax=1., log=True, 
-                    error_bars=True, scale=1.):
+                    error_bars=True, scale=1., outfile="histogram"):
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
         ReceivingService.__init__(self)
@@ -28,6 +28,7 @@ class Histogram(ReceivingService):
         self.log=log
         self.error_bars=error_bars
         self.scale=scale
+        self.outfile=outfile
 
     def update_plot(self,nframe):
         
@@ -105,8 +106,10 @@ class Histogram(ReceivingService):
       
     def close(self):
         self.stop()
-        time.sleep(0.3)
-        self.fig.savefig("histogram.png")
-        f=open("histogram.pkl","wb")
-        pickle.dump((self.hist, self.bins),f)
-        f.close()        
+        if self.outfile is not None:
+            time.sleep(0.3)
+            self.fig.savefig(self.outfile+'.png')
+            f=open(self.outfile+'.pkl',"wb")
+            pickle.dump((self.hist, self.bins),f)
+            f.close()        
+  
