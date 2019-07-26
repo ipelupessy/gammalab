@@ -30,18 +30,20 @@ and recommended is:
 Installation
 ------------
 
-```
-pip install GammaLab
-```
+  ```bash
+  pip install GammaLab
+  ```
 
 Usage
 -----
 
 An example application that acquires data and plots a gamma spectrum is 
 included, you can get help:
-```
+
+```bash
 ./gammalab-histogram.py --help
 ```
+
 but this is only a limited preview of the possibilities that the Gamma Lab 
 offers. You can compose your own applications, examples of this are in the 
 *examples* directory.
@@ -52,28 +54,34 @@ More details
 The applications consist of components "services" that are connected with 
 "wires." For a component to be included it needs to be imported and 
 instantiated:
-```
+
+```python
 from gammalab.acquisition import Soundcard
 soundcard=Soundcard()
 ```
+
 After instantiating additional components, say:
-```
+
+```python
 from gammalab.backend import SaveRaw
 save=SaveRaw()
 ```
+
 they need to be "wired:"
-```
+```python
 soundcard.plugs_into(save)
 ```
 At the moment, components can have one input and one output, but an output can be connected to
 multiple components. When all components are wired, you start the pipeline:
-```
+
+```python
 main(timout=100)
 ```
 The timeout is optional. If ommitted the application will run until <enter> is pressed.
 
 The following services are available:
-```
+
+```python
 from gammalab.acquisition import SoundCard
 from gammalab.acquisition import Noise
 from gammalab.transform import Raw2Float
@@ -103,7 +111,8 @@ do their computations. This could also be using some other package's thread
 (e.g. for soundcard acquisition pyaudio's callback thread is used).
 
 The simplest example of a service is the following:
-```
+
+```python
 class Identity(ThreadService, SourceService, ReceivingService):
     def __init__(self):
         SourceService.__init__(self)
