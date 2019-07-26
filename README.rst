@@ -30,6 +30,8 @@ and recommended is:
 Installation
 ------------
 
+Easiest is to use pip::
+
   pip install GammaLab
 
 Usage
