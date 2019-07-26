@@ -36,11 +36,9 @@ Usage
 -----
 
 An example application that acquires data and plots a gamma spectrum is 
-included, you can get help:
+included, you can get help::
 
-```bash
-./gammalab-histogram.py --help
-```
+  ./gammalab-histogram.py --help
 
 but this is only a limited preview of the possibilities that the Gamma Lab 
 offers. You can compose your own applications, examples of this are in the 
@@ -51,47 +49,40 @@ More details
 
 The applications consist of components "services" that are connected with 
 "wires." For a component to be included it needs to be imported and 
-instantiated:
+instantiated::
 
-```python
-from gammalab.acquisition import Soundcard
-soundcard=Soundcard()
-```
+  from gammalab.acquisition import Soundcard
+  soundcard=Soundcard()
 
-After instantiating additional components, say:
+After instantiating additional components, say::
 
-```python
-from gammalab.backend import SaveRaw
-save=SaveRaw()
-```
+  from gammalab.backend import SaveRaw
+  save=SaveRaw()
 
-they need to be "wired:"
-```python
-soundcard.plugs_into(save)
-```
+they need to be "wired"::
+
+  soundcard.plugs_into(save)
+
 At the moment, components can have one input and one output, but an output can be connected to
-multiple components. When all components are wired, you start the pipeline:
+multiple components. When all components are wired, you start the pipeline::
 
-```python
-main(timout=100)
-```
+  main(timout=100)
+
 The timeout is optional. If ommitted the application will run until <enter> is pressed.
 
-The following services are available:
+The following services are available::
 
-```python
-from gammalab.acquisition import SoundCard
-from gammalab.acquisition import Noise
-from gammalab.transform import Raw2Float
-from gammalab.transform import DownSampleMaxed
-from gammalab.transform import Identity
-from gammalab.analysis import PulseDetection
-from gammalab.analysis import Histogram
-from gammalab.analysis import Count
-from gammalab.backend import Playback
-from gammalab.backend import Monitor
-from gammalab.backend import SaveRaw
-```
+  from gammalab.acquisition import SoundCard
+  from gammalab.acquisition import Noise
+  from gammalab.transform import Raw2Float
+  from gammalab.transform import DownSampleMaxed
+  from gammalab.transform import Identity
+  from gammalab.analysis import PulseDetection
+  from gammalab.analysis import Histogram
+  from gammalab.analysis import Count
+  from gammalab.backend import Playback
+  from gammalab.backend import Monitor
+  from gammalab.backend import SaveRaw
 
 Development
 -----------
@@ -108,23 +99,22 @@ some methods normally implmented by deriving from the SourceService class
 do their computations. This could also be using some other package's thread
 (e.g. for soundcard acquisition pyaudio's callback thread is used).
 
-The simplest example of a service is the following:
+The simplest example of a service is the following::
 
-```python
-class Identity(ThreadService, SourceService, ReceivingService):
-    def __init__(self):
-        SourceService.__init__(self)
-        ReceivingService.__init__(self)
-        ThreadService.__init__(self)
-        self.input_wire=RawWire()
+  class Identity(ThreadService, SourceService, ReceivingService):
+      def __init__(self):
+          SourceService.__init__(self)
+          ReceivingService.__init__(self)
+         ThreadService.__init__(self)
+         self.input_wire=RawWire()
+         
+     def output_protocol(self, wire):
+          assert isinstance(wire, RawWire)
+         wire.CHANNELS=self.input_wire.CHANNELS
+         wire.RATE=self.input_wire.RATE
+         wire.FORMAT=self.input_wire.FORMAT
 
-    def output_protocol(self, wire):
-        assert isinstance(wire, RawWire)
-        wire.CHANNELS=self.input_wire.CHANNELS
-        wire.RATE=self.input_wire.RATE
-        wire.FORMAT=self.input_wire.FORMAT
+      def process(self, data):
+          return data
 
-    def process(self, data):
-        return data
-```
 This service just forwards the input data (a raw byte stream) to its output.
