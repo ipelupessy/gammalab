@@ -3,9 +3,7 @@ Gamma Lab
 
 Python toolkit for soundcard gamma spectroscopy.
 
-
-![Example spectrum of Am-241](doc/images/am241.png Am-241)
-
+![Example spectrum of Am-241](doc/images/am241.png)
 
 Introduction
 ------------
