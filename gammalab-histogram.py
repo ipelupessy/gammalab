@@ -73,7 +73,8 @@ def new_argument_parser():
         '--runtime',
         dest='runtime',
         default=None,
-        help='runtime in seconds (None means unlimited)',
+        type=float,
+        help='runtime in seconds',
     )
     return parser.parse_args()
 
