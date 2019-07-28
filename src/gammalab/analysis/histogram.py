@@ -48,6 +48,9 @@ class Histogram(ReceivingService):
         
         self.hist=self.hist+hist
         
+        self.update_histogram_plot()
+
+    def update_histogram_plot(self):
         self.ax.cla()
         x=numpy.zeros(2*self.nchannels)
         y=numpy.zeros(2*self.nchannels)
@@ -68,35 +71,17 @@ class Histogram(ReceivingService):
             fmt="none",
             drawstyle = 'steps-mid'
             )
-        
-        
-        #~ self.ax.hist(data, bins=self.nchannels, range=(self.xmin,self.xmax), log=self.log)
         self.ax.set_ylabel("counts")
         self.ax.set_xlabel("level" if self.scale==1. else "energy (keV)")
         self.ax.set_xlim(self.xmin,self.xmax)
-
-        
+      
     def start(self):
         pyplot.ion()
         self.fig, self.ax = pyplot.subplots()
       
-        x=numpy.zeros(2*self.nchannels)
-        y=numpy.zeros(2*self.nchannels)
-        x[::2]=self.bins[:-1]
-        x[1::2]=self.bins[1:]
-        y[::2]=self.hist
-        y[1::2]=self.hist
-
-        if self.log:
-            self.ax.semilogy(self.scale*x,y+1)
-        else:
-            self.ax.plot(self.scale*x,y)
-        self.ax.set_ylabel("counts")
-        self.ax.set_xlabel("level" if self.scale==1. else "energy (keV)")
-        self.ax.set_xlim(self.xmin,self.xmax)
-        
+        self.update_histogram_plot()
+      
         self.stopped=False
-        self.nplot=0
 
         ani = FuncAnimation(self.fig, self.update_plot, interval=250)
         self.fig.canvas.draw()
