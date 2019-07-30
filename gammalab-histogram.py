@@ -16,13 +16,13 @@ from gammalab.analysis import Histogram
 from gammalab.analysis import Count
 
 
-def run(threshold=0.003, nchannels=500, xmax=2000., scale=5400., runtime=None, outfile=None):
+def run(threshold=0.003, nchannels=500, xmax=2000., scale=5400., runtime=None, outfile=None, log=True):
 
     source=SoundCard()
     convert=Raw2Float()
     detect=PulseDetection(threshold=threshold)
     count=Count(outfile=None)
-    histogram=Histogram(nchannels=nchannels,xmin=0,xmax=xmax, scale=scale, outfile=outfile)
+    histogram=Histogram(nchannels=nchannels,xmin=0,xmax=xmax, scale=scale, outfile=outfile, log=log)
     
     source.plugs_into(convert)
     
@@ -34,7 +34,8 @@ def run(threshold=0.003, nchannels=500, xmax=2000., scale=5400., runtime=None, o
 
 def new_argument_parser():
     "Parse command line arguments"
-    parser = argparse.ArgumentParser( formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser( formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                      description=__doc__)
     parser.add_argument(
         '--threshold',
         dest='threshold',
@@ -75,6 +76,12 @@ def new_argument_parser():
         default=None,
         type=float,
         help='runtime in seconds',
+    )
+    parser.add_argument(
+        '--log',
+        dest='log',
+        action="store_true",
+        help='plot logarithmic y-axis',
     )
     return parser.parse_args()
 
