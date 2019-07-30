@@ -50,11 +50,14 @@ class Monitor(ReceivingService):
   
     def start(self):
           self.plotdata=numpy.zeros(int(self.input_wire.RATE*self.window), dtype=self.input_wire.FORMAT)
+          self.plotx=numpy.arange(int(self.input_wire.RATE*self.window))/float(self.input_wire.RATE)
           pyplot.ion()
           f, ax = pyplot.subplots()
 
-          plot=ax.plot(self.plotdata)
+          plot=ax.plot(self.plotx,self.plotdata)
           ax.set_ylim(self.vmin,self.vmax)
+          ax.set_xlabel("time (s)")
+          ax.set_ylabel("level")
         
           self.fig=f
           self.ax=ax
