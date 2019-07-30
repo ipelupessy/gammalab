@@ -29,6 +29,7 @@ class Histogram(ReceivingService):
         self.error_bars=error_bars
         self.scale=scale
         self.outfile=outfile
+        self.ymax=1.
 
     def update_plot(self,nframe):
         
@@ -40,7 +41,10 @@ class Histogram(ReceivingService):
             data.extend(_data)
                 
         if self.stopped or len(data)==0:
-            return
+            if self.error_bars:
+                return self._line,self._top,self._bot
+            else:
+                return self._line,
 
         data=[x[1] for x in data]
         
@@ -48,9 +52,35 @@ class Histogram(ReceivingService):
         
         self.hist=self.hist+hist
         
-        self.update_histogram_plot()
+        return self.update_histogram_plot()
 
     def update_histogram_plot(self):
+        y=numpy.zeros(2*self.nchannels)
+        y[::2]=self.hist
+        y[1::2]=self.hist
+        yerr=y**0.5
+        self._line.set_ydata(y)
+        self._update_ylim(y.max())
+        if self.error_bars:
+            self._top.set_ydata(numpy.maximum(y+yerr,1))
+            self._bot.set_ydata(y-yerr)
+            return self._line,self._top,self._bot
+        else:
+            return self._line,
+
+    def _update_ylim(self,ymax):
+        if self.log:
+            _ymax=ymax
+            if _ymax>self.ymax:
+                self.ymax=10*_ymax
+                self.ax.set_ylim(1,2*self.ymax)
+        else:
+            _ymax=ymax
+            if _ymax>self.ymax:
+                self.ymax=1.5*ymax
+                self.ax.set_ylim(0,1.3*self.ymax)      
+
+    def _histogram_plot(self):
         self.ax.cla()
         x=numpy.zeros(2*self.nchannels)
         y=numpy.zeros(2*self.nchannels)
@@ -58,32 +88,29 @@ class Histogram(ReceivingService):
         x[1::2]=self.bins[1:]
         y[::2]=self.hist
         y[1::2]=self.hist
-        if self.log:
-            self.ax.semilogy(self.scale*x,y)
-        else:
-            self.ax.plot(self.scale*x,y)
         if self.error_bars:
-            self.ax.errorbar(
-            self.scale*(self.bins[:-1]+self.bins[1:])/2,
-            self.hist,
-            yerr = self.hist**0.5+1,
-            marker = '.',
-            fmt="none",
-            drawstyle = 'steps-mid'
-            )
+            yerr=y**0.5
+            self._top,=self.ax.plot(self.scale*x,numpy.maximum(y+yerr,1),":",c="tab:orange", zorder=0)
+            self._bot,=self.ax.plot(self.scale*x,y-yerr,":",c="tab:orange",zorder=5)
+        if self.log:
+            self._line,=self.ax.semilogy(self.scale*x,y, lw=2, zorder=10)
+        else:
+            self._line,=self.ax.plot(self.scale*x,y,lw=2, zorder=10)
+
         self.ax.set_ylabel("counts")
         self.ax.set_xlabel("level" if self.scale==1. else "energy (keV)")
         self.ax.set_xlim(self.xmin,self.xmax)
+        self._update_ylim(max(y.max(),50))
       
     def start(self):
         pyplot.ion()
         self.fig, self.ax = pyplot.subplots()
       
-        self.update_histogram_plot()
+        self._histogram_plot()
       
         self.stopped=False
 
-        ani = FuncAnimation(self.fig, self.update_plot, interval=250)
+        ani = FuncAnimation(self.fig, self.update_plot, interval=250, blit=True)
         self.fig.canvas.draw()
 
     def stop(self):
