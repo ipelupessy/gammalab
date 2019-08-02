@@ -48,10 +48,10 @@ class SourceService(Service):
         except ServiceError as ex:
           raise ex      
         except AssertionError as ex:
-          self.print_message(ex)
+          self.print_message(str(ex))
           raise Exception("Wiring fault! Trying to connect incompatible services")
         except AttributeError as ex:
-          self.print_message(ex)
+          self.print_message(str(ex))
           raise Exception("Wiring fault! Wires connected out of order?")
         
 class ReceivingService(Service):

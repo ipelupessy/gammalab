@@ -32,7 +32,7 @@ def shutdown():
           s.stop()
           s.close()
         except Exception as ex:
-          shared_output.put("[Shutdown] "+ex)
+          shared_output.put("[Shutdown] "+str(ex))
 
     exit(0)
 
