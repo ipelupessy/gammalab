@@ -1,21 +1,30 @@
-from . import all_services
+from . import all_services, shared_output
 
-from threading import Timer
+import threading
 import time
 try:
     input=raw_input
 except:
     pass
 
+def output_thread():
+    while True:
+        message=shared_output.get(True)
+        print(message)
+
 def startup():
-    print("startup")
+    print("[Startup] entry")
+
+    t=threading.Thread(target=output_thread)
+    t.daemon=True
+    t.start()
 
     for s in all_services:
         s.start()
 
 def shutdown():
     if all_services:
-        print("shutting down")
+        shared_output.put("[Shutdown] shutting down")
 
     while all_services:
         s=all_services.pop()
@@ -23,7 +32,7 @@ def shutdown():
           s.stop()
           s.close()
         except Exception as ex:
-          print(ex)
+          shared_output.put("[Shutdown] "+ex)
 
     exit(0)
 
@@ -36,7 +45,7 @@ def main(timeout=None):
         timer.daemon=True
         timer.start()
         
-    print("running")
+    shared_output.put("[Main] running")
     input()
 
     shutdown()

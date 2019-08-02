@@ -1,4 +1,3 @@
-from __future__ import print_function
 import sys
 import pickle
 
@@ -29,8 +28,8 @@ class Count(ThreadService, ReceivingService):
             if dt10>0:
                 cps10=100./dt10
                 
-        print("time {0:f} total pulses {1:d}, cps: {2:f}, current cps (10%) {3:f} \r".format(dt, total, cps, cps10), end="")
-        sys.stdout.flush()
+        message="t: {0:6.3g}, counts: {1:5.3e} | cps: {2:5.2f}, cps (10%) {3:5.2f}".format(dt, total, cps, cps10)
+        self.print_message(message)
         
     def stop(self):
         if self.outfile is not None:

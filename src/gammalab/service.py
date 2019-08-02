@@ -1,4 +1,4 @@
-from . import all_services
+from . import all_services, shared_output
 
 import threading
 
@@ -8,7 +8,8 @@ class ServiceError(Exception):
 class Service(object):
     def __init__(self):
         all_services.add(self)
-      
+        self._output=shared_output
+    
     def start(self):
         raise Exception("not implemented for %s"%str(self))
     def stop(self):
@@ -19,6 +20,8 @@ class Service(object):
         raise ServiceError("service %s has no outputs"%str(self))
     def connect_to(self, other):
         raise ServiceError("service %s has no inputs"%str(self))
+    def print_message(self, message):
+        self._output.put('['+self.__class__.__name__+'] '+message)
 
 class SourceService(Service):
     def __init__(self):
@@ -37,7 +40,7 @@ class SourceService(Service):
             try:
                 w.put_nowait(data)
             except:
-                print("%s buffer full"%str(self))
+                self.print_message("%s buffer full"%str(self))
 
     def plugs_into(self, other):
         try:
@@ -45,10 +48,10 @@ class SourceService(Service):
         except ServiceError as ex:
           raise ex      
         except AssertionError as ex:
-          print(ex)
+          self.print_message(ex)
           raise Exception("Wiring fault! Trying to connect incompatible services")
         except AttributeError as ex:
-          print(ex)
+          self.print_message(ex)
           raise Exception("Wiring fault! Wires connected out of order?")
         
 class ReceivingService(Service):

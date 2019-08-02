@@ -17,7 +17,7 @@ class Playback(ReceivingService):
     def _callback(self, in_data, frame_count, time_info, status):
         data=self.receive_input(block=False)
         if data is None:
-            print("playback buffer underrun")
+            self.print_message("playback buffer underrun")
             data=bytes(0)*pyaudio_nbytes[self.input_wire.FORMAT]*frame_count
         return (data, pyaudio.paContinue)
 
