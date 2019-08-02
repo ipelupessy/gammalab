@@ -58,9 +58,15 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         return pulses
 
     def process(self, data):
-        self.data[self.ndata:self.ndata+len(data)]=data
-        self.ndata+=len(data)
-        if self.ndata>=self.window:
-            self.ndata=0
-            return self.detect_pulses()
-        return None
+        outdata=[]
+        while len(data)>0:
+            start=self.ndata
+            end=min(self.window,start+len(data))
+            self.data[start:end]=data[:end-start]
+            data=data[end-start:]
+            self.ndata=end
+            if self.ndata>=self.window:
+                outdata.extend(self.detect_pulses())
+                self.ndata=0
+        
+        return outdata or None

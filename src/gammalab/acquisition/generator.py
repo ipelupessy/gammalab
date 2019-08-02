@@ -27,5 +27,5 @@ class Noise(ThreadService, SourceService):
         
         n=int(numpy.floor(dt*self.RATE))
         data=numpy.random.random(n)
-        return data.tobytes()
+        return data.astype("float32").tobytes()
 
