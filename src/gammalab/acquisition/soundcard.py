@@ -24,6 +24,8 @@ class SoundCard(SourceService):
         
     def _callback(self, in_data, frame_count, time_info, status):
         self.send_output(in_data)
+        if status!=0:
+            self.print_message("status = {0}".format(status))
         return (None, pyaudio.paContinue)
 
     def start(self):
