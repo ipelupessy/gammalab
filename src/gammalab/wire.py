@@ -12,7 +12,7 @@ class FloatWire(Queue):
 class PulseWire(Queue):
     _description="pulses"
 
-class outputWire(Queue):
+class MessageWire(Queue):
     _description="output queue for terminal messages"
 
 # Wires are Queues. 

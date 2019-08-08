@@ -1,7 +1,7 @@
-from .wire import outputWire
+from .wire import MessageWire
 
 all_services=set()
-shared_output=outputWire()
+shared_output=MessageWire()
 
 from .main import main
 
