@@ -12,23 +12,27 @@ from gammalab import main
 from gammalab.acquisition import SoundCard
 from gammalab.transform import Raw2Float
 from gammalab.analysis import PulseDetection
-from gammalab.analysis import Histogram
+from gammalab.analysis import AggregateHistogram
 from gammalab.analysis import Count
+from gammalab.backend import PlotHistogram
 
-
-def run(threshold=0.003, nchannels=500, xmax=2000., scale=5400., runtime=None, outfile=None, log=True):
+def run(threshold=0.003, nchannels=500, xmax=2000., scale=5400., runtime=None, outfile=None, log=True, do_plot=True):
 
     source=SoundCard()
     convert=Raw2Float()
     detect=PulseDetection(threshold=threshold)
     count=Count(outfile=None)
-    histogram=Histogram(nchannels=nchannels,xmin=0,xmax=xmax, scale=scale, outfile=outfile, log=log)
+    histogram=AggregateHistogram(nchannels=nchannels, outfile=outfile)
     
     source.plugs_into(convert)
     
     convert.plugs_into(detect)
     detect.plugs_into(count)
     detect.plugs_into(histogram)
+    
+    if do_plot:
+      plothistogram=PlotHistogram(xmin=0,xmax=xmax, scale=scale, outfile=outfile, log=log)
+      histogram.plugs_into(plothistogram)
     
     main(runtime)
 
@@ -82,6 +86,12 @@ def new_argument_parser():
         dest='log',
         action="store_true",
         help='plot logarithmic y-axis',
+    )
+    parser.add_argument(
+        '--no-plot',
+        dest='do_plot',
+        action="store_false",
+        help='hide plot',
     )
     return parser.parse_args()
 
