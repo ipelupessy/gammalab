@@ -1,7 +1,6 @@
 from ..service import ThreadService, SourceService, ReceivingService
 from ..wire import PulseWire, HistogramWire
 
-import time
 import numpy
 import pickle
 
@@ -27,7 +26,8 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
         wire.vmax=self.vmax
 
     def process(self, data):
-        hist, bins=numpy.histogram(data, bins=self.nchannels, 
+        signal=[x[1] for x in data]
+        hist, bins=numpy.histogram(signal, bins=self.nchannels, 
             range=(self.vmin,self.vmax))
         
         self.hist=self.hist+hist

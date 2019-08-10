@@ -2,6 +2,7 @@ from ..service import ReceivingService
 from ..wire import FloatWire, HistogramWire
 
 import numpy
+import time
 
 try:
     from matplotlib.animation import FuncAnimation
@@ -77,7 +78,7 @@ class Monitor(ReceivingService):
 
 class PlotHistogram(ReceivingService):
     def __init__(self, xmin=0, xmax=1., log=True, 
-                    error_bars=True, scale=1., outfile="histogram"):
+                    error_bars=True, outfile="histogram"):
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
         ReceivingService.__init__(self)
@@ -88,7 +89,6 @@ class PlotHistogram(ReceivingService):
         self.xmax=xmax
         self.log=log
         self.error_bars=error_bars
-        self.scale=scale
         self.outfile=outfile
         self.ymax=1.
 
@@ -152,15 +152,15 @@ class PlotHistogram(ReceivingService):
         y[1::2]=hist
         if self.error_bars:
             yerr=y**0.5
-            self._top,=self.ax.plot(self.scale*x,numpy.maximum(y+yerr,1),":",c="tab:orange", zorder=0)
-            self._bot,=self.ax.plot(self.scale*x,y-yerr,":",c="tab:orange",zorder=5)
+            self._top,=self.ax.plot(x,numpy.maximum(y+yerr,1),":",c="tab:orange", zorder=0)
+            self._bot,=self.ax.plot(x,y-yerr,":",c="tab:orange",zorder=5)
         if self.log:
-            self._line,=self.ax.semilogy(self.scale*x,y+0.1, lw=2, zorder=10)
+            self._line,=self.ax.semilogy(x,y+0.1, lw=2, zorder=10)
         else:
-            self._line,=self.ax.plot(self.scale*x,y,lw=2, zorder=10)
+            self._line,=self.ax.plot(x,y,lw=2, zorder=10)
 
         self.ax.set_ylabel("counts")
-        self.ax.set_xlabel("level" if self.scale==1. else "energy (keV)")
+        self.ax.set_xlabel("level or energy (keV)")
         self.ax.set_xlim(self.xmin,self.xmax)
         self._update_ylim(max(y.max(),50))
       

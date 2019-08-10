@@ -10,7 +10,7 @@ matplotlib.use('TkAgg')
 
 from gammalab import main
 from gammalab.acquisition import SoundCard
-from gammalab.transform import Raw2Float
+from gammalab.transform import Raw2Float, Scale
 from gammalab.analysis import PulseDetection
 from gammalab.analysis import AggregateHistogram
 from gammalab.analysis import Count
@@ -22,18 +22,20 @@ def run(threshold=0.003, nchannels=500, xmax=2000., scale=5400., runtime=None, o
     convert=Raw2Float()
     detect=PulseDetection(threshold=threshold)
     count=Count(outfile=None)
-    histogram=AggregateHistogram(nchannels=nchannels, outfile=outfile)
+    calibrate=Scale(scale=scale)
+    histogram=AggregateHistogram(nchannels=nchannels, vmin=0, vmax=scale, outfile=outfile)
     
     source.plugs_into(convert)
     
     convert.plugs_into(detect)
     detect.plugs_into(count)
-    detect.plugs_into(histogram)
-    
+    detect.plugs_into(calibrate)
+    calibrate.plugs_into(histogram)
+
     if do_plot:
-      plothistogram=PlotHistogram(xmin=0,xmax=xmax, scale=scale, outfile=outfile, log=log)
-      histogram.plugs_into(plothistogram)
-    
+        plothistogram=PlotHistogram(xmin=0,xmax=xmax, outfile=outfile, log=log)
+        histogram.plugs_into(plothistogram)
+
     main(runtime)
 
 def new_argument_parser():
