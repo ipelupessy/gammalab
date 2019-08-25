@@ -32,14 +32,18 @@ class RawReplay(ThreadService, SourceService):
           n=int(dt*self.RATE/16)*16
         else:
           n=int(self.frames_per_buffer/16)*16
-        try:
-          data=self._file.read(pyaudio_nbytes[self.FORMAT]*n)
-        except:
+        data=self._file.read(pyaudio_nbytes[self.FORMAT]*n)
+        if len(data)==0:
           data=None
-        #~ print numpy.frombuffer(data,dtype="float32")
+          self.done=True
         return data
         
     def start(self):
         self.t0=time.time()
         self._file=open(self.filename, "rb")
         ThreadService.start(self)
+
+    def stop(self):
+        ThreadService.stop(self)
+        self._file.close()
+
