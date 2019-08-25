@@ -16,9 +16,11 @@ from gammalab.analysis import AggregateHistogram
 from gammalab.analysis import Count
 from gammalab.backend import PlotHistogram
 
-def run(threshold=0.003, nchannels=500, xmax=2000., scale=5400., runtime=None, outfile=None, log=True, do_plot=True):
+def run(threshold=0.003, nchannels=500, xmax=2000., scale=5400., 
+        runtime=None, outfile=None, log=True, do_plot=True,
+        input_device_index=None):
 
-    source=SoundCard()
+    source=SoundCard(input_device_index=input_device_index)
     convert=Raw2Float()
     detect=PulseDetection(threshold=threshold)
     count=Count(outfile=None)
@@ -94,6 +96,13 @@ def new_argument_parser():
         dest='do_plot',
         action="store_false",
         help='hide plot',
+    )
+    parser.add_argument(
+        '--input_device_index',
+        dest='input_device_index',
+        default=None,
+        type=int,
+        help='select input device',
     )
     return parser.parse_args()
 
