@@ -34,6 +34,8 @@ class Monitor(ReceivingService):
         
         if data:
             data=numpy.concatenate(data)
+        else:
+            return self.plot
         
         if self.stopped:
             return self.plot
@@ -67,7 +69,7 @@ class Monitor(ReceivingService):
           self.stopped=False
           self.nplot=0
 
-          ani = FuncAnimation(self.fig, self.update_plot, interval=50, blit=True)
+          ani = FuncAnimation(self.fig, self.update_plot, interval=1000, blit=True)
           f.canvas.draw()
 
     def stop(self):
