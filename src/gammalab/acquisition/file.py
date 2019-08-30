@@ -43,7 +43,7 @@ class RawReplay(ThreadService, SourceService):
         self._file=open(self.filename, "rb")
         ThreadService.start(self)
 
-    def stop(self):
-        ThreadService.stop(self)
+    def close(self):
+        ThreadService.close(self)
         self._file.close()
 
