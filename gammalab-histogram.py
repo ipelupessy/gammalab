@@ -9,7 +9,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 
 from gammalab import main
-from gammalab.acquisition import SoundCard
+from gammalab.acquisition import SoundCard, RawReplay
 from gammalab.transform import Raw2Float, Scale
 from gammalab.analysis import PulseDetection
 from gammalab.analysis import AggregateHistogram
@@ -18,9 +18,12 @@ from gammalab.backend import PlotHistogram
 
 def run(threshold=0.003, nchannels=500, xmax=2000., scale=5400., 
         runtime=None, outfile=None, log=True, do_plot=True,
-        input_device_index=None):
+        input_device_index=None, inputfile=None, realtime=True):
 
-    source=SoundCard(input_device_index=input_device_index)
+    if inputfile is not None:
+        source=RawReplay(filename=inputfile, realtime=realtime)
+    else:
+        source=SoundCard(input_device_index=input_device_index)
     convert=Raw2Float()
     detect=PulseDetection(threshold=threshold)
     count=Count(outfile=None)
@@ -104,6 +107,18 @@ def new_argument_parser():
         type=int,
         help='select input device',
     )
+    parser.add_argument(
+        '--infile',
+        dest='inputfile',
+        default=None,
+        help='input file',
+    ) 
+    parser.add_argument(
+        '--realtime',
+        dest='realtime',
+        action="store_true",
+        help='file input in realtime',
+    )       
     return parser.parse_args()
 
 if __name__=="__main__":
