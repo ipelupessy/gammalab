@@ -133,7 +133,7 @@ class PlotHistogram(ReceivingService):
             _ymax=ymax
             if _ymax>self.ymax:
                 self.ymax=10*_ymax
-                self.ax.set_ylim(1,2*self.ymax)
+                self.ax.set_ylim(0.5,2*self.ymax)
         else:
             _ymax=ymax
             if _ymax>self.ymax:
