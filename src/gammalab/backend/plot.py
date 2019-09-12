@@ -12,7 +12,7 @@ except:
     HAS_MATPLOTLIB=False
 
 class Monitor(ReceivingService):
-    def __init__(self, window=5, vmin=-0.01, vmax=1.1):
+    def __init__(self, window=5, vmin=-0.01, vmax=1.1, outfile=None):
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
         ReceivingService.__init__(self)
@@ -22,6 +22,7 @@ class Monitor(ReceivingService):
         self.stopped=True
         self.vmin=vmin
         self.vmax=vmax
+        self.outfile=outfile
 
     def update_plot(self,nframe):
         
@@ -69,7 +70,7 @@ class Monitor(ReceivingService):
           self.stopped=False
           self.nplot=0
 
-          ani = FuncAnimation(self.fig, self.update_plot, interval=1000, blit=True)
+          ani = FuncAnimation(self.fig, self.update_plot, interval=250, blit=True)
           f.canvas.draw()
 
     def stop(self):
@@ -77,6 +78,10 @@ class Monitor(ReceivingService):
       
     def close(self):
         self.stop()
+        if self.outfile is not None:
+            time.sleep(0.3)
+            self.fig.savefig(self.outfile+'.png')
+
 
 class PlotHistogram(ReceivingService):
     def __init__(self, xmin=0, xmax=1., log=True, 
