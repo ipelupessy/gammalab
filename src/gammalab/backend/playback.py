@@ -3,8 +3,8 @@ from ..wire import RawWire
 
 import pyaudio
 
-pyaudio_format=dict(float32=pyaudio.paFloat32)
-pyaudio_nbytes=dict(float32=4)
+pyaudio_format=dict(int16=pyaudio.paInt16, float32=pyaudio.paFloat32)
+pyaudio_nbytes=dict(int16=2, float32=4)
 
 class Playback(ReceivingService):
     def __init__(self, frames_per_buffer=2048, output_device_index=None):

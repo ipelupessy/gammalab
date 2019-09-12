@@ -9,7 +9,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 
 from gammalab import main
-from gammalab.acquisition import SoundCard, RawReplay
+from gammalab.acquisition import SoundCard, FileReplay
 from gammalab.transform import Raw2Float, Scale
 from gammalab.analysis import PulseDetection
 from gammalab.analysis import AggregateHistogram
@@ -21,7 +21,7 @@ def run(threshold=0.003, nchannels=500, xmax=2000., scale=5400.,
         input_device_index=None, inputfile=None, realtime=True):
 
     if inputfile is not None:
-        source=RawReplay(filename=inputfile, realtime=realtime)
+        source=FileReplay(filename=inputfile, realtime=realtime)
     else:
         source=SoundCard(input_device_index=input_device_index)
     convert=Raw2Float()
