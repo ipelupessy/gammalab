@@ -167,7 +167,7 @@ class PlotHistogram(ReceivingService):
             self._line,=self.ax.plot(x,y,lw=2, zorder=10)
 
         self.ax.set_ylabel("counts")
-        self.ax.set_xlabel("level or energy (keV)")
+        self.ax.set_xlabel("energy (keV)") # take label from wire?
         self.ax.set_xlim(self.xmin,self.xmax)
         self._update_ylim(max(y.max(),50))
       
