@@ -1,28 +1,35 @@
-import wave
-try:
-    from queue import Queue
-except:
-    from Queue import Queue
+from ..service import ReceivingService, ThreadService
+from ..wire import RawWire
 
-class SaveWav(object):
-    def __init__(self, service, filename=None):
+import wave
+
+class SaveWav(ThreadService, ReceivingService):
+    def __init__(self, filename=None):
+        ReceivingService.__init__(self)
+        ThreadService.__init__(self)
+        self.input_wire=RawWire()
+        
         if filename is None:
             filename="data.wav"
-        self.input_queue=Queue() # maxsize?
         
         self.outputfile=filename
         
-        try:
-          service.connect(self.input_queue)
-          self.CHANNELS=device.CHANNELS
-          self.RATE=device.RATE
-          self.FORMAT=device.FORMAT
-        except:
-          raise Exception("trying to connect incompatible services")
+        self.output=wave.open(self.outputfile, 'wb')
 
-        self.output=wave.open(self.outputfile, 'w')
-        self.output.setnchannels(self.CHANNELS)
-        self.output.setframerate(self.RATE)
-        self.output.setsampwidth()
+    def start(self):
+        self.output.setnchannels(1)
+        if self.input_wire.FORMAT!="int16":
+            raise Exception("Format to be saved in wav needs to be int16")
+        self.output.setsampwidth(2)
+        self.output.setframerate(self.input_wire.RATE)
 
-    def 
+        ThreadService.start(self)
+
+
+
+    def process(self, data):
+        self.output.writeframes(data)
+
+    def stop(self):
+        self.output.close()
+        ThreadService.stop(self)
