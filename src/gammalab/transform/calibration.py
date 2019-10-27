@@ -5,9 +5,7 @@ import numpy
 
 class Interpolate(ThreadService, SourceService, ReceivingService):
     def __init__(self, calibration):
-        SourceService.__init__(self)
-        ReceivingService.__init__(self)
-        ThreadService.__init__(self)
+        super(Interpolate, self).__init__()
         self.input_wire=PulseWire()
         self._xp=numpy.array([c[0] for c in calibration])
         self._yp=numpy.array([c[1] for c in calibration])
@@ -27,9 +25,7 @@ class Interpolate(ThreadService, SourceService, ReceivingService):
 
 class Scale(ThreadService, SourceService, ReceivingService):
     def __init__(self, scale):
-        SourceService.__init__(self)
-        ReceivingService.__init__(self)
-        ThreadService.__init__(self)
+        super(Scale, self).__init__()
         self.input_wire=PulseWire()
         self.scale=scale
         

@@ -10,8 +10,7 @@ pyaudio_nbytes=dict(int16=2, float32=4)
 class RawReplay(ThreadService, SourceService):
     def __init__(self, filename="data.raw", frames_per_buffer=1024, realtime=True, 
         sample_rate=48000, sample_format="float32"):
-        SourceService.__init__(self)
-        ThreadService.__init__(self)
+        super(RawReplay, self).__init__()
         self.CHANNELS=1
         self.RATE=sample_rate
         self.FORMAT=sample_format
@@ -57,8 +56,7 @@ format_from_width={2 : "int16", 4 : "float32"}
 
 class WavReplay(RawReplay):
     def __init__(self, filename, frames_per_buffer=1024, realtime=True):
-        SourceService.__init__(self)
-        ThreadService.__init__(self)
+        super(WavReplay, self).__init__()
         self.filename=filename
         self.frames_per_buffer=frames_per_buffer
         self.realtime=realtime
@@ -77,5 +75,5 @@ class WavReplay(RawReplay):
 
 def FileReplay(filename, **kwargs):
     if filename.endswith("wav"):
-        return WavReplay(filename,**kwargs)
+        return WavReplay(filename, **kwargs)
     return RawReplay(filename, **kwargs)

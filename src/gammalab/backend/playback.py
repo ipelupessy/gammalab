@@ -8,7 +8,7 @@ pyaudio_nbytes=dict(int16=2, float32=4)
 
 class Playback(ReceivingService):
     def __init__(self, frames_per_buffer=2048, output_device_index=None):
-        ReceivingService.__init__(self)
+        super(Playback, self).__init__()
         self.input_wire=RawWire()      
         self.pyaudio=pyaudio.PyAudio()
         self.player=None

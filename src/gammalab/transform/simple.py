@@ -5,9 +5,7 @@ import numpy
 
 class Identity(ThreadService, SourceService, ReceivingService):
     def __init__(self):
-        SourceService.__init__(self)
-        ReceivingService.__init__(self)
-        ThreadService.__init__(self)
+        super(Identity, self).__init__()
         self.input_wire=RawWire()
 
     def output_protocol(self, wire):
@@ -21,9 +19,7 @@ class Identity(ThreadService, SourceService, ReceivingService):
 
 class Raw2Numpy(ThreadService, SourceService, ReceivingService):
     def __init__(self):
-        SourceService.__init__(self)
-        ReceivingService.__init__(self)
-        ThreadService.__init__(self)
+        super(Raw2Numpy, self).__init__()
         self.input_wire=RawWire()
 
     def output_protocol(self, wire):
@@ -37,9 +33,7 @@ class Raw2Numpy(ThreadService, SourceService, ReceivingService):
 
 class Raw2Float(ThreadService, SourceService, ReceivingService):
     def __init__(self):
-        SourceService.__init__(self)
-        ReceivingService.__init__(self)
-        ThreadService.__init__(self)
+        super(Raw2Float, self).__init__()
         self.input_wire=RawWire()
 
     def output_protocol(self, wire):
@@ -60,9 +54,7 @@ class Raw2Float(ThreadService, SourceService, ReceivingService):
 
 class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
     def __init__(self, factor=8):
-        SourceService.__init__(self)
-        ReceivingService.__init__(self)
-        ThreadService.__init__(self)
+        super(DownSampleMaxed, self).__init__()
         self.input_wire=FloatWire()
         self.factor=factor
 

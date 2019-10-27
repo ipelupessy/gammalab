@@ -13,9 +13,10 @@ except:
 
 class Monitor(ReceivingService):
     def __init__(self, window=5, vmin=-0.01, vmax=1.1, outfile=None):
+        super(Monitor, self).__init__()
+        
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
-        ReceivingService.__init__(self)
         self.input_wire=FloatWire()
         
         self.window=window
@@ -86,9 +87,10 @@ class Monitor(ReceivingService):
 class PlotHistogram(ReceivingService):
     def __init__(self, xmin=0, xmax=1., log=True, 
                     error_bars=True, outfile="histogram"):
+        super(PlotHistogram, self).__init__()
+
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
-        ReceivingService.__init__(self)
         self.input_wire=HistogramWire()
         
         self.stopped=True

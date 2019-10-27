@@ -6,7 +6,8 @@ class ServiceError(Exception):
     pass
 
 class Service(object):
-    def __init__(self):
+    def __init__(self, **kwargs):
+        super(Service, self).__init__(**kwargs)
         all_services.add(self)
         self._output=shared_output
     
@@ -24,8 +25,8 @@ class Service(object):
         self._output.put('['+self.__class__.__name__+'] '+message)
 
 class SourceService(Service):
-    def __init__(self):
-        Service.__init__(self)
+    def __init__(self, **kwargs):
+        super(SourceService, self).__init__(**kwargs)
         self.wires=[]
 
     def output_protocol(self):
@@ -55,8 +56,8 @@ class SourceService(Service):
           raise Exception("Wiring fault! Wires connected out of order?")
         
 class ReceivingService(Service):
-    def __init__(self):
-        Service.__init__(self)
+    def __init__(self, **kwargs):
+        super(ReceivingService, self).__init__(**kwargs)
     def connect_input(self, service):
         service.connect(self.input_wire)
     def receive_input(self, block=True):
@@ -68,8 +69,9 @@ class ReceivingService(Service):
 # multiple input/outputs will be implemented by connecting to/from special attributes:
 # s1.output1.plugs_into(s2)
 
-class ThreadService(object):
-    def __init__(self):
+class ThreadService(Service):
+    def __init__(self, **kwargs):
+        super(ThreadService, self).__init__(**kwargs)
         self.stopped=True
         self.done=False
         self.thread=threading.Thread(target=self._process)

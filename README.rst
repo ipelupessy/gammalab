@@ -117,9 +117,7 @@ The simplest example of a service with input and output is the following::
 
   class Identity(ThreadService, SourceService, ReceivingService):
       def __init__(self):
-         SourceService.__init__(self)
-         ReceivingService.__init__(self)
-         ThreadService.__init__(self)
+         super(Identity, self).__init__()
          self.input_wire=RawWire()
          
      def output_protocol(self, wire):
@@ -131,4 +129,6 @@ The simplest example of a service with input and output is the following::
       def process(self, data):
          return data
 
-This service just forwards the input data (a raw byte stream) to its output.
+This service just forwards the input data (a raw byte stream) to its output,
+retaining its sample rate, format and number of channels.
+

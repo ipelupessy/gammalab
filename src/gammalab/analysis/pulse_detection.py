@@ -13,9 +13,7 @@ except:
     
 class PulseDetection(ThreadService, SourceService, ReceivingService):
     def __init__(self, threshold=0.005, window=24*1024, debug=False):
-        SourceService.__init__(self)
-        ReceivingService.__init__(self)
-        ThreadService.__init__(self)
+        super(PulseDetection, self).__init__()
         self.input_wire=FloatWire()
         self.threshold=threshold
         self.window=window
@@ -106,8 +104,8 @@ class FittedPulseDetection(PulseDetection):
     def __init__(self, threshold=0.005, window=24*1024, debug=False):
         if not HAS_SCIPY:
             raise Exception("pulse fitting needs Scipy...")
-
-        PulseDetection.__init__(self, threshold, window, debug)
+        super(FittedPulseDetection, self).__init__(threshold=threshold, 
+                                                   window=window, debug=debug)
 
         self.print_message("assumes very specific pulse shape, x**2 exp(-x/tau)")
 

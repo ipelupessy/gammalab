@@ -6,9 +6,7 @@ import pickle
 
 class AggregateHistogram(ThreadService,ReceivingService, SourceService):
     def __init__(self, nchannels=100, vmin=0, vmax=1., outfile="histogram"):
-        SourceService.__init__(self)
-        ReceivingService.__init__(self)
-        ThreadService.__init__(self)
+        super(AggregateHistogram, self).__init__()
         self.input_wire=PulseWire()
 
         self.vmin=vmin

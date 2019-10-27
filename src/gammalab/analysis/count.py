@@ -6,8 +6,7 @@ from ..wire import PulseWire
 
 class Count(ThreadService, ReceivingService):
     def __init__(self, outfile="count"):
-        ReceivingService.__init__(self)
-        ThreadService.__init__(self)
+        super(Count, self).__init__()
         self.input_wire=PulseWire()
         self.all_pulses=[]
         self.outfile=outfile

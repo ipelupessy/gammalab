@@ -3,8 +3,8 @@ from ..wire import RawWire
 
 class SaveRaw(ThreadService, ReceivingService):
     def __init__(self, filename=None):
-        ReceivingService.__init__(self)
-        ThreadService.__init__(self)
+        super(SaveRaw, self).__init__()
+
         self.input_wire=RawWire()
         
         if filename is None:

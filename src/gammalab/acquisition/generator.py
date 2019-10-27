@@ -5,8 +5,7 @@ from ..wire import RawWire
 
 class Noise(ThreadService, SourceService):
     def __init__(self, frames_per_buffer=2048):
-        SourceService.__init__(self)
-        ThreadService.__init__(self)
+        super(Noise, self).__init__()
         self.CHANNELS=1
         self.RATE=48000
         self.FORMAT="float32"

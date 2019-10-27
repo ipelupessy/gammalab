@@ -8,7 +8,7 @@ pyaudio_format=dict(int16=pyaudio.paInt16, float32=pyaudio.paFloat32)
 class SoundCard(SourceService):
     def __init__(self, frames_per_buffer=2048, input_device_index=None, 
                  sample_rate=48000, sample_format="float32"):
-        SourceService.__init__(self)
+        super(SoundCard, self).__init__()
         self.CHANNELS=1
         self.RATE=sample_rate
         self.FORMAT=sample_format
