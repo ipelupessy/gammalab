@@ -3,45 +3,18 @@ try:
 except:
     from Queue import Queue
 
-class Wire(Queue):
-    _description="none"
-
-    def __init__(self, **kwargs):
-        super(Wire, self).__init__(**kwargs)
-        self.protocol=Dict()
-
-# attributes are forwarded to the protocol
-    def __getattr__(self, name):
-        try:
-            return getattr(super(Wire, self), name)
-        except AttributeError:
-            if name in self.protocol:
-                return self.protocol[name]
-            else:
-                raise AttributeError("No such attribute in protocol: " + name)
-
-    def __setattr__(self, name, value):
-        self.protocol[name] = value
-
-    def __delattr__(self, name):
-        if name in self.protocol:
-            del self.protocol[name]
-        else:
-            raise AttributeError("No such attribute in protocol: " + name)
-
-
-class RawWire(Wire):
+class RawWire(Queue):
     _description="Raw byte (string)"
 
-class FloatWire(Wire):
+class FloatWire(Queue):
     _description="numpy float array"
 
-class PulseWire(Wire):
+class PulseWire(Queue):
     _description="pulses"
 
-class MessageWire(Wire):
+class MessageWire(Queue):
     _description="output queue for terminal messages"
 
-class HistogramWire(Wire):
+class HistogramWire(Queue):
     _description="dict with histogram"
 
