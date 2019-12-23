@@ -13,7 +13,7 @@ source=SoundCard()
 monitor=Monitor(vmin=-0.01,vmax=0.3)
 convert=Raw2Float()
 downsample=DownSampleMaxed(factor=16)
-detect=PulseDetection(threshold=0.0025)
+detect=PulseDetection(threshold=0.0035)
 count=Count()
 playback=Playback()
 
