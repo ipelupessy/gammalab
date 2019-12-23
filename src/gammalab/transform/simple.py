@@ -4,43 +4,30 @@ from ..wire import RawWire, FloatWire
 import numpy
 
 class Identity(ThreadService, SourceService, ReceivingService):
-    def __init__(self):
-        super(Identity, self).__init__()
-        self.input_wire=RawWire()
-
+    input_wire_class=RawWire
+    output_wire_class=RawWire
+    
     def output_protocol(self, wire):
-        assert isinstance(wire, RawWire)
-        wire.CHANNELS=self.input_wire.CHANNELS
-        wire.RATE=self.input_wire.RATE
-        wire.FORMAT=self.input_wire.FORMAT        
-
+        super(Identity, self).output_protocol(self, wire)
+        wire.protocol.update(self.input_wire.protocol)
+    
     def process(self, data):
         return data
 
 class Raw2Numpy(ThreadService, SourceService, ReceivingService):
-    def __init__(self):
-        super(Raw2Numpy, self).__init__()
-        self.input_wire=RawWire()
-
-    def output_protocol(self, wire):
-        assert isinstance(wire, FloatWire)
-        wire.CHANNELS=self.input_wire.CHANNELS
-        wire.RATE=self.input_wire.RATE
-        wire.FORMAT=self.input_wire.FORMAT        
+    input_wire_class=RawWire
+    output_wire_class=FloatWire
 
     def process(self, data):
         return numpy.frombuffer(data,dtype=self.input_wire.FORMAT)
 
 class Raw2Float(ThreadService, SourceService, ReceivingService):
-    def __init__(self):
-        super(Raw2Float, self).__init__()
-        self.input_wire=RawWire()
+    input_wire_class=RawWire
+    output_wire_class=FloatWire
 
     def output_protocol(self, wire):
-        assert isinstance(wire, FloatWire)
-        wire.CHANNELS=self.input_wire.CHANNELS
-        wire.RATE=self.input_wire.RATE
-        wire.FORMAT="float32"        
+        super(Raw2Float, self).output_protocol(wire)
+        wire.protocol.FORMAT="float32"        
 
     def process(self, data):
         if self.input_wire.FORMAT=="float32":
@@ -53,15 +40,15 @@ class Raw2Float(ThreadService, SourceService, ReceivingService):
           return None
 
 class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
+    input_wire_class=FloatWire
+    output_wire_class=FloatWire
+
     def __init__(self, factor=8):
         super(DownSampleMaxed, self).__init__()
-        self.input_wire=FloatWire()
         self.factor=factor
 
     def output_protocol(self, wire):
-        assert isinstance(wire, FloatWire)
-        wire.CHANNELS=self.input_wire.CHANNELS
-        wire.FORMAT=self.input_wire.FORMAT
+        super(DownSampleMaxed, self).output_protocol(wire)
         wire.RATE=self.input_wire.RATE/self.factor
 
     def process(self, data):

@@ -25,19 +25,21 @@ class Service(object):
         self._output.put('['+self.__class__.__name__+'] '+message)
 
 class SourceService(Service):
+    output_wire_class=None
+
     def __init__(self, **kwargs):
         super(SourceService, self).__init__(**kwargs)
-        self.wires=[]
+        self.output_wires=[]
 
     def output_protocol(self):
         raise Exception("not implemented for %s"%str(self))
 
     def connect(self, wire):
         self.output_protocol(wire)
-        self.wires.append(wire)
+        self.output_wires.append(wire)
 
     def send_output(self,data):
-        for w in self.wires:
+        for w in self.output_wires:
             try:
                 w.put_nowait(data)
             except:
@@ -56,8 +58,11 @@ class SourceService(Service):
           raise Exception("Wiring fault! Wires connected out of order?")
         
 class ReceivingService(Service):
+    input_wire_class=None
+
     def __init__(self, **kwargs):
         super(ReceivingService, self).__init__(**kwargs)
+        self.input_wire=self.input_wire_class()
     def connect_input(self, service):
         service.connect(self.input_wire)
     def receive_input(self, block=True):
