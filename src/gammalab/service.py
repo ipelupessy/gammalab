@@ -31,8 +31,8 @@ class SourceService(Service):
         super(SourceService, self).__init__(**kwargs)
         self.output_wires=[]
 
-    def output_protocol(self):
-        raise Exception("not implemented for %s"%str(self))
+    def output_protocol(self, wire):
+        assert isinstance(wire, self.output_wire_class)
 
     def connect(self, wire):
         self.output_protocol(wire)
