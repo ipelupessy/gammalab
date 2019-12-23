@@ -130,5 +130,7 @@ The simplest example of a service with input and output is the following::
          return data
 
 This service just forwards the input data (a raw byte stream) to its output,
-retaining its sample rate, format and number of channels.
+retaining its sample rate, format and number of channels.In this case the 
+necessary ```start``` etc methods are provided by inheritance from 
+ThreadService.
 
