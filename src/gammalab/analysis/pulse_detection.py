@@ -101,30 +101,42 @@ def pulse(x, A, x0,  y, tau):
 
 
 class FittedPulseDetection(PulseDetection):
-    def __init__(self, threshold=0.005, window=24*1024, debug=False):
+    """ 
+    detects pulses and determines amplitude by fitting a predifined 
+    pulse shape. x**2*exp(-x/tau).
+
+    In principle there could be two reasons to use fitted pulse shapes: in 
+    case the signal is undersampled the maximum can fall between two 
+    samples or if the signal saturates the ADC and the maximum can still be 
+    recovered by fitting the rising and falling edges. 
+
+    """
+    def __init__(self, threshold=0.005, window=24*1024, debug=False, 
+                  fit_threshold=0., signal_noise=0.0035, pulse_decay_time=2.7247/48000):
         if not HAS_SCIPY:
             raise Exception("pulse fitting needs Scipy...")
         super(FittedPulseDetection, self).__init__(threshold=threshold, 
                                                    window=window, debug=debug)
 
-        self.print_message("assumes very specific pulse shape, x**2 exp(-x/tau)")
+        self.print_message("currently assumes very specific pulse shape, x**2 exp(-x/tau)")
 
+        self.fit_threshold=fit_threshold
+        self.sigma=signal_noise
+        self.pulse_decay_time=pulse_decay_time
 
     def _fit_pulse(self, x, yp):
-    
-        sigma=0.0035
-    
-        A_=numpy.max(yp) # initial parameters
-        x0_=4.5
-        tau=2.7247*self.input_wire.RATE/48000.
+
+        A_=numpy.max(yp) # initial amplitude
+        x0_=4.5 # initial timeshift
+        tau=self.pulse_decay_time*self.input_wire.RATE
         
-        template=partial(pulse, y=0., tau=tau)
+        template=partial(pulse, y=0., tau=tau) # fix base level (=0) and decay time
         
         a=(yp<0.95) * (yp>A_/5.) # select range
         x_=x[a]
         yp_=yp[a]
         
-        sigma_=sigma*numpy.ones_like(x_) # weights
+        sigma_=self.sigma*numpy.ones_like(x_) # weights
       
         (A,x0),cov=curve_fit(template, x_,yp_, p0=(A_,x0_), sigma=sigma_)
           
@@ -133,10 +145,14 @@ class FittedPulseDetection(PulseDetection):
     
         p_=template(x_,A,x0)
         sigma_=numpy.sum((p_-yp_)**2)/len(yp_)
-        sigma_=sigma_**0.5 / sigma # normalized mean error
+        sigma_=sigma_**0.5 / self.sigma # normalized mean error
     
         return e, sigma_
   
     def amplitude_and_quality(self, start,end):
         data=self.data[max(start-5,0):end+15]
-        return self._fit_pulse(self._x[:len(data)], data)
+        max_data=numpy.max(self.data[start:end])
+        if max_data>self.fit_threshold:
+            return self._fit_pulse(self._x[:len(data)], data)
+        else:
+            return max_data,0.
