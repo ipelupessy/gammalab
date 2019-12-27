@@ -99,8 +99,8 @@ Development
 
 It is not difficult to program additional services.
 
-A service is a class with at least the methods: ```start`` ```stop``` and 
-```close```. A service which accepts input should instantiate a "wire" 
+A service is a class with at least the methods: ``start`` ``stop`` and 
+``close``. A service which accepts input should instantiate a "wire" 
 class defining its input and have connect_input and receive_input methods 
 (normally taken care of by deriving from ReceivingService class). If it 
 generates output, the service should have an output_protocol method, which 
@@ -130,5 +130,7 @@ The simplest example of a service with input and output is the following::
          return data
 
 This service just forwards the input data (a raw byte stream) to its output,
-retaining its sample rate, format and number of channels.
+retaining its sample rate, format and number of channels.In this case the 
+necessary ``start`` etc methods are provided by inheritance from 
+ThreadService.
 
