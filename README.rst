@@ -24,10 +24,10 @@ You need at least:
 
 - Python 2.7 or 3.6 or later,
 - numpy
+- the Python sound interface SoundCard 
 
 and recommended is:
 
-- the Python sound interface PyAudio or SoundCard 
 - matplotlib
 
 Installation
@@ -35,9 +35,7 @@ Installation
 
 Easiest is to use pip::
 
-  pip install GammaLab[Soundcard]
-
-instead of `SoundCard` `PyAudio` can be specified.
+  pip install GammaLab
 
 Usage
 -----
@@ -45,7 +43,7 @@ Usage
 An example application that acquires data and plots a gamma spectrum is 
 included, you can get help::
 
-  ./gammalab-histogram.py --help
+  > gammalab-histogram.py --help
 
 This provides only a limited preview of the possibilities that the Gamma 
 Lab offers. You can compose your own applications, examples of this are in 
