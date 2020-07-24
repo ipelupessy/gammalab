@@ -15,7 +15,7 @@ from gammalab.acquisition import PyAudio, SoundCard
 from gammalab.backend import Monitor
 from gammalab.transform import Raw2Float, DownSampleMaxed
 
-def run(input_device_index=None):
+def run(input_device_index=None, runtime=None):
     try:
         source=PyAudio(input_device_index=input_device_index)
     except:
@@ -29,7 +29,7 @@ def run(input_device_index=None):
     convert.plugs_into(downsample)
     downsample.plugs_into(monitor)
   
-    main()
+    main(runtime)
 
 def new_argument_parser():
     "Parse command line arguments"
@@ -41,6 +41,13 @@ def new_argument_parser():
         default=None,
         type=int,
         help='select input device',
+    )
+    parser.add_argument(
+        '--runtime',
+        dest='runtime',
+        default=None,
+        type=float,
+        help='runtime in seconds',
     )
     return parser.parse_args()
 
