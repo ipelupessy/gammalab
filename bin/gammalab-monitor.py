@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-gammalab-plot makes a plot of raw detector (soundcard) values. 
+gammalab-monitor plots raw detector (soundcard) values. 
 """
 import argparse
 
