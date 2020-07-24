@@ -1,18 +1,23 @@
 from ..service import SourceService, ThreadService
 from ..wire import RawWire
 
-import soundcard
+try:
+    import soundcard
+    HAS_SOUNDCARD=True
+except ImportError:
+    HAS_SOUNDCARD=False
 
 class SoundCard(ThreadService, SourceService):
     def __init__(self, frames_per_buffer=2048, input_device_index=None, input_device_name="",
                  sample_rate=48000, sample_format="float32"):
         super(SoundCard, self).__init__()
+        if not HAS_SOUNDCARD:
+          raise Exception("soundcard module not or not correctly installed")        
         self.CHANNELS=1
         self.RATE=sample_rate
         if sample_format != "float32":
           raise Exception("SoundCard only supports float32 sample_format")
         self.FORMAT=sample_format
-        self.recorder=None
         self.frames_per_buffer=frames_per_buffer
         self.input_device_index=input_device_index
         self.input_device_name=input_device_name
@@ -24,7 +29,8 @@ class SoundCard(ThreadService, SourceService):
                 if not self.stopped and not self.done:
                     try:
                         data=recorder.record(self.frames_per_buffer)
-                    except:
+                    except Exception as ex:
+                        self.print_message( "error: {0}".format(str(ex)))
                         self.done=True
                     if len(data)==0:
                         self.print_message("no data")

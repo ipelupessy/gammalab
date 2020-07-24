@@ -1,7 +1,11 @@
 from ..service import SourceService
 from ..wire import RawWire
 
-import pyaudio
+try:
+    import pyaudio
+    HAS_PYAUDIO=True
+except ImportError:
+    HAS_PYAUDIO=False
 
 pyaudio_format=dict(int16=pyaudio.paInt16, float32=pyaudio.paFloat32)
 
@@ -12,6 +16,8 @@ class PyAudio(SourceService):
         self.CHANNELS=1
         self.RATE=sample_rate
         self.FORMAT=sample_format
+        if not HAS_PYAUDIO:
+          raise Exception("pyaudio module not or not correctly installed")
         self.pyaudio=pyaudio.PyAudio()
         self.recorder=None
         self.frames_per_buffer=frames_per_buffer

@@ -1,7 +1,11 @@
 from ..service import ReceivingService
 from ..wire import RawWire
 
-import pyaudio
+try:
+    import pyaudio
+    HAS_PYAUDIO=True
+except ImportError:
+    HAS_PYAUDIO=False
 
 pyaudio_format=dict(int16=pyaudio.paInt16, float32=pyaudio.paFloat32)
 pyaudio_nbytes=dict(int16=2, float32=4)
@@ -9,7 +13,9 @@ pyaudio_nbytes=dict(int16=2, float32=4)
 class PyAudioPlay(ReceivingService):
     def __init__(self, frames_per_buffer=2048, output_device_index=None):
         super(PyAudioPlay, self).__init__()
-        self.input_wire=RawWire()      
+        self.input_wire=RawWire()
+        if not HAS_PYAUDIO:
+          raise Exception("pyaudio module not or not correctly installed")        
         self.pyaudio=pyaudio.PyAudio()
         self.player=None
         self.frames_per_buffer=frames_per_buffer

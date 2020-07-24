@@ -87,7 +87,7 @@ The following services are available::
   from gammalab.analysis import PulseDetection
   from gammalab.analysis import Histogram
   from gammalab.analysis import Count
-  from gammalab.backend import Playback
+  from gammalab.backend import PyAudioPlay
   from gammalab.backend import Monitor
   from gammalab.backend import SaveRaw
   
