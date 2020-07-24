@@ -10,13 +10,13 @@ except ImportError:
 
 class SoundCardPlay(ThreadService, ReceivingService):
     def __init__(self, frames_per_buffer=2048, output_device_index=None, output_device_name=""):
-        super(SoundCardPlay, self).__init__()
         if not HAS_SOUNDCARD:
           raise Exception("soundcard module not or not correctly installed")        
         self.input_wire=RawWire()
         self.frames_per_buffer=frames_per_buffer
         self.output_device_index=output_device_index
         self.output_device_name=output_device_name
+        super(SoundCardPlay, self).__init__()
 
     def connect_input(self,service):
         super(SoundCardPlay, self).connect_input(service)

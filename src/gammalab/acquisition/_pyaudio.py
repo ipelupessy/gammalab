@@ -13,16 +13,16 @@ except ImportError:
 class PyAudio(SourceService):
     def __init__(self, frames_per_buffer=2048, input_device_index=None, 
                  sample_rate=48000, sample_format="float32"):
-        super(PyAudio, self).__init__()
+        if not HAS_PYAUDIO:
+          raise Exception("pyaudio module not or not correctly installed")
         self.CHANNELS=1
         self.RATE=sample_rate
         self.FORMAT=sample_format
-        if not HAS_PYAUDIO:
-          raise Exception("pyaudio module not or not correctly installed")
         self.pyaudio=pyaudio.PyAudio()
         self.recorder=None
         self.frames_per_buffer=frames_per_buffer
         self.input_device_index=input_device_index
+        super(PyAudio, self).__init__()
         
     def output_protocol(self, wire):
         assert isinstance(wire, RawWire)

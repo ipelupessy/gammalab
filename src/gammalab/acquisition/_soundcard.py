@@ -10,7 +10,6 @@ except ImportError:
 class SoundCard(ThreadService, SourceService):
     def __init__(self, frames_per_buffer=2048, input_device_index=None, input_device_name="",
                  sample_rate=48000, sample_format="float32"):
-        super(SoundCard, self).__init__()
         if not HAS_SOUNDCARD:
           raise Exception("soundcard module not or not correctly installed")        
         self.CHANNELS=1
@@ -21,6 +20,7 @@ class SoundCard(ThreadService, SourceService):
         self.frames_per_buffer=frames_per_buffer
         self.input_device_index=input_device_index
         self.input_device_name=input_device_name
+        super(SoundCard, self).__init__()
 
     def _process(self):
         mic=soundcard.get_microphone(self.input_device_index or self.input_device_name)
