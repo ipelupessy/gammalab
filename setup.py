@@ -12,7 +12,7 @@ setup(
     package_dir={'' : 'src'},
     install_requires=['wheel','numpy','pyaudio'],
     python_requires='>=2.7',
-    scripts=['gammalab-histogram.py'],
+    scripts=['bin/gammalab-histogram'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

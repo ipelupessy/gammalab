@@ -5,8 +5,11 @@ gammalab-histogram makes a histogram of detected peak heights.
 
 import argparse
 
-import matplotlib
-matplotlib.use('TkAgg')
+try:
+  import matplotlib
+  matplotlib.use('TkAgg')
+except:
+  pass
 
 from gammalab import main
 from gammalab.acquisition import PyAudio, FileReplay
