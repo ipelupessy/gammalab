@@ -24,10 +24,10 @@ You need at least:
 
 - Python 2.7 or 3.6 or later,
 - numpy
-- pyaudio
 
 and recommended is:
 
+- the Python sound interface PyAudio or SoundCard 
 - matplotlib
 
 Installation
@@ -35,7 +35,9 @@ Installation
 
 Easiest is to use pip::
 
-  pip install GammaLab
+  pip install GammaLab[Soundcard]
+
+instead of `SoundCard` `PyAudio` can be specified.
 
 Usage
 -----
