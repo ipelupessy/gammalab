@@ -4,11 +4,13 @@ from ..wire import RawWire
 try:
     import pyaudio
     HAS_PYAUDIO=True
+
+    pyaudio_format=dict(int16=pyaudio.paInt16, float32=pyaudio.paFloat32)
+    pyaudio_nbytes=dict(int16=2, float32=4)
+  
 except ImportError:
     HAS_PYAUDIO=False
 
-pyaudio_format=dict(int16=pyaudio.paInt16, float32=pyaudio.paFloat32)
-pyaudio_nbytes=dict(int16=2, float32=4)
 
 class PyAudioPlay(ReceivingService):
     def __init__(self, frames_per_buffer=2048, output_device_index=None):
