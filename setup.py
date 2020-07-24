@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='GammaLab',
-    version='0.3.7',
+    version='0.3.8',
     description='Toolkit for soundcard gamma ray spectroscopy',
     author='F.I. Pelupessy',
     url='https://github.com/ipelupessy/gammalab',
@@ -16,7 +16,7 @@ setup(
     'soundcard' : ['SoundCard'],
     },
     python_requires='>=2.7',
-    scripts=['bin/gammalab-histogram.py', 'bin/gammalab-plot.py'],
+    scripts=['bin/gammalab-histogram.py', 'bin/gammalab-monitor.py'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
