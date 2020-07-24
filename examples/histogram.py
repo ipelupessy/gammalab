@@ -2,7 +2,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 
 from gammalab import main
-from gammalab.acquisition import SoundCard
+from gammalab.acquisition import PyAudio
 from gammalab.backend import Monitor
 from gammalab.transform import Raw2Float, DownSampleMaxed, Scale
 from gammalab.analysis import PulseDetection
@@ -10,7 +10,7 @@ from gammalab.analysis import AggregateHistogram
 from gammalab.analysis import Count
 from gammalab.backend import Playback, PlotHistogram
 
-source=SoundCard()
+source=PyAudio()
 monitor=Monitor(vmin=-0.01,vmax=0.1)
 convert=Raw2Float()
 downsample=DownSampleMaxed(factor=8)
