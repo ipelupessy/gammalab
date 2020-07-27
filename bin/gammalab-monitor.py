@@ -11,15 +11,12 @@ except:
   pass
 
 from gammalab import main
-from gammalab.acquisition import PyAudio, SoundCard
+from gammalab.acquisition import SoundCard
 from gammalab.backend import Monitor
 from gammalab.transform import Raw2Float, DownSampleMaxed
 
-def run(input_device_index=None, runtime=None):
-    try:
-        source=PyAudio(input_device_index=input_device_index)
-    except:
-        source=SoundCard(input_device_index=input_device_index)
+def run(input_device_name="", runtime=None):
+    source=SoundCard(input_device_name=input_device_name)
 
     monitor=Monitor()
     convert=Raw2Float()
@@ -36,11 +33,11 @@ def new_argument_parser():
     parser = argparse.ArgumentParser( formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                       description=__doc__)
     parser.add_argument(
-        '--input_device_index',
-        dest='input_device_index',
+        '--input_device_name',
+        dest='input_device_name',
         default=None,
-        type=int,
-        help='select input device',
+        type=str,
+        help='select input device by (fuzzy matched) name',
     )
     parser.add_argument(
         '--runtime',

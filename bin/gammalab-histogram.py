@@ -21,16 +21,13 @@ from gammalab.backend import PlotHistogram
 
 def run(threshold=0.003, nchannels=500, vmax=2000., scale=5400., 
         runtime=None, outfile=None, log=True, do_plot=True,
-        input_device_index=None, inputfile=None, realtime=True,
+        input_device_name="", inputfile=None, realtime=True,
         fitpulse=False, fit_threshold=0.95):
 
     if inputfile is not None:
         source=FileReplay(filename=inputfile, realtime=realtime)
     else:
-        try:
-            source=PyAudio(input_device_index=input_device_index)
-        except:
-            source=SoundCard(input_device_index=input_device_index)
+        source=SoundCard(input_device_name=input_device_name)
     convert=Raw2Float()
     if fitpulse:
         detect=FittedPulseDetection(threshold=threshold, fit_threshold=fit_threshold)
@@ -112,11 +109,11 @@ def new_argument_parser():
         help='hide plot',
     )
     parser.add_argument(
-        '--input_device_index',
-        dest='input_device_index',
-        default=None,
-        type=int,
-        help='select input device',
+        '--input_device_name',
+        dest='input_device_name',
+        default="",
+        type=str,
+        help='select input device by (fuzzy matched) name',
     )
     parser.add_argument(
         '--infile',
