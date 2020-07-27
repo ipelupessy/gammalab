@@ -9,6 +9,16 @@ except ImportError:
     HAS_SOUNDCARD=False
 
 class SoundCardPlay(ThreadService, ReceivingService):
+
+    @staticmethod
+    def devices():
+        """ return dict with names and ids of sound devices for playback (aka speakers) """
+        result=dict()
+        if HAS_SOUNDCARD:
+          for m in soundcard.all_speakers():
+            result[m.name]=m.id
+        return result
+
     def __init__(self, frames_per_buffer=2048, output_device_index=None, output_device_name=""):
         if not HAS_SOUNDCARD:
           raise Exception("soundcard module not or not correctly installed")        

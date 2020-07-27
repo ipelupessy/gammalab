@@ -8,6 +8,16 @@ except ImportError:
     HAS_SOUNDCARD=False
 
 class SoundCard(ThreadService, SourceService):
+
+    @staticmethod
+    def devices():
+        """ return dict with names and ids of sound devices for acquisition (aka microphones) """
+        result=dict()
+        if HAS_SOUNDCARD:
+          for m in soundcard.all_microphones():
+            result[m.name]=m.id
+        return result
+  
     def __init__(self, frames_per_buffer=2048, input_device_index=None, input_device_name="",
                  sample_rate=48000, sample_format="float32"):
         if not HAS_SOUNDCARD:
