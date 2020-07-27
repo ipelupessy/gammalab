@@ -1,14 +1,20 @@
 from ..service import SourceService
 from ..wire import RawWire
 
-import pyaudio
+try:
+    import pyaudio
+    HAS_PYAUDIO=True
 
-pyaudio_format=dict(int16=pyaudio.paInt16, float32=pyaudio.paFloat32)
+    pyaudio_format=dict(int16=pyaudio.paInt16, float32=pyaudio.paFloat32)
+except ImportError:
+    HAS_PYAUDIO=False
 
-class SoundCard(SourceService):
+
+class PyAudio(SourceService):
     def __init__(self, frames_per_buffer=2048, input_device_index=None, 
                  sample_rate=48000, sample_format="float32"):
-        super(SoundCard, self).__init__()
+        if not HAS_PYAUDIO:
+          raise Exception("pyaudio module not or not correctly installed")
         self.CHANNELS=1
         self.RATE=sample_rate
         self.FORMAT=sample_format
@@ -16,6 +22,7 @@ class SoundCard(SourceService):
         self.recorder=None
         self.frames_per_buffer=frames_per_buffer
         self.input_device_index=input_device_index
+        super(PyAudio, self).__init__()
         
     def output_protocol(self, wire):
         assert isinstance(wire, RawWire)

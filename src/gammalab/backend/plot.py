@@ -12,9 +12,7 @@ except:
     HAS_MATPLOTLIB=False
 
 class Monitor(ReceivingService):
-    def __init__(self, window=5, vmin=-0.01, vmax=1.1, outfile=None):
-        super(Monitor, self).__init__()
-        
+    def __init__(self, window=5, vmin=-0.01, vmax=1.1, outfile=None):        
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
         self.input_wire=FloatWire()
@@ -24,6 +22,8 @@ class Monitor(ReceivingService):
         self.vmin=vmin
         self.vmax=vmax
         self.outfile=outfile
+
+        super(Monitor, self).__init__()
 
     def update_plot(self,nframe):
         
@@ -58,7 +58,7 @@ class Monitor(ReceivingService):
           self.plotx=numpy.arange(int(self.input_wire.RATE*self.window))/float(self.input_wire.RATE)
           pyplot.ion()
           f, ax = pyplot.subplots()
-
+          f.canvas.set_window_title("GammaLab Monitor")
           plot=ax.plot(self.plotx,self.plotdata)
           ax.set_ylim(self.vmin,self.vmax)
           ax.set_xlabel("time (s)")
@@ -87,8 +87,6 @@ class Monitor(ReceivingService):
 class PlotHistogram(ReceivingService):
     def __init__(self, xmin=0, xmax=1., log=True, 
                     error_bars=True, outfile="histogram"):
-        super(PlotHistogram, self).__init__()
-
         if not HAS_MATPLOTLIB:
             raise Exception("needs matplotlib")
         self.input_wire=HistogramWire()
@@ -100,6 +98,8 @@ class PlotHistogram(ReceivingService):
         self.error_bars=error_bars
         self.outfile=outfile
         self.ymax=1.
+
+        super(PlotHistogram, self).__init__()
 
     def update_plot(self,nframe):
         
@@ -176,6 +176,7 @@ class PlotHistogram(ReceivingService):
     def start(self):
         pyplot.ion()
         self.fig, self.ax = pyplot.subplots()
+        self.fig.canvas.set_window_title("GammaLab Histogram")
       
         self._histogram_plot()
       

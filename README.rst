@@ -24,7 +24,7 @@ You need at least:
 
 - Python 2.7 or 3.6 or later,
 - numpy
-- pyaudio
+- the Python sound interface SoundCard 
 
 and recommended is:
 
@@ -43,7 +43,7 @@ Usage
 An example application that acquires data and plots a gamma spectrum is 
 included, you can get help::
 
-  ./gammalab-histogram.py --help
+  > gammalab-histogram.py --help
 
 This provides only a limited preview of the possibilities that the Gamma 
 Lab offers. You can compose your own applications, examples of this are in 
@@ -87,7 +87,7 @@ The following services are available::
   from gammalab.analysis import PulseDetection
   from gammalab.analysis import Histogram
   from gammalab.analysis import Count
-  from gammalab.backend import Playback
+  from gammalab.backend import PyAudioPlay
   from gammalab.backend import Monitor
   from gammalab.backend import SaveRaw
   
@@ -99,8 +99,8 @@ Development
 
 It is not difficult to program additional services.
 
-A service is a class with at least the methods: ```start`` ```stop``` and 
-```close```. A service which accepts input should instantiate a "wire" 
+A service is a class with at least the methods: ``start`` ``stop`` and 
+``close``. A service which accepts input should instantiate a "wire" 
 class defining its input and have connect_input and receive_input methods 
 (normally taken care of by deriving from ReceivingService class). If it 
 generates output, the service should have an output_protocol method, which 
@@ -130,5 +130,7 @@ The simplest example of a service with input and output is the following::
          return data
 
 This service just forwards the input data (a raw byte stream) to its output,
-retaining its sample rate, format and number of channels.
+retaining its sample rate, format and number of channels.In this case the 
+necessary ``start`` etc methods are provided by inheritance from 
+ThreadService.
 

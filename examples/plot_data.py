@@ -2,7 +2,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 
 from gammalab import main
-from gammalab.acquisition import SoundCard
+from gammalab.acquisition import PyAudio, SoundCard
 from gammalab.backend import Monitor
 from gammalab.transform import Raw2Float, DownSampleMaxed
 
