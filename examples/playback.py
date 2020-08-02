@@ -1,6 +1,6 @@
 from gammalab import main
-from gammalab.acquisition import PyAudio, SoundCard
-from gammalab.backend import PyAudioPlay, SoundCardPlay
+from gammalab.acquisition import SoundCard
+from gammalab.backend import SoundCardPlay
 
 soundcard=SoundCard()
 playback=SoundCardPlay()

@@ -1,3 +1,5 @@
+# needs pyaudio
+
 from gammalab import main
 from gammalab.acquisition import PyAudio
 from gammalab.backend import SaveWav

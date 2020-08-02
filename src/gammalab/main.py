@@ -9,7 +9,8 @@ except:
     pass
 
 def output_thread():
-    while True:
+    message=None
+    while message!="[Shutdown] done":
         message=shared_output.get(True)
         print(message)
 
@@ -34,6 +35,8 @@ def shutdown():
           s.close()
         except Exception as ex:
           shared_output.put("[Shutdown] "+str(ex))
+
+    shared_output.put("[Shutdown] done")
 
     exit(0)
 

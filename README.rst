@@ -87,7 +87,7 @@ The following services are available::
   from gammalab.analysis import PulseDetection
   from gammalab.analysis import Histogram
   from gammalab.analysis import Count
-  from gammalab.backend import PyAudioPlay
+  from gammalab.backend import SoundCardPlay
   from gammalab.backend import Monitor
   from gammalab.backend import SaveRaw
   
@@ -109,11 +109,8 @@ the wire. It also needs to have some methods normally implemented by
 deriving from the SourceService class (notably the ```plugs_into``` 
 method). 
 
-Services start up a seperate thread to do their computations. This could 
-also be using some other package's thread (e.g. for soundcard acquisition 
-pyaudio's callback thread is used).
-
-The simplest example of a service with input and output is the following::
+Services start up a seperate thread to do their computations. The simplest 
+example of a service with input and output is the following::
 
   class Identity(ThreadService, SourceService, ReceivingService):
       def __init__(self):
@@ -132,5 +129,4 @@ The simplest example of a service with input and output is the following::
 This service just forwards the input data (a raw byte stream) to its output,
 retaining its sample rate, format and number of channels.In this case the 
 necessary ``start`` etc methods are provided by inheritance from 
-ThreadService.
-
+ThreadService. The process method defines the actual processing done.
