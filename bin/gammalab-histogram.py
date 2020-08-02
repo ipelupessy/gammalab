@@ -12,7 +12,7 @@ except:
   pass
 
 from gammalab import main
-from gammalab.acquisition import PyAudio, SoundCard, FileReplay
+from gammalab.acquisition import SoundCard, FileReplay
 from gammalab.transform import Raw2Float, Scale
 from gammalab.analysis import PulseDetection, FittedPulseDetection
 from gammalab.analysis import AggregateHistogram

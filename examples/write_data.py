@@ -1,8 +1,8 @@
 from gammalab import main
-from gammalab.acquisition import PyAudio
+from gammalab.acquisition import SoundCard
 from gammalab.backend import SaveRaw
 
-soundcard=PyAudio()
+soundcard=SoundCard()
 save=SaveRaw()
 
 soundcard.plugs_into(save)
