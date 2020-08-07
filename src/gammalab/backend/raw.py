@@ -2,10 +2,9 @@ from ..service import ReceivingService, ThreadService
 from ..wire import RawWire
 
 class SaveRaw(ThreadService, ReceivingService):
+    input_wire_class=RawWire
     def __init__(self, filename=None):
         super(SaveRaw, self).__init__()
-
-        self.input_wire=RawWire()
         
         if filename is None:
             filename="data.raw"

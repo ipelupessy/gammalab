@@ -8,6 +8,7 @@ import wave
 pyaudio_nbytes=dict(int16=2, float32=4)
 
 class RawReplay(ThreadService, SourceService):
+    output_wire_class=RawWire
     def __init__(self, filename="data.raw", frames_per_buffer=1024, realtime=True, 
         sample_rate=48000, sample_format="float32"):
         super(RawReplay, self).__init__()
@@ -19,7 +20,7 @@ class RawReplay(ThreadService, SourceService):
         self.realtime=realtime
 
     def output_protocol(self, wire):
-        assert isinstance(wire, RawWire)
+        super(RawReplay, self).output_protocol(wire)      
         wire.CHANNELS=self.CHANNELS
         wire.RATE=self.RATE
         wire.FORMAT=self.FORMAT

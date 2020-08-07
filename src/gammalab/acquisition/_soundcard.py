@@ -8,6 +8,7 @@ except ImportError:
     HAS_SOUNDCARD=False
 
 class SoundCard(ThreadService, SourceService):
+    output_wire_class=RawWire
 
     @staticmethod
     def devices():
@@ -57,7 +58,7 @@ class SoundCard(ThreadService, SourceService):
         self.stopped=True
 
     def output_protocol(self, wire):
-        assert isinstance(wire, RawWire)
+        super(SoundCard, self).output_protocol(wire)
         wire.CHANNELS=self.CHANNELS
         wire.RATE=self.RATE
         wire.FORMAT=self.FORMAT

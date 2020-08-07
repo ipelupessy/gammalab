@@ -19,10 +19,11 @@ class SoundCardPlay(ThreadService, ReceivingService):
             result[m.name]=m.id
         return result
 
+    input_wire_class=RawWire
+
     def __init__(self, frames_per_buffer=2048, output_device_index=None, output_device_name=""):
         if not HAS_SOUNDCARD:
           raise Exception("soundcard module not or not correctly installed")        
-        self.input_wire=RawWire()
         self.frames_per_buffer=frames_per_buffer
         self.output_device_index=output_device_index
         self.output_device_name=output_device_name
