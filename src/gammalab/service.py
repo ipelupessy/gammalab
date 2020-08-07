@@ -30,6 +30,8 @@ class SourceService(Service):
     def __init__(self, **kwargs):
         super(SourceService, self).__init__(**kwargs)
         self.output_wires=[]
+        if self.output_wire_class is None:
+            raise Exception("SourceService {0} does not specify output_wire_class".format(self))
 
     def output_protocol(self):
         raise Exception("not implemented for %s"%str(self))
@@ -62,6 +64,8 @@ class ReceivingService(Service):
 
     def __init__(self, **kwargs):
         super(ReceivingService, self).__init__(**kwargs)
+        if self.input_wire_class is None:
+            raise Exception("ReceivingService {0} does not specify input_wire_class".format(self))
         self.input_wire=self.input_wire_class()
     def connect_input(self, service):
         service.connect(self.input_wire)

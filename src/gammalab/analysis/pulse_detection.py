@@ -12,16 +12,17 @@ except:
     HAS_SCIPY=False
     
 class PulseDetection(ThreadService, SourceService, ReceivingService):
+    input_wire_class=FloatWire
+    output_wire_class=PulseWire
     def __init__(self, threshold=0.005, window=24*1024, debug=False):
         super(PulseDetection, self).__init__()
-        self.input_wire=FloatWire()
         self.threshold=threshold
         self.window=window
         self.debug=debug
         self._x=numpy.arange(window)
 
     def output_protocol(self, wire):
-        assert isinstance(wire, PulseWire)
+        super(PulseDetection, self).output_protocol(wire)
         wire._debug=self.debug
         wire.unit="raw value"
 

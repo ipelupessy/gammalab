@@ -5,9 +5,10 @@ import numpy
 import pickle
 
 class AggregateHistogram(ThreadService,ReceivingService, SourceService):
+    input_wire_class=PulseWire
+    output_wire_class=HistogramWire
     def __init__(self, nchannels=100, vmin=0, vmax=1., outfile="histogram"):
         super(AggregateHistogram, self).__init__()
-        self.input_wire=PulseWire()
 
         self.vmin=vmin
         self.vmax=vmax
@@ -18,7 +19,7 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
             range=(self.vmin,self.vmax))
 
     def output_protocol(self, wire):
-        assert isinstance(wire, HistogramWire)
+        super(AggregateHistogram, self).output_protocol(wire)
         wire.nchannels=self.nchannels
         wire.vmin=self.vmin
         wire.vmax=self.vmax
@@ -39,4 +40,3 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
             pickle.dump((self.hist, self.bins),f)
             f.close()
         ThreadService.stop(self)
-  

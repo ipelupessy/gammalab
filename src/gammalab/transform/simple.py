@@ -8,15 +8,23 @@ class Identity(ThreadService, SourceService, ReceivingService):
     output_wire_class=RawWire
     
     def output_protocol(self, wire):
-        super(Identity, self).output_protocol(self, wire)
-        wire.protocol.update(self.input_wire.protocol)
-    
+        super(Identity, self).output_protocol(wire)
+        wire.CHANNELS=self.input_wire.CHANNELS
+        wire.RATE=self.input_wire.RATE
+        wire.FORMAT=self.input_wire.FORMAT
+
     def process(self, data):
         return data
 
 class Raw2Numpy(ThreadService, SourceService, ReceivingService):
     input_wire_class=RawWire
     output_wire_class=FloatWire
+
+    def output_protocol(self, wire):
+        super(Raw2Numpy, self).output_protocol(wire)
+        wire.CHANNELS=self.input_wire.CHANNELS
+        wire.RATE=self.input_wire.RATE
+        wire.FORMAT=self.input_wire.FORMAT
 
     def process(self, data):
         return numpy.frombuffer(data,dtype=self.input_wire.FORMAT)
@@ -27,7 +35,9 @@ class Raw2Float(ThreadService, SourceService, ReceivingService):
 
     def output_protocol(self, wire):
         super(Raw2Float, self).output_protocol(wire)
-        wire.protocol.FORMAT="float32"        
+        wire.CHANNELS=self.input_wire.CHANNELS
+        wire.RATE=self.input_wire.RATE
+        wire.FORMAT="float32"
 
     def process(self, data):
         if self.input_wire.FORMAT=="float32":
@@ -49,6 +59,8 @@ class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
 
     def output_protocol(self, wire):
         super(DownSampleMaxed, self).output_protocol(wire)
+        wire.CHANNELS=self.input_wire.CHANNELS
+        wire.FORMAT=self.input_wire.FORMAT
         wire.RATE=self.input_wire.RATE/self.factor
 
     def process(self, data):

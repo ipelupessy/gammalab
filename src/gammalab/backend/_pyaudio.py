@@ -13,10 +13,10 @@ except ImportError:
 
 
 class PyAudioPlay(ReceivingService):
+    input_wire_class=RawWire
     def __init__(self, frames_per_buffer=2048, output_device_index=None):
         if not HAS_PYAUDIO:
           raise Exception("pyaudio module not or not correctly installed")        
-        self.input_wire=RawWire()
         self.pyaudio=pyaudio.PyAudio()
         self.player=None
         self.frames_per_buffer=frames_per_buffer
