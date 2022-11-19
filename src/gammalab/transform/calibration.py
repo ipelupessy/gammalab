@@ -36,3 +36,19 @@ class Scale(ThreadService, SourceService, ReceivingService):
         timestamps=[x[0] for x in data]
         scaled=[self.scale*x[1] for x in data]
         return zip(timestamps, scaled)
+
+class SecondOrder(ThreadService, SourceService, ReceivingService):
+    def __init__(self, scale, drift=0):
+        super(SecondOrder, self).__init__()
+        self.input_wire=PulseWire()
+        self.scale=scale
+        self.drift=drift
+        print(drift)
+        
+    def output_protocol(self, wire):
+        assert isinstance(wire, PulseWire)
+
+    def process(self, data):
+        timestamps=[x[0] for x in data]
+        scaled=[self.scale*x[1]*(1+self.drift*x[1]) for x in data]
+        return zip(timestamps, scaled)

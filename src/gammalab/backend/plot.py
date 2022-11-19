@@ -58,7 +58,7 @@ class Monitor(ReceivingService):
           self.plotx=numpy.arange(int(self.input_wire.RATE*self.window))/float(self.input_wire.RATE)
           pyplot.ion()
           f, ax = pyplot.subplots()
-          f.canvas.set_window_title("GammaLab Monitor")
+          f.canvas.manager.set_window_title("GammaLab Monitor")
           plot=ax.plot(self.plotx,self.plotdata)
           ax.set_ylim(self.vmin,self.vmax)
           ax.set_xlabel("time (s)")
@@ -176,7 +176,7 @@ class PlotHistogram(ReceivingService):
     def start(self):
         pyplot.ion()
         self.fig, self.ax = pyplot.subplots()
-        self.fig.canvas.set_window_title("GammaLab Histogram")
+        self.fig.canvas.manager.set_window_title("GammaLab Histogram")
       
         self._histogram_plot()
       
