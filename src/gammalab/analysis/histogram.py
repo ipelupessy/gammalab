@@ -22,6 +22,7 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
         wire.nchannels=self.nchannels
         wire.vmin=self.vmin
         wire.vmax=self.vmax
+        wire.unit=self.input_wire.unit
 
     def process(self, data):
         signal=[x[1] for x in data]

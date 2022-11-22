@@ -31,13 +31,13 @@ class Wire(object):
         if name in self.protocol:
             return self.protocol[name]
         else:
-            raise AttributeError("No such attribute in protocol: " + name)
+            raise AttributeError(f"No attribute {name} in protocol of {self.__class__.__name__} ")
 
     def __delattr__(self, name):
         if name in self.protocol:
             del self.protocol[name]
         else:
-            raise AttributeError("No such attribute in protocol: " + name)
+            raise AttributeError(f"No attribute {name} in protocol of {self.__class__.__name__} ")
 
 class RawWire(Wire):
     _description="Raw byte (string)"

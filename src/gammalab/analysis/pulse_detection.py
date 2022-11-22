@@ -23,6 +23,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
     def output_protocol(self, wire):
         assert isinstance(wire, PulseWire)
         wire._debug=self.debug
+        wire.unit="raw value"
 
     def start(self):
         self.data=numpy.zeros(self.window, dtype=self.input_wire.FORMAT)

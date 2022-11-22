@@ -1,10 +1,16 @@
+"""
+  Calibration converts raw detector values to energies
+"""
+
 from ..service import ReceivingService, SourceService, ThreadService
 from ..wire import PulseWire
 
 import numpy
 
+# todo: simplify with inheritance?
+
 class Interpolate(ThreadService, SourceService, ReceivingService):
-    def __init__(self, calibration):
+    def __init__(self, calibration, unit="keV"):
         super(Interpolate, self).__init__()
         self.input_wire=PulseWire()
         self._xp=numpy.array([c[0] for c in calibration])
@@ -13,9 +19,11 @@ class Interpolate(ThreadService, SourceService, ReceivingService):
             assert(numpy.all(numpy.diff(self._xp) > 0))
         except AssertionError:
             raise Exception("provide ordered calibration dataset")
+        self.unit=unit
         
     def output_protocol(self, wire):
         assert isinstance(wire, PulseWire)
+        wire.unit=self.unit
 
     def process(self, data):
         timestamps=[x[0] for x in data]
@@ -24,13 +32,15 @@ class Interpolate(ThreadService, SourceService, ReceivingService):
         return zip(timestamps, calibrated)
 
 class Scale(ThreadService, SourceService, ReceivingService):
-    def __init__(self, scale):
+    def __init__(self, scale, unit="keV"):
         super(Scale, self).__init__()
         self.input_wire=PulseWire()
         self.scale=scale
+        self.unit=unit
         
     def output_protocol(self, wire):
         assert isinstance(wire, PulseWire)
+        wire.unit=self.unit
 
     def process(self, data):
         timestamps=[x[0] for x in data]
@@ -38,15 +48,16 @@ class Scale(ThreadService, SourceService, ReceivingService):
         return zip(timestamps, scaled)
 
 class SecondOrder(ThreadService, SourceService, ReceivingService):
-    def __init__(self, scale, drift=0):
+    def __init__(self, scale, drift=0, unit="keV"):
         super(SecondOrder, self).__init__()
         self.input_wire=PulseWire()
         self.scale=scale
         self.drift=drift
-        print(drift)
-        
+        self.unit=unit
+                
     def output_protocol(self, wire):
         assert isinstance(wire, PulseWire)
+        wire.unit=self.unit
 
     def process(self, data):
         timestamps=[x[0] for x in data]

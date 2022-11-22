@@ -22,7 +22,12 @@ from gammalab.backend import PlotHistogram
 def run(threshold=0.003, nchannels=500, vmax=2000., scale=5400., drift=0., 
         runtime=None, outfile=None, log=True, do_plot=True,
         input_device_name="", inputfile=None, realtime=True,
-        fitpulse=False, fit_threshold=0.95):
+        fitpulse=False, fit_threshold=0.95, raw_values=False):
+
+    if raw_values:
+        print("check detector output! we assume range of [0,1]")
+        scale=1
+        vmax=1
 
     if inputfile is not None:
         source=FileReplay(filename=inputfile, realtime=realtime)
@@ -34,19 +39,28 @@ def run(threshold=0.003, nchannels=500, vmax=2000., scale=5400., drift=0.,
     else:
         detect=PulseDetection(threshold=threshold)
     
-    count=Count(outfile=None)
-    calibrate=SecondOrder(scale=scale, drift=drift)
-    histogram=AggregateHistogram(nchannels=int(nchannels*scale/vmax), vmin=0, vmax=vmax, outfile=outfile)
+    count=Count(outfile=outfile+".counts" if outfile is not None else None)
+    histogram=AggregateHistogram(nchannels=int(nchannels*scale/vmax),
+                                 vmin=0, 
+                                 vmax=vmax, 
+                                 outfile=outfile+".histogram" if outfile is not None else None)
     
     source.plugs_into(convert)
-    
     convert.plugs_into(detect)
     detect.plugs_into(count)
-    detect.plugs_into(calibrate)
-    calibrate.plugs_into(histogram)
+
+    if raw_values:
+        detect.plugs_into(histogram)
+    else:
+        calibrate=SecondOrder(scale=scale, drift=drift)
+        detect.plugs_into(calibrate)
+        calibrate.plugs_into(histogram)
 
     if do_plot:
-        plothistogram=PlotHistogram(xmin=0,xmax=vmax, outfile=outfile, log=log)
+        plothistogram=PlotHistogram(xmin=0, 
+                                    xmax=vmax, 
+                                    outfile=outfile,
+                                    log=log)
         histogram.plugs_into(plothistogram)
 
     main(runtime)
@@ -147,6 +161,12 @@ def new_argument_parser():
         type=float,
         help='minimum peak to determine amplitude through fitting',
     )
+    parser.add_argument(
+        '--raw',
+        dest='raw_values',
+        action="store_true",
+        help='histogram of raw detector values (no calibration or scaling)',
+    )    
 
     return parser.parse_args()
 
