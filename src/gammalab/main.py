@@ -19,7 +19,6 @@ def startup():
     print("[Startup] entry")
 
     t=multiprocessing.Process(target=output_thread)
-    #~ t=threading.Thread(target=output_thread)
     t.daemon=True
     t.start()
 

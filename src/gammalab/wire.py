@@ -1,16 +1,12 @@
-try:
-    from queue import Queue
-except:
-    from Queue import Queue
 
-from multiprocessing import Queue as MPQueue
+from multiprocessing import Queue as Queue
 
 class Wire(object):
     _initialized=False
     _description="none"
 
     def __init__(self, **kwargs):
-        self._queue=MPQueue(**kwargs)
+        self._queue=Queue(**kwargs)
 
 # forward the necessary methods; note we are not deriving class from Queue since 
 # multiprocessing Queue import is a factory method

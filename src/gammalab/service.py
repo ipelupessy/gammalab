@@ -1,6 +1,5 @@
 from . import all_services, shared_output
 
-import threading
 import multiprocessing
 import ctypes
 
@@ -88,7 +87,6 @@ class ThreadService(Service):
         self.stopped=True
         self.done=False
         self.thread=multiprocessing.Process(target=self.start_process)
-        #~ self.thread=threading.Thread(target=self.start_process)
 
     def start(self):
         self.stopped=False
