@@ -180,14 +180,16 @@ class PlotHistogram(ThreadService, ReceivingService):
         except Exception as ex:
             self.print_message("import error: {0}".format(str(ex)))
 
-        pyplot.ion()
+        #~ pyplot.ion()
         self.fig, self.ax = pyplot.subplots()
+        self.ax.cla()
         self.fig.canvas.manager.set_window_title("GammaLab Histogram")
       
         self._histogram_plot()
 
         ani = FuncAnimation(self.fig, self.update_plot, interval=250, blit=True)
-        self.fig.canvas.draw()
+        #~ self.fig.canvas.draw()
+        pyplot.show(block=True)
         
         while not self.stopped:
           time.sleep(0.5)
