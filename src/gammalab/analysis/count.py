@@ -27,7 +27,7 @@ class Count(ThreadService, ReceivingService):
             if dt10>0:
                 cps10=100./dt10
                 
-        message="t: {0:6.3g}, counts: {1:5.3e} | cps: {2:5.2f}, cps (10%) {3:5.2f}".format(dt, total, cps, cps10)
+        message="t: {0:6.3g}, counts: {1:5.3e} | avg. cps: {2:5.2f}, current cps (10%) {3:5.2f}".format(dt, total, cps, cps10)
         self.print_message(message)
         
     def stop(self):

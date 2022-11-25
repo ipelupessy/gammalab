@@ -13,16 +13,21 @@ except:
 
 from gammalab import main
 from gammalab.acquisition import SoundCard, FileReplay
-from gammalab.transform import Raw2Float, Scale
+from gammalab.transform import Raw2Float, SecondOrder
 from gammalab.analysis import PulseDetection, FittedPulseDetection
 from gammalab.analysis import AggregateHistogram
 from gammalab.analysis import Count
 from gammalab.backend import PlotHistogram
 
-def run(threshold=0.003, nchannels=500, vmax=2000., scale=5400., 
+def run(threshold=0.003, nchannels=500, vmax=2000., scale=5400., drift=0., 
         runtime=None, outfile=None, log=True, do_plot=True,
         input_device_name="", inputfile=None, realtime=True,
-        fitpulse=False, fit_threshold=0.95):
+        fitpulse=False, fit_threshold=0.95, raw_values=False):
+
+    if raw_values:
+        print("check detector output! we assume range of [0,1]")
+        scale=1
+        vmax=1
 
     if inputfile is not None:
         source=FileReplay(filename=inputfile, realtime=realtime)
@@ -34,19 +39,28 @@ def run(threshold=0.003, nchannels=500, vmax=2000., scale=5400.,
     else:
         detect=PulseDetection(threshold=threshold)
     
-    count=Count(outfile=None)
-    calibrate=Scale(scale=scale)
-    histogram=AggregateHistogram(nchannels=int(nchannels*vmax/1000.), vmin=0, vmax=vmax, outfile=outfile)
+    count=Count(outfile=outfile+".counts" if outfile is not None else None)
+    histogram=AggregateHistogram(nchannels=int(nchannels*scale/vmax),
+                                 vmin=0, 
+                                 vmax=vmax, 
+                                 outfile=outfile+".histogram" if outfile is not None else None)
     
     source.plugs_into(convert)
-    
     convert.plugs_into(detect)
     detect.plugs_into(count)
-    detect.plugs_into(calibrate)
-    calibrate.plugs_into(histogram)
+
+    if raw_values:
+        detect.plugs_into(histogram)
+    else:
+        calibrate=SecondOrder(scale=scale, drift=drift)
+        detect.plugs_into(calibrate)
+        calibrate.plugs_into(histogram)
 
     if do_plot:
-        plothistogram=PlotHistogram(xmin=0,xmax=vmax, outfile=outfile, log=log)
+        plothistogram=PlotHistogram(xmin=0, 
+                                    xmax=vmax, 
+                                    outfile=outfile,
+                                    log=log)
         histogram.plugs_into(plothistogram)
 
     main(runtime)
@@ -84,6 +98,13 @@ def new_argument_parser():
         help='signal energy scale (in keV)',
     )
     parser.add_argument(
+        '--drift',
+        dest='drift',
+        default=0,
+        type=float,
+        help='second order correction parameter (fractional deviation at raw value 1)',
+    )
+    parser.add_argument(
         '--outfile',
         dest='outfile',
         default=None,
@@ -103,10 +124,10 @@ def new_argument_parser():
         help='plot logarithmic y-axis',
     )
     parser.add_argument(
-        '--no-plot',
+        '--do-plot',
         dest='do_plot',
-        action="store_false",
-        help='hide plot',
+        action="store_true",
+        help='show plot',
     )
     parser.add_argument(
         '--input_device_name',
@@ -140,6 +161,12 @@ def new_argument_parser():
         type=float,
         help='minimum peak to determine amplitude through fitting',
     )
+    parser.add_argument(
+        '--raw',
+        dest='raw_values',
+        action="store_true",
+        help='histogram of raw detector values (no calibration or scaling)',
+    )    
 
     return parser.parse_args()
 

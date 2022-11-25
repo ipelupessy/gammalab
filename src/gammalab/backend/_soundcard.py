@@ -36,7 +36,7 @@ class SoundCardPlay(ThreadService, ReceivingService):
 
     def _process(self):
         speaker=soundcard.get_speaker(self.output_device_index or self.output_device_name)
-        print(speaker)
+        self.print_message( f"opening {str(speaker)} for audio output")
         with speaker.player(samplerate=self.input_wire.RATE, blocksize=self.frames_per_buffer) as player:
             while not self.done:
                 data=self.receive_input()

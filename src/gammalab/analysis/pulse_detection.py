@@ -24,6 +24,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
     def output_protocol(self, wire):
         super(PulseDetection, self).output_protocol(wire)
         wire._debug=self.debug
+        wire.unit="raw value"
 
     def start(self):
         self.data=numpy.zeros(self.window, dtype=self.input_wire.FORMAT)

@@ -40,10 +40,25 @@ Easiest is to use pip::
 Usage
 -----
 
-An example application that acquires data and plots a gamma spectrum is 
-included, you can get help::
+Two example ready made example applications are included in a pip install. 
+The ```gammalab-histogram.py``` program acquires data and plots a gamma 
+spectrum. you can get help::
 
   > gammalab-histogram.py --help
+
+Another program ```gammalab-monitor.py``` lets you directly inspect the 
+data coming from the soundcard (e.g. to confirm you indeed use the right 
+sound interface or the manually fine tune the volume gain). Also it lets 
+you record a data stream for later analysis with 
+```gammalab-histogram.py```. To get usage info::
+
+  > gammalab-monitor.py --help
+
+For example::
+
+  > gammalab-monitor.py --list_input_devices
+  
+will list the available soundcard devices.
 
 This provides only a limited preview of the possibilities that the Gamma 
 Lab offers. You can compose your own applications, examples of this are in 

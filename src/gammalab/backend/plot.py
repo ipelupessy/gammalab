@@ -59,7 +59,7 @@ class Monitor(ReceivingService):
           self.plotx=numpy.arange(int(self.input_wire.RATE*self.window))/float(self.input_wire.RATE)
           pyplot.ion()
           f, ax = pyplot.subplots()
-          f.canvas.set_window_title("GammaLab Monitor")
+          f.canvas.manager.set_window_title("GammaLab Monitor")
           plot=ax.plot(self.plotx,self.plotdata)
           ax.set_ylim(self.vmin,self.vmax)
           ax.set_xlabel("time (s)")
@@ -171,14 +171,14 @@ class PlotHistogram(ReceivingService):
             self._line,=self.ax.plot(x,y,lw=2, zorder=10)
 
         self.ax.set_ylabel("counts")
-        self.ax.set_xlabel("energy (keV)") # take label from wire?
+        self.ax.set_xlabel(f"energy ({self.input_wire.unit})") # take label from wire?
         self.ax.set_xlim(self.xmin,self.xmax)
         self._update_ylim(max(y.max(),50))
       
     def start(self):
         pyplot.ion()
         self.fig, self.ax = pyplot.subplots()
-        self.fig.canvas.set_window_title("GammaLab Histogram")
+        self.fig.canvas.manager.set_window_title("GammaLab Histogram")
       
         self._histogram_plot()
       
