@@ -3,12 +3,14 @@ try:
 except:
     from Queue import Queue
 
+from multiprocessing import Queue as MPQueue
+
 class Wire(object):
-    __initialized=False
+    _initialized=False
     _description="none"
 
     def __init__(self, **kwargs):
-        self._queue=Queue(**kwargs)
+        self._queue=MPQueue(**kwargs)
 
 # forward the necessary methods; note we are not deriving class from Queue since 
 # multiprocessing Queue import is a factory method
@@ -18,11 +20,21 @@ class Wire(object):
         self.get_nowait=self._queue.get_nowait
         
         self.protocol=dict()
-        self.__initialized=True
+        self._initialized=True
+
+    def __getstate__(self):
+        d=self.__dict__.copy()
+        d["_initialized"]=False
+        return self.__dict__
+
+    def __setstate__(self, d):
+        for x in d:
+          setattr(self, x, d[x])
+        self._initialized=True
 
 # attributes are forwarded to the protocol (after __init__)
     def __setattr__(self, name, value):
-        if self.__initialized:
+        if self._initialized:
             self.protocol[name] = value
         else:
             self.__dict__[name] = value

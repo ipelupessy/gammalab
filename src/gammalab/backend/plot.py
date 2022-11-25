@@ -1,46 +1,43 @@
-from ..service import ReceivingService
+from ..service import ThreadService, ReceivingService
 from ..wire import FloatWire, HistogramWire
 
 import numpy
 import time
 
-try:
-    from matplotlib.animation import FuncAnimation
-    from matplotlib import pyplot    
-    HAS_MATPLOTLIB=True
-except:
-    HAS_MATPLOTLIB=False
-
-class Monitor(ReceivingService):
+class Monitor(ThreadService, ReceivingService):
     input_wire_class=FloatWire
 
-    def __init__(self, window=5, vmin=-0.01, vmax=1.1, outfile=None):        
-        if not HAS_MATPLOTLIB:
-            raise Exception("needs matplotlib")
-        
+    def __init__(self, window=5, vmin=-0.01, vmax=1.1, outfile=None):                
         self.window=window
-        self.stopped=True
         self.vmin=vmin
         self.vmax=vmax
         self.outfile=outfile
+        self.do_update=True
 
         super(Monitor, self).__init__()
+        self.thread.daemon=True
 
     def update_plot(self,nframe):
-        
+
+        if self.do_update==False:
+            return self.plot
+
         data=[]
         while True:
             _data=self.receive_input(False)
             if _data is None:
                 break
             data.append(_data)
-        
+
         if data:
             data=numpy.concatenate(data)
         else:
             return self.plot
-        
+
         if self.stopped:
+            self.do_update=False
+            if self.outfile is not None:
+              self.fig.savefig(self.outfile+'.png')            
             return self.plot
         
         while len(data)>0:
@@ -54,46 +51,46 @@ class Monitor(ReceivingService):
         self.plot[0].set_ydata(self.plotdata)
         return self.plot
   
-    def start(self):
-          self.plotdata=numpy.zeros(int(self.input_wire.RATE*self.window), dtype=self.input_wire.FORMAT)
-          self.plotx=numpy.arange(int(self.input_wire.RATE*self.window))/float(self.input_wire.RATE)
-          pyplot.ion()
-          f, ax = pyplot.subplots()
-          f.canvas.manager.set_window_title("GammaLab Monitor")
-          plot=ax.plot(self.plotx,self.plotdata)
-          ax.set_ylim(self.vmin,self.vmax)
-          ax.set_xlabel("time (s)")
-          ax.set_ylabel("level")
-        
-          self.fig=f
-          self.ax=ax
-          self.plot=plot
+    def start_process(self):
+        global FuncAnimation, pyplot
+        try:
+            from matplotlib.animation import FuncAnimation
+            from matplotlib import pyplot    
+        except Exception as ex:
+            self.print_message("import error: {0}".format(str(ex)))
 
-          self.stopped=False
-          self.nplot=0
-
-          ani = FuncAnimation(self.fig, self.update_plot, interval=250, blit=True)
-          f.canvas.draw()
-
-    def stop(self):
-        self.stopped=True
+        self.plotdata=numpy.zeros(int(self.input_wire.RATE*self.window), dtype=self.input_wire.FORMAT)
+        self.plotx=numpy.arange(int(self.input_wire.RATE*self.window))/float(self.input_wire.RATE)
+        #~ pyplot.ion()
+        f, ax = pyplot.subplots()
+        ax.cla()
+        f.canvas.manager.set_window_title("GammaLab Monitor")
+        plot=ax.plot(self.plotx,self.plotdata)
+        ax.set_ylim(self.vmin,self.vmax)
+        ax.set_xlabel("time (s)")
+        ax.set_ylabel("level")
       
+        self.fig=f
+        self.ax=ax
+        self.plot=plot
+
+        self.nplot=0
+
+        ani = FuncAnimation(self.fig, self.update_plot, interval=250, repeat=False, blit=True)
+        #~ self.fig.canvas.draw()
+        pyplot.show(block=True)
+
     def close(self):
         self.stop()
-        if self.outfile is not None:
-            time.sleep(0.3)
-            self.fig.savefig(self.outfile+'.png')
+        self.done=True
+        self.thread.join(1.)
+      
 
-
-class PlotHistogram(ReceivingService):
+class PlotHistogram(ThreadService, ReceivingService):
     input_wire_class=HistogramWire
   
     def __init__(self, xmin=0, xmax=1., log=True, 
-                    error_bars=True, outfile="histogram"):
-        if not HAS_MATPLOTLIB:
-            raise Exception("needs matplotlib")
-        
-        self.stopped=True
+                    error_bars=True, outfile="histogram"):        
         self.xmin=xmin
         self.xmax=xmax
         self.log=log
@@ -175,23 +172,24 @@ class PlotHistogram(ReceivingService):
         self.ax.set_xlim(self.xmin,self.xmax)
         self._update_ylim(max(y.max(),50))
       
-    def start(self):
+    def start_process(self):
+        global FuncAnimation, pyplot
+        try:
+            from matplotlib.animation import FuncAnimation
+            from matplotlib import pyplot    
+        except Exception as ex:
+            self.print_message("import error: {0}".format(str(ex)))
+
         pyplot.ion()
         self.fig, self.ax = pyplot.subplots()
         self.fig.canvas.manager.set_window_title("GammaLab Histogram")
       
         self._histogram_plot()
-      
-        self.stopped=False
 
         ani = FuncAnimation(self.fig, self.update_plot, interval=250, blit=True)
         self.fig.canvas.draw()
-
-    def stop(self):
-        self.stopped=True
-      
-    def close(self):
-        self.stop()
+        
+        while not self.stopped:
+          time.sleep(0.5)
         if self.outfile is not None:
-            time.sleep(0.3)
-            self.fig.savefig(self.outfile+'.png')
+          self.fig.savefig(self.outfile+'.png')

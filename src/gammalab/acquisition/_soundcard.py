@@ -1,28 +1,23 @@
 from ..service import SourceService, ThreadService
 from ..wire import RawWire
 
-try:
-    import soundcard
-    HAS_SOUNDCARD=True
-except ImportError:
-    HAS_SOUNDCARD=False
-
 class SoundCard(ThreadService, SourceService):
     output_wire_class=RawWire
 
     @staticmethod
     def devices():
         """ return dict with names and ids of sound devices for acquisition (aka microphones) """
+        try:
+            import soundcard
+        except Exception as ex:
+            raise Exception( "import error: {0}".format(str(ex)))
         result=dict()
-        if HAS_SOUNDCARD:
-          for m in soundcard.all_microphones():
-            result[m.name]=m.id
+        for m in soundcard.all_microphones():
+          result[m.name]=m.id
         return result
   
     def __init__(self, frames_per_buffer=2048, input_device_index=None, input_device_name="",
                  sample_rate=48000, sample_format="float32"):
-        if not HAS_SOUNDCARD:
-          raise Exception("soundcard module not or not correctly installed")        
         self.CHANNELS=1
         self.RATE=sample_rate
         if sample_format != "float32":
@@ -34,6 +29,12 @@ class SoundCard(ThreadService, SourceService):
         super(SoundCard, self).__init__()
 
     def _process(self):
+        global soundcard
+        try:
+            import soundcard
+        except Exception as ex:
+            self.print_message( "import error: {0}".format(str(ex)))
+
         mic=soundcard.get_microphone(self.input_device_index or self.input_device_name)
         with mic.recorder(samplerate=self.RATE, blocksize=self.frames_per_buffer, channels=self.CHANNELS) as recorder:
             while not self.done:    
@@ -51,7 +52,7 @@ class SoundCard(ThreadService, SourceService):
     
                 if (not self.stopped and 
                     not self.done and
-                    data is not None):  
+                    data is not None):
                     self.send_output(data)
                 
             self.send_output(None)

@@ -1,6 +1,8 @@
 from . import all_services, shared_output
 
 import threading
+import multiprocessing
+import ctypes
 
 class ServiceError(Exception):
     pass
@@ -81,14 +83,20 @@ class ReceivingService(Service):
 class ThreadService(Service):
     def __init__(self, **kwargs):
         super(ThreadService, self).__init__(**kwargs)
+        self.__stopped=multiprocessing.Value(ctypes.c_bool)
+        self.__done=multiprocessing.Value(ctypes.c_bool)
         self.stopped=True
         self.done=False
-        self.thread=threading.Thread(target=self._process)
+        self.thread=multiprocessing.Process(target=self.start_process)
+        #~ self.thread=threading.Thread(target=self.start_process)
 
     def start(self):
         self.stopped=False
         if not self.thread.is_alive():
             self.thread.start()
+
+    def start_process(self):
+        self._process()
 
     def _process(self):
         while not self.done:
@@ -122,3 +130,18 @@ class ThreadService(Service):
         self.done=True
         self.thread.join()
 
+    @property
+    def done(self):
+        return self.__done.value
+
+    @done.setter
+    def done(self, value):
+        self.__done.value=value
+
+    @property
+    def stopped(self):
+        return self.__stopped.value
+
+    @stopped.setter
+    def stopped(self, value):
+        self.__stopped.value=value
