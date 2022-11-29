@@ -24,7 +24,7 @@ class Interpolate(ThreadService, SourceService, ReceivingService):
         self.unit=unit
         
     def output_protocol(self, wire):
-        super(Interpolate, self).output_protocol(wire)   
+        super(Interpolate, self).output_protocol(wire)
         wire.unit=self.unit
 
     def process(self, data):
@@ -42,7 +42,7 @@ class Scale(ThreadService, SourceService, ReceivingService):
         self.unit=unit
         
     def output_protocol(self, wire):
-        super(Scale, self).output_protocol(wire)   
+        super(Scale, self).output_protocol(wire)
         wire.unit=self.unit
 
     def process(self, data):
