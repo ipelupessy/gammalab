@@ -21,7 +21,7 @@ class Raw2Numpy(ThreadService, SourceService, ReceivingService):
     output_wire_class=FloatWire
 
     def output_protocol(self, wire):
-        super(Identity, self).output_protocol(wire)
+        super(Raw2Numpy, self).output_protocol(wire)
         wire.CHANNELS=self.input_wire.CHANNELS
         wire.RATE=self.input_wire.RATE
         wire.FORMAT=self.input_wire.FORMAT
