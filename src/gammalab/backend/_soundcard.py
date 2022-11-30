@@ -2,28 +2,24 @@ import numpy
 from ..service import ReceivingService, ThreadService
 from ..wire import RawWire
 
-try:
-    import soundcard
-    HAS_SOUNDCARD=True
-except ImportError:
-    HAS_SOUNDCARD=False
-
 class SoundCardPlay(ThreadService, ReceivingService):
 
     @staticmethod
     def devices():
         """ return dict with names and ids of sound devices for playback (aka speakers) """
         result=dict()
-        if HAS_SOUNDCARD:
-          for m in soundcard.all_speakers():
-            result[m.name]=m.id
+        try:
+            import soundcard
+        except Exception as ex:
+            raise Exception( "import error: {0}".format(str(ex)))
+
+        for m in soundcard.all_speakers():
+          result[m.name]=m.id
         return result
 
     input_wire_class=RawWire
 
     def __init__(self, frames_per_buffer=2048, output_device_index=None, output_device_name=""):
-        if not HAS_SOUNDCARD:
-          raise Exception("soundcard module not or not correctly installed")        
         self.frames_per_buffer=frames_per_buffer
         self.output_device_index=output_device_index
         self.output_device_name=output_device_name
@@ -35,8 +31,15 @@ class SoundCardPlay(ThreadService, ReceivingService):
             raise Exception("SoundCard playback only supports float32 format")
 
     def _process(self):
+        global soundcard
+        try:
+            import soundcard
+        except Exception as ex:
+            self.print_message( "import error: {0}".format(str(ex)))
+            
         speaker=soundcard.get_speaker(self.output_device_index or self.output_device_name)
         self.print_message( f"opening {str(speaker)} for audio output")
+
         with speaker.player(samplerate=self.input_wire.RATE, blocksize=self.frames_per_buffer) as player:
             while not self.done:
                 data=self.receive_input()

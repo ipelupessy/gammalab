@@ -1,10 +1,8 @@
-try:
-    from queue import Queue
-except:
-    from Queue import Queue
+
+from multiprocessing import Queue as Queue
 
 class Wire(object):
-    __initialized=False
+    _initialized=False
     _description="none"
 
     def __init__(self, **kwargs):
@@ -18,11 +16,21 @@ class Wire(object):
         self.get_nowait=self._queue.get_nowait
         
         self.protocol=dict()
-        self.__initialized=True
+        self._initialized=True
+
+    def __getstate__(self):
+        d=self.__dict__.copy()
+        d["_initialized"]=False
+        return self.__dict__
+
+    def __setstate__(self, d):
+        for x in d:
+          setattr(self, x, d[x])
+        self._initialized=True
 
 # attributes are forwarded to the protocol (after __init__)
     def __setattr__(self, name, value):
-        if self.__initialized:
+        if self._initialized:
             self.protocol[name] = value
         else:
             self.__dict__[name] = value

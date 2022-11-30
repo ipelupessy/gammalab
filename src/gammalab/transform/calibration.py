@@ -12,6 +12,7 @@ import numpy
 class Interpolate(ThreadService, SourceService, ReceivingService):
     input_wire_class=PulseWire
     output_wire_class=PulseWire
+
     def __init__(self, calibration, unit="keV"):
         super(Interpolate, self).__init__()
         self._xp=numpy.array([c[0] for c in calibration])
@@ -53,7 +54,7 @@ class Scale(ThreadService, SourceService, ReceivingService):
 class SecondOrder(ThreadService, SourceService, ReceivingService):
     input_wire_class=PulseWire
     output_wire_class=PulseWire    
-        
+
     def __init__(self, scale, drift=0, unit="keV"):
         super(SecondOrder, self).__init__()
         self.input_wire=PulseWire()

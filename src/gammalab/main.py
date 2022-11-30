@@ -1,5 +1,6 @@
 from . import all_services, shared_output
 
+import multiprocessing
 import threading
 import time
 
@@ -17,7 +18,7 @@ def output_thread():
 def startup():
     print("[Startup] entry")
 
-    t=threading.Thread(target=output_thread)
+    t=multiprocessing.Process(target=output_thread)
     t.daemon=True
     t.start()
 
