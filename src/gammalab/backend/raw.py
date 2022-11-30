@@ -16,6 +16,5 @@ class SaveRaw(ThreadService, ReceivingService):
     def process(self, data):
         self.output.write(data)
 
-    def stop(self):
+    def cleanup(self):
         self.output.close()
-        ThreadService.stop(self)

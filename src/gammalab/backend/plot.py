@@ -61,23 +61,20 @@ class Monitor(ThreadService, ReceivingService):
 
         self.plotdata=numpy.zeros(int(self.input_wire.RATE*self.window), dtype=self.input_wire.FORMAT)
         self.plotx=numpy.arange(int(self.input_wire.RATE*self.window))/float(self.input_wire.RATE)
-        #~ pyplot.ion()
-        f, ax = pyplot.subplots()
-        ax.cla()
-        f.canvas.manager.set_window_title("GammaLab Monitor")
-        plot=ax.plot(self.plotx,self.plotdata)
-        ax.set_ylim(self.vmin,self.vmax)
-        ax.set_xlabel("time (s)")
-        ax.set_ylabel("level")
-      
-        self.fig=f
-        self.ax=ax
-        self.plot=plot
 
+        self.fig, self.ax = pyplot.subplots()
+        self.fig.canvas.manager.set_window_title("GammaLab Monitor")
+
+        self.ax.cla()
+        self.plot=self.ax.plot(self.plotx,self.plotdata)
+        self.ax.set_ylim(self.vmin,self.vmax)
+        self.ax.set_xlabel("time (s)")
+        self.ax.set_ylabel("level")
+      
         self.nplot=0
 
         ani = FuncAnimation(self.fig, self.update_plot, interval=250, repeat=False, blit=True)
-        #~ self.fig.canvas.draw()
+
         pyplot.show(block=True)
 
     def close(self):
@@ -180,18 +177,24 @@ class PlotHistogram(ThreadService, ReceivingService):
         except Exception as ex:
             self.print_message("import error: {0}".format(str(ex)))
 
-        #~ pyplot.ion()
         self.fig, self.ax = pyplot.subplots()
-        self.ax.cla()
         self.fig.canvas.manager.set_window_title("GammaLab Histogram")
       
         self._histogram_plot()
 
-        ani = FuncAnimation(self.fig, self.update_plot, interval=250, blit=True)
-        #~ self.fig.canvas.draw()
+        ani = FuncAnimation(self.fig, self.update_plot, interval=250, repeat=False, blit=True)
+
         pyplot.show(block=True)
         
+        self.print_message("ends")
+        
         while not self.stopped:
-          time.sleep(0.5)
+            time.sleep(0.5)
         if self.outfile is not None:
-          self.fig.savefig(self.outfile+'.png')
+            self.fig.savefig(self.outfile+'.png')
+
+    def close(self):
+        self.stop()
+        self.done=True
+        self.thread.join(1.)
+

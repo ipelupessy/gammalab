@@ -43,13 +43,12 @@ class RawReplay(ThreadService, SourceService):
           self.done=True
         return data
         
-    def start(self):
+    def start_process(self):
         self.t0=time.time()
         self._file=open(self.filename, "rb")
-        ThreadService.start(self)
+        self._process()
 
-    def close(self):
-        ThreadService.close(self)
+    def cleanup(self):
         self._file.close()
 
 
@@ -61,7 +60,6 @@ class WavReplay(RawReplay):
         self.filename=filename
         self.frames_per_buffer=frames_per_buffer
         self.realtime=realtime
-        self._file=wave.open(self.filename, "rb")
         self.CHANNELS=self._file.getnchannels()==1
         self.RATE=self._file.getframerate()
         self.SAMPLEWIDTH=self._file.getsampwidth()
@@ -70,10 +68,11 @@ class WavReplay(RawReplay):
     def readframes(self,n):
         return self._file.readframes(n)
         
-    def start(self):
+    def start_process(self):
         self.t0=time.time()
-        ThreadService.start(self)
-
+        self._file=wave.open(self.filename, "rb")
+        self._process
+ 
 def FileReplay(filename, **kwargs):
     if filename.endswith("wav"):
         return WavReplay(filename, **kwargs)

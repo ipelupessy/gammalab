@@ -34,9 +34,8 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
 
         return dict(hist=self.hist, bins=self.bins)
 
-    def stop(self):
+    def cleanup(self):
         if self.outfile is not None:
             f=open(self.outfile+".pkl","wb")
             pickle.dump((self.hist, self.bins),f)
             f.close()
-        ThreadService.stop(self)

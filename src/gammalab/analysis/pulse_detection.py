@@ -3,13 +3,6 @@ from ..wire import FloatWire, PulseWire
 
 from functools import partial
 import numpy
-
-try:
-    import scipy
-    from scipy.optimize import curve_fit
-    HAS_SCIPY=True    
-except:
-    HAS_SCIPY=False
     
 class PulseDetection(ThreadService, SourceService, ReceivingService):
     input_wire_class=FloatWire
@@ -67,10 +60,8 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
             time=start/(1.*self.RATE)+self.itime
             try:
               amplitude, sigma=self.amplitude_and_quality(start,end)
-            except:
-              self.print_message("detection error")
-              raise
-              continue
+            except Exception as ex:
+              self.print_message("Pulse detection error condition: %s"%str(ex))
             
             width=end-start
 
@@ -115,8 +106,7 @@ class FittedPulseDetection(PulseDetection):
     """
     def __init__(self, threshold=0.005, window=24*1024, debug=False, 
                   fit_threshold=0., signal_noise=0.0035, pulse_decay_time=2.7247/48000):
-        if not HAS_SCIPY:
-            raise Exception("pulse fitting needs Scipy...")
+
         super(FittedPulseDetection, self).__init__(threshold=threshold, 
                                                    window=window, debug=debug)
 
@@ -155,6 +145,23 @@ class FittedPulseDetection(PulseDetection):
         data=self.data[max(start-5,0):end+15]
         max_data=numpy.max(self.data[start:end])
         if max_data>self.fit_threshold:
-            return self._fit_pulse(self._x[:len(data)], data)
+            try:
+                return self._fit_pulse(self._x[:len(data)], data)
+            except Exception as ex:
+                self.print_message("Fitted pulse detection error: %s"%str(ex))
+                return max_data,0.
         else:
             return max_data,0.
+
+    def start_process(self):
+        global scipy, curve_fit
+        
+        try:
+            import scipy
+            from scipy.optimize import curve_fit
+        except Exception as ex:
+            self.print_message( "import error: {0}".format(str(ex)))
+            #~ self.stopped=True
+            #~ self.done=True
+
+        self._process()

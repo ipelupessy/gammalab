@@ -30,10 +30,9 @@ class Count(ThreadService, ReceivingService):
         message="t: {0:6.3g}, counts: {1:5.3e} | avg. cps: {2:5.2f}, current cps (10%) {3:5.2f}".format(dt, total, cps, cps10)
         self.print_message(message)
         
-    def stop(self):
+    def cleanup(self):
         if self.outfile is not None:
             f=open(self.outfile+".pkl","wb")
             pickle.dump(self.all_pulses,f)
             f.close()
-        ThreadService.stop(self)
     

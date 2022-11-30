@@ -31,3 +31,6 @@ class SaveWav(ThreadService, ReceivingService):
 
     def process(self, data):
         self.output.writeframes(data)
+
+    def cleanup(self):
+        self.output.close()

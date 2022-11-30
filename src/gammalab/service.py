@@ -74,6 +74,7 @@ class ReceivingService(Service):
         try:
             return self.input_wire.get(block, 2)
         except Exception as ex:
+            #~ self.print_message("receive_input timeout or error")
             return None
 
 # multiple input/outputs will be implemented by connecting to/from special attributes:
@@ -108,7 +109,11 @@ class ThreadService(Service):
             # if stopped reveive input, but do not process, nor output
 
             if not self.stopped and not self.done:
-                data=self.process(data)
+# lets try ignoring exceptions for a while:
+                try:
+                    data=self.process(data)
+                except:
+                    data=None
 
             if hasattr(self,"send_output"):
                 if (not self.stopped and 
@@ -118,7 +123,12 @@ class ThreadService(Service):
             
         if hasattr(self,"send_output"):
             self.send_output(None)
+            
         self.stopped=True
+        self.cleanup()
+        
+    def cleanup(self):
+        pass
 
     def stop(self):
         self.stopped=True
@@ -127,6 +137,7 @@ class ThreadService(Service):
         self.stop()
         self.done=True
         self.thread.join()
+
 
     @property
     def done(self):
