@@ -87,7 +87,8 @@ class ThreadService(Service):
         self.__done=multiprocessing.Value(ctypes.c_bool)
         self.stopped=True
         self.done=False
-        self.thread=multiprocessing.Process(target=self.start_process)
+        self.thread=multiprocessing.Process(target=self.start_process, 
+                                            name=self.__class__.__name__)
 
     def start(self):
         self.stopped=False
