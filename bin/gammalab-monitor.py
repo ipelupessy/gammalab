@@ -12,14 +12,14 @@ except:
   pass
 
 from gammalab import main
-from gammalab.acquisition import SoundCard
+from gammalab.acquisition import SoundCard, FileReplay
 from gammalab.backend import Monitor
 from gammalab.backend import SaveRaw
 from gammalab.backend import SoundCardPlay
 from gammalab.transform import Raw2Float, DownSampleMaxed
 
 def run(input_device_name="", runtime=None, list_input_devices=False, raw_output_file="",
-        list_output_devices=False, output_device_name=""):
+        list_output_devices=False, output_device_name="", inputfile=None):
     if list_input_devices:
       for name, id_ in SoundCard.devices().items():
         print("{0}: {1}".format(name, id_))
@@ -29,12 +29,14 @@ def run(input_device_name="", runtime=None, list_input_devices=False, raw_output
         print("{0}: {1}".format(name, id_))
       exit(0)
 
-
-    source=SoundCard(input_device_name=input_device_name)
+    if inputfile is not None:
+        source=FileReplay(inputfile)
+    else:
+        source=SoundCard(input_device_name=input_device_name)
 
     monitor=Monitor()
     convert=Raw2Float()
-    downsample=DownSampleMaxed(factor=16)
+    downsample=DownSampleMaxed(factor=8)
         
     source.plugs_into(convert)
     convert.plugs_into(downsample)
@@ -98,6 +100,12 @@ def new_argument_parser():
         type=str,
         help='optional output device for playback (fuzzy matched by name)',
     )
+    parser.add_argument(
+        '--infile',
+        dest='inputfile',
+        default=None,
+        help='Optionally playback from input file',
+    ) 
     return parser.parse_args()
 
 if __name__=="__main__":

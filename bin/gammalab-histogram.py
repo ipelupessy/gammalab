@@ -25,7 +25,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., scale=5400., drift=0.,
         fitpulse=False, fit_threshold=0.95, raw_values=False):
 
     if raw_values:
-        print("check detector output! we assume range of [0,1]")
+        print("[Gammalab-histogram] check detector output! we assume range of [0,1]")
         scale=1
         vmax=1
 
