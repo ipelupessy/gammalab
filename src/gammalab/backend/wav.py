@@ -27,7 +27,7 @@ class SaveWav(ThreadService, ReceivingService):
         self.output.setsampwidth(2)
         self.output.setframerate(self.input_wire.RATE)
         
-        self._process()
+        super(SaveWav, self).start_process()
 
     def process(self, data):
         self.output.writeframes(data)

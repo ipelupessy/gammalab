@@ -37,7 +37,8 @@ class Monitor(ThreadService, ReceivingService):
         if self.stopped:
             self.do_update=False
             if self.outfile is not None:
-              self.fig.savefig(self.outfile+'.png')            
+              self.fig.savefig(self.outfile+'.png')
+            self.done=True
             return self.plot
         
         while len(data)>0:
@@ -77,10 +78,17 @@ class Monitor(ThreadService, ReceivingService):
 
         pyplot.show(block=True)
 
+        if self.outfile is not None:
+            self.fig.savefig(self.outfile+'.png')
+
+        self.cleanup()
+        
     def close(self):
+        # deamon process
         self.stop()
-        self.done=True
-        self.thread.join(1.)
+
+        while not self.done:
+            time.sleep(0.1)
       
 
 class PlotHistogram(ThreadService, ReceivingService):
@@ -94,8 +102,10 @@ class PlotHistogram(ThreadService, ReceivingService):
         self.error_bars=error_bars
         self.outfile=outfile
         self.ymax=1.
+        self.do_update=True
 
         super(PlotHistogram, self).__init__()
+        self.thread.daemon=True
 
     def update_plot(self,nframe):
         
@@ -106,7 +116,13 @@ class PlotHistogram(ThreadService, ReceivingService):
                 break
             data=_data
 
-        if self.stopped or data is None:
+        if self.stopped or not self.do_update or data is None:
+            if self.stopped:
+                self.do_update=False
+                if self.outfile is not None:
+                  self.fig.savefig(self.outfile+'.png')
+                self.done=True
+          
             if self.error_bars:
                 return self._line,self._top,self._bot
             else:
@@ -127,6 +143,8 @@ class PlotHistogram(ThreadService, ReceivingService):
         if self.error_bars:
             self._top.set_ydata(numpy.maximum(y+yerr,1))
             self._bot.set_ydata(y-yerr)
+                
+        if self.error_bars:
             return self._line,self._top,self._bot
         else:
             return self._line,
@@ -185,16 +203,16 @@ class PlotHistogram(ThreadService, ReceivingService):
         ani = FuncAnimation(self.fig, self.update_plot, interval=250, repeat=False, blit=True)
 
         pyplot.show(block=True)
-        
-        self.print_message("ends")
-        
-        while not self.stopped:
-            time.sleep(0.5)
+                
         if self.outfile is not None:
             self.fig.savefig(self.outfile+'.png')
 
+        self.cleanup()
+
     def close(self):
+        # deamon process
         self.stop()
-        self.done=True
-        self.thread.join(1.)
+
+        while not self.done:
+            time.sleep(0.1)
 

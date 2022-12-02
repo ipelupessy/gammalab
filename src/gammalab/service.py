@@ -2,6 +2,7 @@ from . import all_services, shared_output
 
 import multiprocessing
 import ctypes
+import time
 
 class ServiceError(Exception):
     pass
@@ -97,19 +98,20 @@ class ThreadService(Service):
 
     def start_process(self):
         self._process()
+        self.cleanup()
 
     def _process(self):
-        while not self.done:
+        while not self.stopped:
             if hasattr(self,"receive_input"):
                 data=self.receive_input()
                 if data is None:
-                    self.done=True
+                    self.stopped=True
             else:
                 data=None
 
             # if stopped reveive input, but do not process, nor output
 
-            if not self.stopped and not self.done:
+            if not self.stopped:
 # lets try ignoring exceptions for a while:
                 try:
                     data=self.process(data)
@@ -118,27 +120,29 @@ class ThreadService(Service):
 
             if hasattr(self,"send_output"):
                 if (not self.stopped and 
-                    not self.done and
                     data is not None):  
                     self.send_output(data)
             
         if hasattr(self,"send_output"):
             self.send_output(None)
-            
+                    
         self.stopped=True
-        self.cleanup()
         
     def cleanup(self):
-        pass
+        self.done=True
 
     def stop(self):
         self.stopped=True
 
     def close(self):
         self.stop()
-        self.done=True
-        self.thread.join()
 
+        while not self.done:
+            time.sleep(0.1)
+
+        self.thread.terminate()
+        self.thread.join()
+        self.thread.close()
 
     @property
     def done(self):

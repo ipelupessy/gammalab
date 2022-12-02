@@ -46,10 +46,12 @@ class RawReplay(ThreadService, SourceService):
     def start_process(self):
         self.t0=time.time()
         self._file=open(self.filename, "rb")
-        self._process()
+        super(RawReplay, self).start_process()
+        
 
     def cleanup(self):
         self._file.close()
+        super(RawReplay, self).cleanup()
 
 
 format_from_width={2 : "int16", 4 : "float32"}

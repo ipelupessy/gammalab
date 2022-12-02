@@ -39,3 +39,4 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
             f=open(self.outfile+".pkl","wb")
             pickle.dump((self.hist, self.bins),f)
             f.close()
+        super(AggregateHistogram, self).cleanup()

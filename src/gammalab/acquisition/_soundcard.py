@@ -37,21 +37,19 @@ class SoundCard(ThreadService, SourceService):
 
         mic=soundcard.get_microphone(self.input_device_index or self.input_device_name)
         with mic.recorder(samplerate=self.RATE, blocksize=self.frames_per_buffer, channels=self.CHANNELS) as recorder:
-            while not self.done:    
-                if not self.stopped and not self.done:
-                    try:
-                        data=recorder.record(self.frames_per_buffer)
-                    except Exception as ex:
-                        self.print_message( "error: {0}".format(str(ex)))
-                        self.done=True
-                    if len(data)==0:
-                        self.print_message("no data")
-                        self.done=True
-                    else:
-                        data=data.astype("float32").tobytes()
+            while not self.stopped:    
+                try:
+                    data=recorder.record(self.frames_per_buffer)
+                except Exception as ex:
+                    self.print_message( "error: {0}".format(str(ex)))
+                    self.stopped=True
+                if len(data)==0:
+                    self.print_message("no data")
+                    self.stopped=True
+                else:
+                    data=data.astype("float32").tobytes()
     
-                if (not self.stopped and 
-                    not self.done and
+                if (not self.stopped and
                     data is not None):
                     self.send_output(data)
                 

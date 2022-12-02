@@ -29,10 +29,12 @@ def shutdown():
     if all_services:
         shared_output.put("[Shutdown] shutting down")
 
+    for s in all_services:
+          s.stop()
+
     while all_services:
         s=all_services.pop()
         try:
-          s.stop()
           s.close()
         except Exception as ex:
           shared_output.put("[Shutdown] "+str(ex))
@@ -51,6 +53,7 @@ def main(timeout=None):
         timer.start()
         
     shared_output.put("[Main] running")
+
     input()
 
     shutdown()

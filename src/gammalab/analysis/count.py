@@ -35,4 +35,4 @@ class Count(ThreadService, ReceivingService):
             f=open(self.outfile+".pkl","wb")
             pickle.dump(self.all_pulses,f)
             f.close()
-    
+        super(Count, self).cleanup()

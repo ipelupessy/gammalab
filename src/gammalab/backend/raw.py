@@ -18,3 +18,4 @@ class SaveRaw(ThreadService, ReceivingService):
 
     def cleanup(self):
         self.output.close()
+        super(SaveRaw, self).cleanup()

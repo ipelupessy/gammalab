@@ -164,4 +164,4 @@ class FittedPulseDetection(PulseDetection):
             #~ self.stopped=True
             #~ self.done=True
 
-        self._process()
+        super(FittedPulseDetection,self).start_process()

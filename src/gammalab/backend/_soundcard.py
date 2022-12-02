@@ -41,18 +41,18 @@ class SoundCardPlay(ThreadService, ReceivingService):
         self.print_message( f"opening {str(speaker)} for audio output")
 
         with speaker.player(samplerate=self.input_wire.RATE, blocksize=self.frames_per_buffer) as player:
-            while not self.done:
+            while not self.stopped:
                 data=self.receive_input()
                 if data is None:
-                    self.done=True
+                    self.stopped=True
                 else:
                     data=numpy.frombuffer(data,dtype=self.input_wire.FORMAT)
 
-                if not self.stopped and not self.done:
+                if not self.stopped:
                     try:
                         player.play(data)
                     except Exception as ex:
                         self.print_message( "error: {0}".format(str(ex)))
-                        self.done=True
+                        self.stopped=True
         self.stopped=True
-        
+
