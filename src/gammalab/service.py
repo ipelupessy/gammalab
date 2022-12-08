@@ -73,7 +73,7 @@ class ReceivingService(Service):
         service.connect(self.input_wire)
     def receive_input(self, block=True):
         try:
-            return self.input_wire.get(block, 2)
+            return self.input_wire.get(block)
         except Exception as ex:
             #~ self.print_message("receive_input timeout or error")
             return None

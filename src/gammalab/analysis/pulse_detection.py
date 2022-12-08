@@ -19,12 +19,12 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         wire._debug=self.debug
         wire.unit="raw value"
 
-    def start(self):
+    def start_process(self):
         self.data=numpy.zeros(self.window, dtype=self.input_wire.FORMAT)
         self.ndata=0
         self.RATE=self.input_wire.RATE
         self.itime=0
-        ThreadService.start(self)
+        super(PulseDetection, self).start_process()
   
     def amplitude_and_quality(self, start,end):
         return numpy.max(self.data[start:end]),0
@@ -86,7 +86,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
                 outdata.extend(self.detect_pulses())
                 self.ndata=0
         
-        return outdata or None
+        return outdata or None # if None no data will be send
 
 
 def pulse(x, A, x0,  y, tau):
