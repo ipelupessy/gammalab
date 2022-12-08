@@ -19,8 +19,8 @@ from gammalab.analysis import AggregateHistogram
 from gammalab.analysis import Count
 from gammalab.backend import PlotHistogram
 
-def run(threshold=0.003, nchannels=500, vmax=2000., scale=5400., drift=0., 
-        runtime=None, outfile=None, log=True, do_plot=True,
+def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5400., 
+        drift=0., runtime=None, outfile=None, log=True, do_plot=True,
         input_device_name="", inputfile=None, realtime=True,
         fitpulse=False, fit_threshold=0.95, raw_values=False):
 
@@ -52,7 +52,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., scale=5400., drift=0.,
     if raw_values:
         detect.plugs_into(histogram)
     else:
-        calibrate=SecondOrder(scale=scale, drift=drift)
+        calibrate=SecondOrder(offset=offset, scale=scale, drift=drift)
         detect.plugs_into(calibrate)
         calibrate.plugs_into(histogram)
 
@@ -89,6 +89,13 @@ def new_argument_parser():
         default=2000,
         type=float,
         help='maximum energy bin for histogram',
+    )
+    parser.add_argument(
+        '--offset',
+        dest='offset',
+        default=0.,
+        type=float,
+        help='signal energy offset (in keV)',
     )
     parser.add_argument(
         '--scale',

@@ -55,11 +55,12 @@ class SecondOrder(ThreadService, SourceService, ReceivingService):
     input_wire_class=PulseWire
     output_wire_class=PulseWire    
 
-    def __init__(self, scale, drift=0, unit="keV"):
+    def __init__(self, scale, offset=0., drift=00, unit="keV"):
         super(SecondOrder, self).__init__()
         self.input_wire=PulseWire()
         self.scale=scale
         self.drift=drift
+        self.offset=offset
         self.unit=unit
                 
     def output_protocol(self, wire):
@@ -68,5 +69,5 @@ class SecondOrder(ThreadService, SourceService, ReceivingService):
 
     def process(self, data):
         timestamps=[x[0] for x in data]
-        scaled=[self.scale*x[1]*(1+self.drift*x[1]) for x in data]
+        scaled=[self.offset+self.scale*x[1]*(1+self.drift*x[1]) for x in data]
         return zip(timestamps, scaled)

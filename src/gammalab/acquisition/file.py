@@ -40,7 +40,7 @@ class RawReplay(ThreadService, SourceService):
         data=self.readframes(n)
         if len(data)==0:
           data=None
-          self.done=True
+          self.stopped=True
         return data
         
     def start_process(self):
