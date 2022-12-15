@@ -26,8 +26,10 @@ class Count(ThreadService, ReceivingService):
             dt10=self.all_pulses[-1][0]-self.all_pulses[-100][0]
             if dt10>0:
                 cps10=100./dt10
+        else:
+            cps10=cps
                 
-        message="t: {0:6.3g}, counts: {1:5.3e} | avg. cps: {2:5.2f}, current cps (10%) {3:5.2f}".format(dt, total, cps, cps10)
+        message="time: {0:6.3g} | counts: {1:5.3e} | average cps: {2:5.2f} | current cps: {3:5.2f}".format(dt, total, cps, cps10)
         self.print_message(message)
         
     def cleanup(self):
