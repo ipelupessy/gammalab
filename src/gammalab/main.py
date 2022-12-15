@@ -18,7 +18,7 @@ def output_thread():
 def startup():
     print("[Startup] entry")
 
-    t=multiprocessing.Process(target=output_thread, name="output")
+    t=threading.Thread(target=output_thread, name="output")
     t.daemon=True
     t.start()
 
@@ -41,21 +41,22 @@ def shutdown():
 
     shared_output.put("[Shutdown] done")
 
-    exit(0)
+    time.sleep(0.5)
+
+def check_user_input():
+    input()
 
 def main(timeout=None):
 
     startup()
 
-    if timeout is not None:
-        timer=threading.Timer(timeout, shutdown)
-        timer.daemon=True
-        timer.start()
-        
     shared_output.put("[Main] running")
 
-    input()
-
+    input_checker=threading.Thread(target=check_user_input)
+    input_checker.daemon=True
+    input_checker.start()
+    input_checker.join(timeout)    
+    
     shutdown()
     
     
