@@ -3,9 +3,9 @@ Gamma Lab
 
 Python toolkit for soundcard gamma spectroscopy.
 
-.. figure:: doc/images/am241.png
+.. image:: https://github.com/ipelupessy/gammalab/raw/master/doc/images/am241.png
    
-   Spectrum of Am-241 acquired with a CsI(Tl) scintillation detector and Gamma Lab
+   Spectrum of Am-241 acquired with a CsI(Tl) scintillation detector and Gamma Lab.
 
 Introduction
 ------------
@@ -22,13 +22,14 @@ Prerequisites
 
 You need at least:
 
-- Python 2.7 or 3.6 or later,
+- Python 3.6 or later,
 - numpy
+- matplotlib
 - the Python sound interface SoundCard 
 
 and recommended is:
 
-- matplotlib
+- scipy
 
 Installation
 ------------
@@ -41,16 +42,14 @@ Usage
 -----
 
 Two example ready made example applications are included in a pip install. 
-The ```gammalab-histogram.py``` program acquires data and plots a gamma 
-spectrum. you can get help::
 
-  > gammalab-histogram.py --help
-
-Another program ```gammalab-monitor.py``` lets you directly inspect the 
+The program ```gammalab-monitor.py``` lets you directly inspect the 
 data coming from the soundcard (e.g. to confirm you indeed use the right 
 sound interface or the manually fine tune the volume gain). Also it lets 
 you record a data stream for later analysis with 
-```gammalab-histogram.py```. To get usage info::
+```gammalab-histogram.py --raw_ouput_file <outfile>```. 
+
+To get usage info::
 
   > gammalab-monitor.py --help
 
@@ -58,7 +57,12 @@ For example::
 
   > gammalab-monitor.py --list_input_devices
   
-will list the available soundcard devices.
+will list the available soundcard devices for data acquisition.
+
+Another program, ```gammalab-histogram.py``` program acquires data, provides counts 
+and optionally plots a gamma spectrum. Again, you can get help::
+
+  > gammalab-histogram.py --help
 
 This provides only a limited preview of the possibilities that the Gamma 
 Lab offers. You can compose your own applications, examples of this are in 
@@ -107,7 +111,8 @@ The following services are available::
   from gammalab.backend import SaveRaw
   
 Note that most of these provide rudementary implementations and are open to 
-improvement.  
+improvement. Note that the code is somewhat conceptual in nature and will not
+be the most optimized.
 
 Development
 -----------
