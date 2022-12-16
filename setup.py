@@ -10,7 +10,7 @@ setup(
     packages=find_packages('src'),
     package_data={},
     package_dir={'' : 'src'},
-    install_requires=['wheel', 'numpy', 'SoundCard'],
+    install_requires=['wheel', 'numpy', 'SoundCard', 'matplotlib'],
     python_requires='>=3.6',
     scripts=['bin/gammalab-histogram.py', 'bin/gammalab-monitor.py','bin/gammalab-calibration-calc.py'],
     classifiers=[
