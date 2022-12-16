@@ -3,7 +3,7 @@ Gamma Lab
 
 Python toolkit for soundcard gamma spectroscopy.
 
-.. image:: https://github.com/ipelupessy/gammalab/raw/master/doc/images/am241.png
+.. figure:: https://github.com/ipelupessy/gammalab/blob/master/doc/images/am241.png
    
    Spectrum of Am-241 acquired with a CsI(Tl) scintillation detector and Gamma Lab.
 
@@ -111,8 +111,8 @@ The following services are available::
   from gammalab.backend import SaveRaw
   
 Note that most of these provide rudementary implementations and are open to 
-improvement. Note that the code is somewhat conceptual in nature and will not
-be the most optimized.
+improvement, though the code is somewhat conceptual in nature and probably will 
+never be the most optimized.
 
 Development
 -----------
