@@ -62,3 +62,5 @@ class MessageWire(Wire):
 class HistogramWire(Wire):
     _description="dict with histogram"
 
+class CountWire(Wire):
+    _description="time, counts per sec"

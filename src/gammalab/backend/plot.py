@@ -1,5 +1,5 @@
 from ..service import ThreadService, ReceivingService
-from ..wire import FloatWire, HistogramWire
+from ..wire import FloatWire, HistogramWire, CountWire
 
 import numpy
 import time
@@ -216,3 +216,84 @@ class PlotHistogram(ThreadService, ReceivingService):
         while not self.done:
             time.sleep(0.1)
 
+class CountPlot(ThreadService, ReceivingService):
+    input_wire_class=CountWire
+
+    def __init__(self, outfile=None):                
+        self.outfile=outfile
+        self.do_update=True
+        self.time=[]
+        self.count=[]
+
+        super(CountPlot, self).__init__()
+        self.thread.daemon=True
+
+    def update_plot(self,nframe):
+
+        if self.do_update==False:
+            return self.plot
+
+        data=[]
+        while True:
+            _data=self.receive_input(False)
+            if _data is None:
+                break
+            data.append(_data)
+
+        if self.stopped:
+            self.do_update=False
+            if self.outfile is not None:
+              self.fig.savefig(self.outfile+'.png')
+            self.done=True
+            return self.plot
+
+        if data:
+            self.time.extend([x[0] for x in data])
+            self.count.extend([x[1] for x in data])
+        else:
+            return self.plot
+        
+        self.ax.set_xlim(0,2**numpy.ceil(numpy.log2((max(self.time)+1.))))
+        self.ax.set_ylim(0,2*max(self.count))
+
+
+        self.plot[0].set_xdata(self.time)
+        self.plot[0].set_ydata(self.count)
+
+                
+        return self.plot
+  
+    def start_process(self):
+        global FuncAnimation, pyplot
+        try:
+            from matplotlib.animation import FuncAnimation
+            from matplotlib import pyplot    
+        except Exception as ex:
+            self.print_message("import error: {0}".format(str(ex)))
+
+        self.fig, self.ax = pyplot.subplots()
+        self.fig.canvas.manager.set_window_title("GammaLab Counts")
+
+        self.ax.cla()
+        self.plot=self.ax.plot(self.time,self.count)
+        self.ax.set_xlabel("time (s)")
+        self.ax.set_ylabel("counts per sec")
+        self.ax.set_xlim(0,10)
+        self.ax.set_ylim(0,30)
+
+
+        ani = FuncAnimation(self.fig, self.update_plot, interval=250, repeat=False, blit=False)
+
+        pyplot.show(block=True)
+
+        if self.outfile is not None:
+            self.fig.savefig(self.outfile+'.png')
+
+        self.cleanup()
+        
+    def close(self):
+        # deamon process
+        self.stop()
+
+        while not self.done:
+            time.sleep(0.1)

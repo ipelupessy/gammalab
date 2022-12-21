@@ -26,7 +26,7 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
         wire.unit=self.input_wire.unit
 
     def process(self, data):
-        signal=[x[1] for x in data]
+        signal=[x[1] for x in data["pulses"]]
         hist, bins=numpy.histogram(signal, bins=self.nchannels, 
             range=(self.vmin,self.vmax))
         

@@ -28,10 +28,11 @@ class Interpolate(ThreadService, SourceService, ReceivingService):
         wire.unit=self.unit
 
     def process(self, data):
-        timestamps=[x[0] for x in data]
-        signal=[x[1] for x in data]
+        timestamps=[x[0] for x in data["pulses"]]
+        signal=[x[1] for x in data["pulses"]]
         calibrated=numpy.interp(signal, self._xp, self._yp)
-        return zip(timestamps, calibrated)
+        data["pulses"]=zip(timestamps, calibrated)
+        return data
 
 class Scale(ThreadService, SourceService, ReceivingService):
     input_wire_class=PulseWire
@@ -47,9 +48,10 @@ class Scale(ThreadService, SourceService, ReceivingService):
         wire.unit=self.unit
 
     def process(self, data):
-        timestamps=[x[0] for x in data]
-        scaled=[self.scale*x[1] for x in data]
-        return zip(timestamps, scaled)
+        timestamps=[x[0] for x in data["pulses"]]
+        scaled=[self.scale*x[1] for x in data["pulses"]]
+        data["pulses"]=zip(timestamps, scaled)
+        return data
 
 class SecondOrder(ThreadService, SourceService, ReceivingService):
     input_wire_class=PulseWire
@@ -68,6 +70,7 @@ class SecondOrder(ThreadService, SourceService, ReceivingService):
         wire.unit=self.unit
 
     def process(self, data):
-        timestamps=[x[0] for x in data]
-        scaled=[self.offset+self.scale*x[1]*(1+self.drift*x[1]) for x in data]
-        return zip(timestamps, scaled)
+        timestamps=[x[0] for x in data["pulses"]]
+        scaled=[self.offset+self.scale*x[1]*(1+self.drift*x[1]) for x in data["pulses"]]
+        data["pulses"]=zip(timestamps, scaled)
+        return data

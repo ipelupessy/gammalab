@@ -7,12 +7,14 @@ import numpy
 class PulseDetection(ThreadService, SourceService, ReceivingService):
     input_wire_class=FloatWire
     output_wire_class=PulseWire
-    def __init__(self, threshold=0.005, window=24*1024, debug=False):
+    def __init__(self, threshold=0.005, window=24*1024, debug=False, outfile=None):
         super(PulseDetection, self).__init__()
         self.threshold=threshold
         self.window=window
         self.debug=debug
         self._x=numpy.arange(window)
+        self.outfile=outfile
+        self.all_pulses=[]
 
     def output_protocol(self, wire):
         super(PulseDetection, self).output_protocol(wire)
@@ -24,6 +26,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         self.ndata=0
         self.RATE=self.input_wire.RATE
         self.itime=0
+        self.dtime=self.window/(1.*self.RATE)
         super(PulseDetection, self).start_process()
   
     def amplitude_and_quality(self, start,end):
@@ -71,22 +74,45 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
             else:
                 pulses.append((time,amplitude, width, sigma))
 
-        self.itime+=self.window/(1.*self.RATE)
         return pulses
 
     def process(self, data):
-        outdata=[]
+        detect_ran=False
+        pulses=[]
+        dtime=0.
         while len(data)>0:
             start=self.ndata
             end=min(self.window,start+len(data))
             self.data[start:end]=data[:end-start]
             data=data[end-start:]
             self.ndata=end
+            # if detection buffer filled, run detection
             if self.ndata>=self.window:
-                outdata.extend(self.detect_pulses())
+                pulses.extend(self.detect_pulses())
+                detect_ran=True
+
+                #update itime and dtime
+                self.itime+=self.dtime
+                dtime+=self.dtime
+                
                 self.ndata=0
-        
-        return outdata or None # if None no data will be send
+
+        if self.outfile is not None:
+            self.all_pulses.extend(pulses)
+
+        if detect_ran:
+            result=dict(pulses=pulses, total_time=self.itime, dtime=dtime)
+        else:
+            result=None # do not send data if detection did not run
+       
+        return result
+
+    def cleanup(self):
+        if self.outfile is not None:
+            f=open(self.outfile+".pkl","wb")
+            pickle.dump(self.all_pulses,f)
+            f.close()
+        super(PulseDetection, self).cleanup()
 
 
 def pulse(x, A, x0,  y, tau):
@@ -108,7 +134,7 @@ class FittedPulseDetection(PulseDetection):
                   fit_threshold=0., signal_noise=0.0035, pulse_decay_time=2.7247/48000):
 
         super(FittedPulseDetection, self).__init__(threshold=threshold, 
-                                                   window=window, debug=debug)
+                                                   window=window, debug=debug, outfile=outfile)
 
         self.print_message("currently assumes very specific pulse shape, x**2 exp(-x/tau)")
 

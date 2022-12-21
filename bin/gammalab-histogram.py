@@ -34,10 +34,13 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5400.,
     else:
         source=SoundCard(input_device_name=input_device_name)
     convert=Raw2Float()
+    pulse_file=outfile+".pulses" if outfile is not None else None
     if fitpulse:
-        detect=FittedPulseDetection(threshold=threshold, fit_threshold=fit_threshold)
+        detect=FittedPulseDetection(threshold=threshold, fit_threshold=fit_threshold,
+                                    outfile=pulse_file)
     else:
-        detect=PulseDetection(threshold=threshold)
+        detect=PulseDetection(threshold=threshold, 
+                              outfile=pulse_file)
     
     count=Count(outfile=outfile+".counts" if outfile is not None else None)
     histogram=AggregateHistogram(nchannels=int(nchannels*scale/vmax),
