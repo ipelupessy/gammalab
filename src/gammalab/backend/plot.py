@@ -29,10 +29,6 @@ class Monitor(ThreadService, ReceivingService):
                 break
             data.append(_data)
 
-        if data:
-            data=numpy.concatenate(data)
-        else:
-            return self.plot
 
         if self.stopped:
             self.do_update=False
@@ -40,7 +36,12 @@ class Monitor(ThreadService, ReceivingService):
               self.fig.savefig(self.outfile+'.png')
             self.done=True
             return self.plot
-        
+
+        if data:
+            data=numpy.concatenate(data)
+        else:
+            return self.plot
+
         while len(data)>0:
           
             n=min(len(data),len(self.plotdata)-self.nplot)
