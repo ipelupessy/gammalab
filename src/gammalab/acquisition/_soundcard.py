@@ -36,8 +36,15 @@ class SoundCard(ThreadService, SourceService):
             self.print_message( "import error: {0}".format(str(ex)))
 
         mic=soundcard.get_microphone(self.input_device_index or self.input_device_name)
+        name=mic.name
         with mic.recorder(samplerate=self.RATE, blocksize=self.frames_per_buffer, channels=self.CHANNELS) as recorder:
             while not self.stopped:    
+                try:
+                    _name=mic.name # this can raise exception if mic dissapears
+                    assert _name==name # double check
+                except:
+                    raise Exception("Soundcard acquisition device possibly disconnected")
+
                 try:
                     data=recorder.record(self.frames_per_buffer)
                 except Exception as ex:

@@ -99,9 +99,10 @@ class ThreadService(Service):
     def start_process(self):
         try:
           self._process()
-        except:
-          message="Service process exception"
+        except Exception as ex:
+          message="Service process exception:"
           self.print_message(message)
+          self.print_message(str(ex))
           if hasattr(self,"send_output"):
               self.send_output(None)
         self.cleanup()
@@ -135,6 +136,7 @@ class ThreadService(Service):
         self.stopped=True
         
     def cleanup(self):
+        self.stopped=True
         self.done=True
 
     def stop(self):
