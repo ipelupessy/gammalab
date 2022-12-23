@@ -101,7 +101,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
             self.all_pulses.extend(pulses)
 
         if detect_ran:
-            result=dict(pulses=pulses, total_time=self.itime, dtime=dtime)
+            result=dict(pulses=pulses, total_time=self.itime, dtime=dtime, rate=self.RATE)
         else:
             result=None # do not send data if detection did not run
        

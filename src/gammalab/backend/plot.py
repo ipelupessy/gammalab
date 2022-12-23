@@ -1,81 +1,63 @@
 from ..service import ThreadService, ReceivingService
-from ..wire import FloatWire, HistogramWire, CountWire
+from ..wire import FloatWire, HistogramWire, CountWire, PulseWire
 
 import numpy
 import time
+import random
 
-class Monitor(ThreadService, ReceivingService):
-    input_wire_class=FloatWire
-
-    def __init__(self, window=5, vmin=-0.01, vmax=1.1, outfile=None):                
-        self.window=window
-        self.vmin=vmin
-        self.vmax=vmax
+class _Plot(ThreadService, ReceivingService):
+    def __init__(self, outfile=None, interval=250):                
+        super(_Plot, self).__init__()
+        self.thread.daemon=True
         self.outfile=outfile
+        self.interval=interval
+        self.blit=False
         self.do_update=True
 
-        super(Monitor, self).__init__()
-        self.thread.daemon=True
+    def on_click(self,event):
+        if event.button is MouseButton.RIGHT:
+            self.do_update=not self.do_update
 
-    def update_plot(self,nframe):
+    def setup_plot(self):
+        raise Exception("setup_plot not implemented")
 
-        if self.do_update==False:
-            return self.plot
+    def update_plot(self, nframe):
+        raise Exception("update_plot not implemented")
 
-        data=[]
-        while True:
-            _data=self.receive_input(False)
-            if _data is None:
-                break
-            data.append(_data)
+    def _update_plot(self, nframe):            
+        self.fig.canvas.flush_events()
 
-
+        if self.done:
+            return []
+      
         if self.stopped:
             self.do_update=False
             if self.outfile is not None:
-              self.fig.savefig(self.outfile+'.png')
+                self.fig.savefig(self.outfile+'.png')
             self.done=True
-            return self.plot
+            return []
 
-        if data:
-            data=numpy.concatenate(data)
-        else:
-            return self.plot
+        artists=self.update_plot(nframe)
 
-        while len(data)>0:
-          
-            n=min(len(data),len(self.plotdata)-self.nplot)
-            
-            self.plotdata[self.nplot:self.nplot+n]=data[:n]
-            data=data[n:]
-            self.nplot=(self.nplot+n) % len(self.plotdata)
-                            
-        self.plot[0].set_ydata(self.plotdata)
-        return self.plot
-  
+        #~ if self.do_update==False:
+            #~ return []
+
+        return artists
+        
     def start_process(self):
-        global FuncAnimation, pyplot
+        global FuncAnimation, pyplot, MouseButton
         try:
+            from matplotlib.backend_bases import MouseButton
             from matplotlib.animation import FuncAnimation
             from matplotlib import pyplot    
         except Exception as ex:
             self.print_message("import error: {0}".format(str(ex)))
+            
+        self.fig, self.ax, self.artists=self.setup_plot()
 
-        self.plotdata=numpy.zeros(int(self.input_wire.RATE*self.window), dtype=self.input_wire.FORMAT)
-        self.plotx=numpy.arange(int(self.input_wire.RATE*self.window))/float(self.input_wire.RATE)
-
-        self.fig, self.ax = pyplot.subplots()
-        self.fig.canvas.manager.set_window_title("GammaLab Monitor")
-
-        self.ax.cla()
-        self.plot=self.ax.plot(self.plotx,self.plotdata)
-        self.ax.set_ylim(self.vmin,self.vmax)
-        self.ax.set_xlabel("time (s)")
-        self.ax.set_ylabel("level")
-      
-        self.nplot=0
-
-        ani = FuncAnimation(self.fig, self.update_plot, interval=250, repeat=False, blit=True)
+        pyplot.connect('button_press_event', self.on_click)
+        
+        ani = FuncAnimation(self.fig, self._update_plot, interval=self.interval, blit=self.blit)
 
         pyplot.show(block=True)
 
@@ -90,23 +72,73 @@ class Monitor(ThreadService, ReceivingService):
 
         while not self.done:
             time.sleep(0.1)
-      
 
-class PlotHistogram(ThreadService, ReceivingService):
+
+class Monitor(_Plot):
+    input_wire_class=FloatWire
+
+    def __init__(self, window=5, vmin=-0.01, vmax=1.1, outfile=None):                
+        super(Monitor, self).__init__(outfile=outfile)
+        self.window=window
+        self.vmin=vmin
+        self.vmax=vmax
+        self.blit=True
+
+    def update_plot(self,nframe):
+      
+        data=[]
+        while True:
+            _data=self.receive_input(False)
+            if _data is None:
+                break
+            data.append(_data)
+
+        if data:
+            data=numpy.concatenate(data)
+        else:
+            return self.artists
+
+        if self.do_update is False:
+            return self.artists
+
+        while len(data)>0:          
+            n=min(len(data),len(self.plotdata)-self.nplot)
+            
+            self.plotdata[self.nplot:self.nplot+n]=data[:n]
+            data=data[n:]
+            self.nplot=(self.nplot+n) % len(self.plotdata)
+                            
+        self.artists[0].set_ydata(self.plotdata)
+        return self.artists
+  
+    def setup_plot(self):
+        self.plotdata=numpy.zeros(int(self.input_wire.RATE*self.window), dtype=self.input_wire.FORMAT)
+        self.plotx=numpy.arange(int(self.input_wire.RATE*self.window))/float(self.input_wire.RATE)
+
+        fig, ax = pyplot.subplots(figsize=(8,4))
+        fig.canvas.manager.set_window_title("GammaLab Monitor")
+
+        ax.cla()
+        lines=ax.plot(self.plotx,self.plotdata)
+        ax.set_ylim(self.vmin,self.vmax)
+        ax.set_xlabel("time (s)")
+        ax.set_ylabel("level")
+      
+        self.nplot=0
+        
+        return fig,ax,lines
+        
+class PlotHistogram(_Plot):
     input_wire_class=HistogramWire
   
     def __init__(self, xmin=0, xmax=1., log=True, 
                     error_bars=True, outfile="histogram"):        
+        super(PlotHistogram, self).__init__(outfile=outfile)
         self.xmin=xmin
         self.xmax=xmax
         self.log=log
         self.error_bars=error_bars
-        self.outfile=outfile
         self.ymax=1.
-        self.do_update=True
-
-        super(PlotHistogram, self).__init__()
-        self.thread.daemon=True
 
     def update_plot(self,nframe):
         
@@ -116,25 +148,16 @@ class PlotHistogram(ThreadService, ReceivingService):
             if _data is None:
                 break
             data=_data
+ 
+        if data is None:
+            return self.artists
 
-        if self.stopped or not self.do_update or data is None:
-            if self.stopped:
-                self.do_update=False
-                if self.outfile is not None:
-                  self.fig.savefig(self.outfile+'.png')
-                self.done=True
-          
-            if self.error_bars:
-                return self._line,self._top,self._bot
-            else:
-                return self._line,
+        if self.do_update is False:
+            return self.artists
 
         hist=data["hist"]
         bins=data["bins"]
 
-        return self.update_histogram_plot(hist,bins)
-
-    def update_histogram_plot(self, hist, bins):
         y=numpy.zeros(2*len(hist))
         y[::2]=hist
         y[1::2]=hist
@@ -145,25 +168,29 @@ class PlotHistogram(ThreadService, ReceivingService):
             self._top.set_ydata(numpy.maximum(y+yerr,1))
             self._bot.set_ydata(y-yerr)
                 
-        if self.error_bars:
-            return self._line,self._top,self._bot
-        else:
-            return self._line,
+        return self.artists
 
-    def _update_ylim(self,ymax):
+    def _update_ylim(self,ymax, ax=None):
+        if ax is None:
+            ax=self.ax
         if self.log:
             _ymax=ymax
             if _ymax>self.ymax:
                 self.ymax=10*_ymax
-                self.ax.set_ylim(0.5,2*self.ymax)
+                ax.set_ylim(0.5,2*self.ymax)
+                pyplot.draw()
         else:
             _ymax=ymax
             if _ymax>self.ymax:
                 self.ymax=1.5*ymax
-                self.ax.set_ylim(0,1.3*self.ymax)      
+                ax.set_ylim(0,1.3*self.ymax)      
+                pyplot.draw()
 
-    def _histogram_plot(self):
-        self.ax.cla()
+    def setup_plot(self):
+        fig, ax = pyplot.subplots()
+        fig.canvas.manager.set_window_title("GammaLab Histogram")
+        ax.cla()
+        
         nchannels=self.input_wire.nchannels
         vmin=self.input_wire.vmin
         vmax=self.input_wire.vmax
@@ -176,63 +203,35 @@ class PlotHistogram(ThreadService, ReceivingService):
         y[1::2]=hist
         if self.error_bars:
             yerr=y**0.5
-            self._top,=self.ax.plot(x,numpy.maximum(y+yerr,1),":",c="tab:orange", zorder=0)
-            self._bot,=self.ax.plot(x,y-yerr,":",c="tab:orange",zorder=5)
+            self._top,=ax.plot(x,numpy.maximum(y+yerr,1),":",c="tab:orange", zorder=0)
+            self._bot,=ax.plot(x,y-yerr,":",c="tab:orange",zorder=5)
         if self.log:
-            self._line,=self.ax.semilogy(x,y+0.1, lw=2, zorder=10)
+            self._line,=ax.semilogy(x,y+0.1, lw=2, zorder=10)
         else:
-            self._line,=self.ax.plot(x,y,lw=2, zorder=10)
+            self._line,=ax.plot(x,y,lw=2, zorder=10)
 
-        self.ax.set_ylabel("counts")
-        self.ax.set_xlabel(f"energy ({self.input_wire.unit})") # take label from wire?
-        self.ax.set_xlim(self.xmin,self.xmax)
-        self._update_ylim(max(y.max(),50))
+        ax.set_ylabel("counts")
+        ax.set_xlabel(f"energy ({self.input_wire.unit})") # take label from wire?
+        ax.set_xlim(self.xmin,self.xmax)
+        self._update_ylim(max(y.max(),50), ax=ax)
+        
+        if self.error_bars:
+            artists=[self._line, self._top, self._bot]
+        else:
+            artists=[self._line]
+        
+        return fig,ax,artists
       
-    def start_process(self):
-        global FuncAnimation, pyplot
-        try:
-            from matplotlib.animation import FuncAnimation
-            from matplotlib import pyplot    
-        except Exception as ex:
-            self.print_message("import error: {0}".format(str(ex)))
-
-        self.fig, self.ax = pyplot.subplots()
-        self.fig.canvas.manager.set_window_title("GammaLab Histogram")
-      
-        self._histogram_plot()
-
-        ani = FuncAnimation(self.fig, self.update_plot, interval=250, repeat=False, blit=True)
-
-        pyplot.show(block=True)
-                
-        if self.outfile is not None:
-            self.fig.savefig(self.outfile+'.png')
-
-        self.cleanup()
-
-    def close(self):
-        # deamon process
-        self.stop()
-
-        while not self.done:
-            time.sleep(0.1)
-
-class CountPlot(ThreadService, ReceivingService):
+class CountPlot(_Plot):
     input_wire_class=CountWire
 
     def __init__(self, outfile=None):                
-        self.outfile=outfile
-        self.do_update=True
+        super(CountPlot, self).__init__(outfile=outfile)
         self.time=[]
         self.count=[]
-
-        super(CountPlot, self).__init__()
-        self.thread.daemon=True
+        self.blit=False
 
     def update_plot(self,nframe):
-
-        if self.do_update==False:
-            return self.plot
 
         data=[]
         while True:
@@ -241,56 +240,125 @@ class CountPlot(ThreadService, ReceivingService):
                 break
             data.append(_data)
 
-        if self.stopped:
-            self.do_update=False
-            if self.outfile is not None:
-              self.fig.savefig(self.outfile+'.png')
-            self.done=True
-            return self.plot
-
         if data:
             self.time.extend([x[0] for x in data])
             self.count.extend([x[1] for x in data])
         else:
-            return self.plot
+            return self.artists
+
+        if self.do_update is False:
+            return self.artists
         
         self.ax.set_xlim(0,2**numpy.ceil(numpy.log2((max(self.time)+1.))))
         self.ax.set_ylim(0,2*max(self.count))
 
-
-        self.plot[0].set_xdata(self.time)
-        self.plot[0].set_ydata(self.count)
-
+        self.artists[0].set_xdata(self.time)
+        self.artists[0].set_ydata(self.count)
                 
-        return self.plot
+        return self.artists
   
+    def setup_plot(self):
+        fig, ax = pyplot.subplots()
+        fig.canvas.manager.set_window_title("GammaLab Counts")
+
+        ax.cla()
+        artists=ax.plot(self.time,self.count)
+        ax.set_xlabel("time (s)")
+        ax.set_ylabel("counts per sec")
+        ax.set_xlim(0,10)
+        ax.set_ylim(0,30)
+
+        return fig,ax,artists
+
+class __PulsePlot(ThreadService, ReceivingService):
+    input_wire_class=PulseWire
+
+    def __init__(self, nplot=1):                
+        self.nplot=nplot
+        super(PulsePlot, self).__init__()
+        self.thread.daemon=True
+
+    def process(self,data):      
+
+        self.fig.canvas.flush_events()
+
+        pulses=data["pulses"]
+        
+        if pulses and len(pulses[0])<5:
+            self.print_message("PulseWire does not contain pulse shape")
+            return None
+        
+        self.RATE=data["rate"]
+        self.data=[]
+        for p in pulses[0:self.nplot]:
+            self.data.append(p[4])
+        return None
+  
+    def on_click(self,event):
+        dmin=9999
+        dmax=-9999
+        tmin=9999
+        tmax=-9999
+        if event.button is MouseButton.LEFT:
+            #~ self.ax.cla()
+            for d,line in zip(self.data, self.lines):
+                time=(numpy.arange(0,len(d))-5)
+                line.set_data(time,d)                  
+                
+                tmin=min(tmin,time.min())
+                tmax=max(tmax,time.max())
+                
+                dmin=min(dmin,d.min())
+                dmax=max(dmax,d.max())
+
+            self.ax.set_xlim(tmin,tmax)
+            self.ax.set_ylim(dmin-.1*(dmax-dmin),dmax+0.2*(dmax-dmin))
+
+            self.fig.canvas.draw()
+            #~ self.fig.canvas.flush_events()
+            
+
     def start_process(self):
-        global FuncAnimation, pyplot
+        global MouseButton, pyplot
         try:
-            from matplotlib.animation import FuncAnimation
             from matplotlib import pyplot    
+            from matplotlib.backend_bases import MouseButton
         except Exception as ex:
             self.print_message("import error: {0}".format(str(ex)))
+            return
 
+        self.data=[numpy.array([0]*10)]*self.nplot
+
+        pyplot.ion()
         self.fig, self.ax = pyplot.subplots()
-        self.fig.canvas.manager.set_window_title("GammaLab Counts")
+        self.fig.canvas.manager.set_window_title("GammaLab Pulse Monitor")
 
         self.ax.cla()
-        self.plot=self.ax.plot(self.time,self.count)
-        self.ax.set_xlabel("time (s)")
-        self.ax.set_ylabel("counts per sec")
-        self.ax.set_xlim(0,10)
-        self.ax.set_ylim(0,30)
+
+        pyplot.connect('button_press_event', self.on_click)
+
+        self.lines=[]        
+        for d in self.data:
+            t=(numpy.arange(0,len(d))-5)
+            line,=self.ax.plot(t,d,"o-")
+            self.lines.append(line)
+
+        self.ax.set_xlabel("time (samples)")
+        self.ax.set_ylabel("level")
+        self.ax.set_title("click to refresh")
+        #~ self.ax.set_xlim(0,10)
+        #~ self.ax.set_ylim(0,30)
+
+        pyplot.draw()
+
+        pyplot.show(block=False)
 
 
-        ani = FuncAnimation(self.fig, self.update_plot, interval=250, repeat=False, blit=False)
 
-        pyplot.show(block=True)
-
-        if self.outfile is not None:
-            self.fig.savefig(self.outfile+'.png')
-
-        self.cleanup()
+        #~ self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
+                
+        super(PulsePlot, self).start_process()
         
     def close(self):
         # deamon process
@@ -298,3 +366,90 @@ class CountPlot(ThreadService, ReceivingService):
 
         while not self.done:
             time.sleep(0.1)
+
+class PulsePlot(_Plot):
+    input_wire_class=PulseWire
+
+    def __init__(self, nplot=1):                
+        super(PulsePlot, self).__init__()
+        self.nplot=nplot
+
+    def update_plot(self,nframe):
+
+        data=[]
+        while True:
+            _data=self.receive_input(False)
+            if _data is None:
+                break
+            data.append(_data)
+
+        if self.do_update==False:
+            return self.artists
+
+        if not data:
+            return self.artists
+
+        self.process(data)
+            
+        return self.update_plot_data()
+
+    def process(self,data):      
+      
+        _data=None
+        for d in data:
+            if _data is None:
+                _data=d
+            else:
+                _data["pulses"].extend(d["pulses"])
+                assert _data["rate"]==d["rate"]
+                if d["total_time"]>_data["total_time"]:
+                    _data["total_time"]=d["total_time"]
+                _data["dtime"]+=d["dtime"]
+      
+        pulses=_data["pulses"]
+        
+        if pulses and len(pulses[0])<5:
+            self.print_message("PulseWire does not contain pulse shape")
+        
+        for i,p in enumerate(random.sample(pulses, k=min(self.nplot, len(pulses)))):
+            self.data[i]=p[4]
+  
+    def update_plot_data(self):
+        dmin=9999
+        dmax=-9999
+        tmin=9999
+        tmax=-9999
+        for d,line in zip(self.data, self.lines):
+            time=(numpy.arange(0,len(d))-5)
+            line.set_data(time,d)                  
+            
+            tmin=min(tmin,time.min())
+            tmax=max(tmax,time.max())
+            
+            dmin=min(dmin,d.min())
+            dmax=max(dmax,d.max())
+
+        self.ax.set_xlim(tmin,tmax)
+        self.ax.set_ylim(dmin-.1*(dmax-dmin),dmax+0.2*(dmax-dmin))
+
+        return self.lines[0:len(self.data)]
+            
+    def setup_plot(self):
+        fig, ax = pyplot.subplots(figsize=(8,4))
+        fig.canvas.manager.set_window_title("GammaLab Pulse Monitor")
+
+        self.data=[numpy.array([0]*10)]*self.nplot
+
+        self.lines=[]        
+        for d in self.data:
+            t=(numpy.arange(0,len(d))-5)
+            line,=ax.plot(t,d,"o-")
+            self.lines.append(line)
+
+        ax.set_xlabel("time (samples)")
+        ax.set_ylabel("level")
+        #~ ax.set_title("selected pulses")
+        
+        artists=self.lines
+        
+        return fig,ax,artists

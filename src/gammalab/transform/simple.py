@@ -65,3 +65,22 @@ class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
 
     def process(self, data):
         return numpy.max(data.reshape(-1, self.factor),axis=1)
+
+class Normalize(ThreadService, SourceService, ReceivingService):
+    input_wire_class=FloatWire
+    output_wire_class=FloatWire
+
+    def __init__(self, offset=0., scale=1.):
+        super(DownSampleMaxed, self).__init__()
+        self.scale=scale
+        self.offset=offset
+
+    def output_protocol(self, wire):
+        super(Raw2Float, self).output_protocol(wire)
+        wire.CHANNELS=self.input_wire.CHANNELS
+        wire.RATE=self.input_wire.RATE
+        wire.FORMAT="float32"
+
+    def process(self, data):
+        return numpy.clip(self.offset+self.scale*data, -1.,1., dtype="float32")
+
