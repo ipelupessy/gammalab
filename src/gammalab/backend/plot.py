@@ -21,8 +21,11 @@ class _Plot(ThreadService, ReceivingService):
     def setup_plot(self):
         raise Exception("setup_plot not implemented")
 
-    def update_plot(self, nframe):
+    def update_plot(self, nframe, data=None):
         raise Exception("update_plot not implemented")
+
+    def get_data(self, nframe, data=None):
+        raise Exception("get_data not implemented")
 
     def _update_plot(self, nframe):            
         self.fig.canvas.flush_events()
@@ -37,12 +40,12 @@ class _Plot(ThreadService, ReceivingService):
             self.done=True
             return []
 
-        artists=self.update_plot(nframe)
+        data=self.get_data()
 
-        #~ if self.do_update==False:
-            #~ return []
+        if self.do_update==False or data is None:
+            return self.artists
 
-        return artists
+        return self.update_plot(nframe, data)
         
     def start_process(self):
         global FuncAnimation, pyplot, MouseButton
@@ -84,8 +87,7 @@ class Monitor(_Plot):
         self.vmax=vmax
         self.blit=True
 
-    def update_plot(self,nframe):
-      
+    def get_data(self):
         data=[]
         while True:
             _data=self.receive_input(False)
@@ -96,10 +98,11 @@ class Monitor(_Plot):
         if data:
             data=numpy.concatenate(data)
         else:
-            return self.artists
+            data=None
+        
+        return data
 
-        if self.do_update is False:
-            return self.artists
+    def update_plot(self,nframe, data):
 
         while len(data)>0:          
             n=min(len(data),len(self.plotdata)-self.nplot)
@@ -140,8 +143,7 @@ class PlotHistogram(_Plot):
         self.error_bars=error_bars
         self.ymax=1.
 
-    def update_plot(self,nframe):
-        
+    def get_data(self):        
         data=None
         while True:
             _data=self.receive_input(False)
@@ -149,11 +151,9 @@ class PlotHistogram(_Plot):
                 break
             data=_data
  
-        if data is None:
-            return self.artists
+        return data
 
-        if self.do_update is False:
-            return self.artists
+    def update_plot(self,nframe, data):
 
         hist=data["hist"]
         bins=data["bins"]
@@ -231,23 +231,22 @@ class CountPlot(_Plot):
         self.count=[]
         self.blit=False
 
-    def update_plot(self,nframe):
-
+    def get_data(self):
         data=[]
         while True:
             _data=self.receive_input(False)
             if _data is None:
                 break
             data.append(_data)
-
         if data:
-            self.time.extend([x[0] for x in data])
-            self.count.extend([x[1] for x in data])
+            return data
         else:
-            return self.artists
+            return None
+        
 
-        if self.do_update is False:
-            return self.artists
+    def update_plot(self,nframe, data):
+        self.time.extend([x[0] for x in data])
+        self.count.extend([x[1] for x in data])
         
         self.ax.set_xlim(0,2**numpy.ceil(numpy.log2((max(self.time)+1.))))
         self.ax.set_ylim(0,2*max(self.count))
@@ -277,8 +276,7 @@ class PulsePlot(_Plot):
         super(PulsePlot, self).__init__()
         self.nplot=nplot
 
-    def update_plot(self,nframe):
-
+    def get_data(self):
         data=[]
         while True:
             _data=self.receive_input(False)
@@ -286,11 +284,12 @@ class PulsePlot(_Plot):
                 break
             data.append(_data)
 
-        if self.do_update==False:
-            return self.artists
+        if data:
+            return data
+        else:
+            return None
 
-        if not data:
-            return self.artists
+    def update_plot(self,nframe, data):
 
         self.process(data)
             
