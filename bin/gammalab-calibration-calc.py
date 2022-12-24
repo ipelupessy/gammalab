@@ -6,9 +6,7 @@ gammalab-calibration-cal determines calibration coeff for a polynomial calibrati
 
 import argparse
 import numpy
-
-def calibration_pair(s):
-    return list(map(float, s.split(",")))
+from gammalab.util import get_calibration_coeff, calibration_pair
 
 def new_argument_parser():
 
@@ -28,36 +26,16 @@ def new_argument_parser():
         type=int,
         help='order of calibration polynomial fit',
     )
+    parser.add_argument(
+        '--no_offset',
+        dest='no_offset',
+        action="store_true",
+        default=False,
+        help='force offset to be 0.',
+    )
   
     return parser.parse_args()
 
-def run(data=None, order=2):
-    if data is None:
-        raise Exception("no data, provide --data ..")
-    
-    if order>len(data):
-        order=len(data)
-    
-    data=numpy.array(data)
-    x=data[:,0]
-    y=data[:,1]
-    
-    a=numpy.zeros((len(x), order))
-    
-    for i in range(order):
-        a[:,i]=x**(i+1)
-    
-    p=numpy.linalg.pinv(a)
-    
-    coeff=p.dot(y)
-    
-    print(f"raw coefficents: {coeff}")
-    print(f"the scale is: {coeff[0]}")
-    if order>=2:
-        print(f"the drift is: {coeff[1]/coeff[0]}")
-    
-    
-
 if __name__=="__main__":
     args=new_argument_parser()
-    run(**vars(args))
+    offset,scale,drift=get_calibration_coeff(**vars(args))
