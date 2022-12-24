@@ -70,17 +70,17 @@ class Normalize(ThreadService, SourceService, ReceivingService):
     input_wire_class=FloatWire
     output_wire_class=FloatWire
 
-    def __init__(self, offset=0., scale=1.):
-        super(DownSampleMaxed, self).__init__()
+    def __init__(self, baseline=0., scale=1.):
+        super(Normalize, self).__init__()
         self.scale=scale
-        self.offset=offset
+        self.baseline=baseline
 
     def output_protocol(self, wire):
-        super(Raw2Float, self).output_protocol(wire)
+        super(Normalize, self).output_protocol(wire)
         wire.CHANNELS=self.input_wire.CHANNELS
         wire.RATE=self.input_wire.RATE
         wire.FORMAT="float32"
 
     def process(self, data):
-        return numpy.clip(self.offset+self.scale*data, -1.,1., dtype="float32")
+        return numpy.clip(self.scale*(data-self.baseline), -1.,1., dtype="float32")
 

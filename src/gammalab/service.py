@@ -68,14 +68,20 @@ class ReceivingService(Service):
         super(ReceivingService, self).__init__(**kwargs)
         if self.input_wire_class is None:
             raise Exception("ReceivingService {0} does not specify input_wire_class".format(self))
-        self.input_wire=self.input_wire_class()
     def connect_input(self, service):
+        self.input_wire=self.input_wire_class()
         service.connect(self.input_wire)
     def receive_input(self, block=True):
+        if not hasattr(self,"input_wire"):
+            self.print_message("Unconnected input")
+            return None
         try:
             return self.input_wire.get(block)
+        except multiprocessing.queues.Empty:
+            return None
         except Exception as ex:
-            #~ self.print_message("receive_input timeout or error")
+            self.print_message("receive_input error:")
+            self.print_message(str(ex))
             return None
 
 # multiple input/outputs will be implemented by connecting to/from special attributes:
