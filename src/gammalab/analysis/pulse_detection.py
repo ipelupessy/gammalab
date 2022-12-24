@@ -3,6 +3,7 @@ from ..wire import FloatWire, PulseWire
 
 from functools import partial
 import numpy
+import pickle
     
 class PulseDetection(ThreadService, SourceService, ReceivingService):
     input_wire_class=FloatWire

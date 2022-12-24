@@ -39,6 +39,7 @@ class RawReplay(ThreadService, SourceService):
           n=int(self.frames_per_buffer/16)*16
         data=self.readframes(n)
         if len(data)==0:
+          self.print_message("End of file")
           data=None
           self.stopped=True
         return data
