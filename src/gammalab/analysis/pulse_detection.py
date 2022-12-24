@@ -7,18 +7,18 @@ import numpy
 class PulseDetection(ThreadService, SourceService, ReceivingService):
     input_wire_class=FloatWire
     output_wire_class=PulseWire
-    def __init__(self, threshold=0.005, window=24*1024, debug=False, outfile=None):
+    def __init__(self, threshold=0.005, window=24*1024, emit_pulse_shapes=False, outfile=None):
         super(PulseDetection, self).__init__()
         self.threshold=threshold
         self.window=window
-        self.debug=debug
+        self.emit_pulse_shapes=emit_pulse_shapes
         self._x=numpy.arange(window)
         self.outfile=outfile
         self.all_pulses=[]
 
     def output_protocol(self, wire):
         super(PulseDetection, self).output_protocol(wire)
-        wire._debug=self.debug
+        wire._emit_pulse_shapes=self.emit_pulse_shapes
         wire.unit="raw value"
 
     def start_process(self):
@@ -68,7 +68,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
             
             width=end-start
 
-            if self.debug:
+            if self.emit_pulse_shapes:
                 pulse=self.data[max(start-5,0):end+15].copy()
                 pulses.append((time,amplitude, width, sigma, pulse))
             else:
@@ -130,11 +130,13 @@ class FittedPulseDetection(PulseDetection):
     recovered by fitting the rising and falling edges. 
 
     """
-    def __init__(self, threshold=0.005, window=24*1024, debug=False, 
+    def __init__(self, threshold=0.005, window=24*1024, emit_pulse_shapes=False, 
                   fit_threshold=0., signal_noise=0.0035, pulse_decay_time=2.7247/48000):
 
         super(FittedPulseDetection, self).__init__(threshold=threshold, 
-                                                   window=window, debug=debug, outfile=outfile)
+                                                   window=window, 
+                                                   emit_pulse_shapes=emit_pulse_shapes,
+                                                   outfile=outfile)
 
         self.print_message("currently assumes very specific pulse shape, x**2 exp(-x/tau)")
 

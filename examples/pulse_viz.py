@@ -5,16 +5,17 @@ from gammalab.analysis import PulseDetection
 from gammalab.analysis import Count
 from gammalab.backend import PulsePlot
 
-
-source=SoundCard(input_device_name="PCM2900")
-convert=Raw2Float()
-detect=PulseDetection(threshold=0.003, debug=True)
-count=Count()
-pulseplot=PulsePlot(nplot=5)
-
-source.plugs_into(convert)
-convert.plugs_into(detect)
-detect.plugs_into(count)
-detect.plugs_into(pulseplot)
-
-main()
+if __name__=="__main__":
+    source=SoundCard(input_device_name="PCM2900")
+    convert=Raw2Float()
+    detect=PulseDetection(threshold=0.004, emit_pulse_shapes=True)
+    count=Count()
+    pulseplot=PulsePlot(nplot=5)
+    
+    source.plugs_into(convert)
+    convert.plugs_into(detect)
+    detect.plugs_into(count)
+    detect.plugs_into(pulseplot)
+    
+    main()
+    
