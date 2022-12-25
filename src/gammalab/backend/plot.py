@@ -229,45 +229,58 @@ class CountPlot(_Plot):
         super(CountPlot, self).__init__(outfile=outfile)
         self.time=[]
         self.count=[]
+        self.total_time=0
+        self.avgcps=0
         self.blit=False
 
-    def get_data(self):
-        data=[]
+    def get_data(self):        
+        data=None
         while True:
             _data=self.receive_input(False)
             if _data is None:
                 break
-            data.append(_data)
-        if data:
-            return data
-        else:
-            return None
+            data=_data
+ 
+        return data
         
 
     def update_plot(self,nframe, data):
-        self.time.extend([x[0] for x in data])
-        self.count.extend([x[1] for x in data])
-        
-        self.ax.set_xlim(0,2**numpy.ceil(numpy.log2((max(self.time)+1.))))
-        self.ax.set_ylim(0,2*max(self.count))
+            
+        cps=data["count_per_sec"]
+        tbins=data["time_bins"]
+        self.total_time=data["total_time"]
+        interval=data["interval"]
+              
+        self.count=cps
+        self.time=(tbins[1:]+tbins[0:-1])/2
+        if self.total_time!=0:
+            self.avgcps=self.count.sum()*interval/self.total_time
+        else:
+            self.avgcps=0.
+              
+        self.ax.set_xlim(0,self.time[-1])
+        self.ax.set_ylim(0,1.5*max(self.count))
 
-        self.artists[0].set_xdata(self.time)
-        self.artists[0].set_ydata(self.count)
+        self.artists[0].set_data(self.time, self.count)
+        self.artists[1].set_data([self.time[0],self.total_time], [self.avgcps,self.avgcps])
                 
         return self.artists
   
     def setup_plot(self):
-        fig, ax = pyplot.subplots()
+        fig, ax = pyplot.subplots(figsize=(6,3))
         fig.canvas.manager.set_window_title("GammaLab Counts")
 
         ax.cla()
-        artists=ax.plot(self.time,self.count)
+        artist1,=ax.plot(self.time,self.count, ".")
+        artist2,=ax.plot([0,10],[self.avgcps,self.avgcps], "g--")
         ax.set_xlabel("time (s)")
         ax.set_ylabel("counts per sec")
         ax.set_xlim(0,10)
         ax.set_ylim(0,30)
+        pyplot.tight_layout()
 
-        return fig,ax,artists
+        return fig,ax,[artist1, artist2]
+
 
 class PulsePlot(_Plot):
     input_wire_class=PulseWire

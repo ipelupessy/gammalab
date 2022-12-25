@@ -17,6 +17,7 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
 
         self.hist, self.bins=numpy.histogram([], bins=self.nchannels, 
             range=(self.vmin,self.vmax))
+        self.total_time=0
 
     def output_protocol(self, wire):
         super(AggregateHistogram, self).output_protocol(wire)
@@ -31,12 +32,17 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
             range=(self.vmin,self.vmax))
         
         self.hist=self.hist+hist
+        self.total_time=data["total_time"]
 
-        return dict(hist=self.hist, bins=self.bins)
+        return self.outdata
+
+    @property
+    def outdata(self):
+        return dict(hist=self.hist, bins=self.bins, total_time=self.total_time)        
 
     def cleanup(self):
         if self.outfile is not None:
             f=open(self.outfile+".pkl","wb")
-            pickle.dump((self.hist, self.bins),f)
+            pickle.dump(self.outdata,f)
             f.close()
         super(AggregateHistogram, self).cleanup()
