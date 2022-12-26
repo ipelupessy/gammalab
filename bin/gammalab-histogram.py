@@ -17,13 +17,14 @@ from gammalab.transform import Raw2Float, Normalize, SecondOrder
 from gammalab.analysis import PulseDetection, FittedPulseDetection
 from gammalab.analysis import AggregateHistogram
 from gammalab.analysis import Count
-from gammalab.backend import PlotHistogram
+from gammalab.backend import PlotHistogram, CountPlot
 
 def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000., 
         drift=0., runtime=None, outfile=None, log=True, do_plot=True,
         input_device_name="", inputfile=None, realtime=True,
         fitpulse=False, fit_threshold=0.95, raw_values=False,
-        baseline=0., negative_peaks=False, amplitude=1.):
+        baseline=0., negative_peaks=False, amplitude=1., plot_count=False,
+        histogram_mode="normal"):
 
     if raw_values:
         scale=1.
@@ -45,14 +46,19 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
     
     count=Count(outfile=outfile+".counts" if outfile is not None else None)
     histogram=AggregateHistogram(nchannels=int(nchannels*scale/vmax),
-                                 vmin=0, 
+                                 vmin=threshold, 
                                  vmax=vmax, 
-                                 outfile=outfile+".histogram" if outfile is not None else None)
+                                 outfile=outfile+".histogram" if outfile is not None else None,
+                                 histogram_mode=histogram_mode)
     
     source.plugs_into(convert)
     convert.plugs_into(normalize)
     normalize.plugs_into(detect)
     detect.plugs_into(count)
+    
+    if plot_count:
+        countplot=CountPlot(outfile=outfile+".count" if outfile is not None else None)
+        count.plugs_into(countplot)
 
     if raw_values:
         detect.plugs_into(histogram)
@@ -174,14 +180,27 @@ def new_argument_parser():
         '--do-plot',
         dest='do_plot',
         action="store_true",
-        help='show plot',
+        help='show histogram plot',
     )
     parser.add_argument(
         '--log',
         dest='log',
         action="store_true",
-        help='plot logarithmic y-axis',
+        help='plot histogram with logarithmic y-axis',
     )    
+    parser.add_argument(
+        '--histogram_mode',
+        dest='histogram_mode',
+        default="normal",
+        type=str,
+        help='mode for histogram binning (normal, proportional)',
+    )
+    parser.add_argument(
+        '--plot_count',
+        dest='plot_count',
+        action="store_true",
+        help='show plot of counts',
+    )
     parser.add_argument(
         '--input_device_name',
         dest='input_device_name',

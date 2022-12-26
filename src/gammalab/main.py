@@ -50,6 +50,8 @@ def main(timeout=None):
 
     startup()
 
+    #~ print(multiprocessing.active_children())
+
     shared_output.put("[Main] running")
 
     input_checker=threading.Thread(target=check_user_input)

@@ -4,6 +4,7 @@ from ..wire import FloatWire, HistogramWire, CountWire, PulseWire
 import numpy
 import time
 import random
+import pickle
 
 class _Plot(ThreadService, ReceivingService):
     def __init__(self, outfile=None, interval=250):                
@@ -135,13 +136,16 @@ class PlotHistogram(_Plot):
     input_wire_class=HistogramWire
   
     def __init__(self, xmin=0, xmax=1., log=True, 
-                    error_bars=True, outfile="histogram"):        
+                    error_bars=True, outfile="histogram",
+                    background=""):        
         super(PlotHistogram, self).__init__(outfile=outfile)
         self.xmin=xmin
         self.xmax=xmax
         self.log=log
         self.error_bars=error_bars
-        self.ymax=1.
+        self.ymax=10.
+        self.ymin=1.
+        self.background=background #"background.histogram.pkl"
 
     def get_data(self):        
         data=None
@@ -153,20 +157,29 @@ class PlotHistogram(_Plot):
  
         return data
 
+    def convert_hist_bins(self,hist,bins,total_time):
+        yerr=hist**0.5
+        yerr=numpy.maximum(yerr,1)
+        hist=hist/total_time
+        yerr=yerr/total_time
+        if self.input_wire.histogram_mode=="proportional":
+            binsize=(bins[1:]-bins[:-1])
+            hist=hist/(binsize)
+            yerr=yerr/(binsize)
+        return hist,bins,yerr
+
     def update_plot(self,nframe, data):
 
         hist=data["hist"]
         bins=data["bins"]
-
-        y=numpy.zeros(2*len(hist))
-        y[::2]=hist
-        y[1::2]=hist
-        yerr=y**0.5
-        self._line.set_ydata(y)
-        self._update_ylim(y.max())
+        total_time=data["total_time"]
+        hist,bins,yerr=self.convert_hist_bins(hist,bins,total_time)
+        
+        self._line.set_data(hist,bins)
+        self._update_ylim(hist.max())
         if self.error_bars:
-            self._top.set_ydata(numpy.maximum(y+yerr,1))
-            self._bot.set_ydata(y-yerr)
+            self._top.set_data(hist+yerr,bins)
+            self._bot.set_data(hist-yerr,bins)
                 
         return self.artists
 
@@ -176,8 +189,8 @@ class PlotHistogram(_Plot):
         if self.log:
             _ymax=ymax
             if _ymax>self.ymax:
-                self.ymax=10*_ymax
-                ax.set_ylim(0.5,2*self.ymax)
+                self.ymax=2*_ymax
+                ax.set_ylim(self.ymax/1.e5,2*self.ymax)
                 pyplot.draw()
         else:
             _ymax=ymax
@@ -185,6 +198,15 @@ class PlotHistogram(_Plot):
                 self.ymax=1.5*ymax
                 ax.set_ylim(0,1.3*self.ymax)      
                 pyplot.draw()
+
+    def background_hist_bins(self):
+        with open(self.background,'rb') as f:
+            data=pickle.load(f)
+        hist=data["hist"]
+        bins=data["bins"]
+        total_time=data["total_time"]
+        return self.convert_hist_bins(hist,bins,total_time)
+        
 
     def setup_plot(self):
         fig, ax = pyplot.subplots()
@@ -195,25 +217,25 @@ class PlotHistogram(_Plot):
         vmin=self.input_wire.vmin
         vmax=self.input_wire.vmax
         hist,bins=numpy.histogram([], bins=nchannels, range=(vmin,vmax))
-        x=numpy.zeros(2*nchannels)
-        y=numpy.zeros(2*nchannels)
-        x[::2]=bins[:-1]
-        x[1::2]=bins[1:]
-        y[::2]=hist
-        y[1::2]=hist
         if self.error_bars:
-            yerr=y**0.5
-            self._top,=ax.plot(x,numpy.maximum(y+yerr,1),":",c="tab:orange", zorder=0)
-            self._bot,=ax.plot(x,y-yerr,":",c="tab:orange",zorder=5)
+            yerr=hist**0.5
+            self._top=ax.stairs(numpy.maximum(hist+yerr,1),bins,ls=":",color="tab:orange", zorder=0)
+            self._bot=ax.stairs(hist-yerr,bins,ls=":",color="tab:orange",zorder=5)
+        self._line=ax.stairs(hist,bins,lw=2, zorder=10)
+        if self.background:
+            hist,bins,err=self.background_hist_bins()
+            _line=ax.stairs(hist,bins,lw=2., zorder=6, color="tab:grey", ls="--")
         if self.log:
-            self._line,=ax.semilogy(x,y+0.1, lw=2, zorder=10)
-        else:
-            self._line,=ax.plot(x,y,lw=2, zorder=10)
+            pyplot.yscale("log")
 
-        ax.set_ylabel("counts")
-        ax.set_xlabel(f"energy ({self.input_wire.unit})") # take label from wire?
+        if self.input_wire.histogram_mode=="normal":
+            ax.set_ylabel("counts / s / bin")
+        if self.input_wire.histogram_mode=="proportional":
+            ax.set_ylabel(f"counts / s / {self.input_wire.unit}")
+
+        ax.set_xlabel(f"energy ({self.input_wire.unit})")
         ax.set_xlim(self.xmin,self.xmax)
-        self._update_ylim(max(y.max(),50), ax=ax)
+        self._update_ylim(max(hist.max(),50), ax=ax)
         
         if self.error_bars:
             artists=[self._line, self._top, self._bot]
