@@ -58,7 +58,7 @@ class Count(ThreadService, ReceivingService, SourceService):
         else:
           cps=0
 
-        message="time: {0:6.3g} | counts: {1:5.3e} | average cps: {2:5.2f} | current cps: {3:5.2f}".format(
+        message="time: {0:7.2f} | counts: {1:5.3e} | average cps: {2:5.2f} | current cps: {3:5.2f}".format(
                  self.total_time, self.total_count, avgcps, cps)
         self.print_message(message)
         
