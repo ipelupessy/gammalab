@@ -24,7 +24,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
         input_device_name="", inputfile=None, realtime=True,
         fitpulse=False, fit_threshold=0.95, raw_values=False,
         baseline=0., negative_peaks=False, amplitude=1., plot_count=False,
-        histogram_mode="normal"):
+        histogram_mode="normal", background=""):
 
     if raw_values:
         scale=1.
@@ -71,7 +71,8 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
         plothistogram=PlotHistogram(xmin=0, 
                                     xmax=vmax, 
                                     outfile=outfile,
-                                    log=log)
+                                    log=log,
+                                    background=background)
         histogram.plugs_into(plothistogram)
 
     main(runtime)
@@ -195,6 +196,13 @@ def new_argument_parser():
         type=str,
         help='mode for histogram binning (normal, proportional)',
     )
+    parser.add_argument(
+        '--background',
+        dest='background',
+        default="",
+        type=str,
+        help='optional filename for background spectrum',
+    )    
     parser.add_argument(
         '--plot_count',
         dest='plot_count',

@@ -8,7 +8,7 @@ from ..wire import PulseWire, CountWire
 class Count(ThreadService, ReceivingService, SourceService):
     input_wire_class=PulseWire
     output_wire_class=CountWire
-    def __init__(self, outfile=None, runtime=None, interval=1.):
+    def __init__(self, outfile=None, runtime=None, interval=1., silent=False):
         super(Count, self).__init__()
         self.outfile=outfile
         self.runtime=runtime
@@ -18,6 +18,7 @@ class Count(ThreadService, ReceivingService, SourceService):
         self.total_count=0
         self.total_time=0
         self.recent_pulse_times=[] # all pulse times from last interval
+        self.silent=silent
     
     @property
     def nbins(self):
@@ -60,14 +61,19 @@ class Count(ThreadService, ReceivingService, SourceService):
 
         message="time: {0:7.2f} | counts: {1:5.3e} | average cps: {2:5.2f} | current cps: {3:5.2f}".format(
                  self.total_time, self.total_count, avgcps, cps)
-        self.print_message(message)
+        if not self.silent:
+            self.print_message(message)
         
+        return self.outdata
+    
+    @property            
+    def outdata(self):
         return dict(count_per_sec=self.cps, time_bins=self.tbins, total_time=self.total_time, interval=self.interval)
+      
                 
     def cleanup(self):
         if self.outfile is not None:
             f=open(self.outfile+".pkl","wb")
-            data=dict(count_per_sec=self.cps, time_bins=self.tbins, total_time=self.total_time, interval=self.interval)
-            pickle.dump(data,f)
+            pickle.dump(self.outdata,f)
             f.close()
         super(Count, self).cleanup()

@@ -66,7 +66,8 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
 
     @property
     def outdata(self):
-        return dict(hist=self.hist, bins=self.bins, total_time=self.total_time)        
+        return dict(hist=self.hist, bins=self.bins, total_time=self.total_time, 
+                    unit=self.input_wire.unit)        
 
     def cleanup(self):
         if self.outfile is not None:

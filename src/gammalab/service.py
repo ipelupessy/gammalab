@@ -94,7 +94,7 @@ class ThreadService(Service):
         self.__done=multiprocessing.Value(ctypes.c_bool)
         self.stopped=True
         self.done=False
-        self.thread=multiprocessing.Process(target=self.start_process, 
+        self.thread=multiprocessing.Process(target=self._start_process, 
                                             name=self.__class__.__name__)
 
     def start(self):
@@ -102,9 +102,9 @@ class ThreadService(Service):
         if not self.thread.is_alive():
             self.thread.start()
 
-    def start_process(self):
+    def _start_process(self):
         try:
-          self._process()
+          self.start_process()
         except Exception as ex:
           message="Service process exception:"
           self.print_message(message)
@@ -112,6 +112,10 @@ class ThreadService(Service):
           if hasattr(self,"send_output"):
               self.send_output(None)
         self.cleanup()
+
+
+    def start_process(self):
+        self._process()
 
     def _process(self):
         while not self.stopped:

@@ -127,7 +127,7 @@ class Monitor(_Plot):
         ax.set_ylim(self.vmin,self.vmax)
         ax.set_xlabel("time (s)")
         ax.set_ylabel("level")
-      
+
         self.nplot=0
         
         return fig,ax,lines
@@ -137,15 +137,14 @@ class PlotHistogram(_Plot):
   
     def __init__(self, xmin=0, xmax=1., log=True, 
                     error_bars=True, outfile="histogram",
-                    background=""):        
+                    background="", yrange=1.e4):        
         super(PlotHistogram, self).__init__(outfile=outfile)
         self.xmin=xmin
         self.xmax=xmax
         self.log=log
         self.error_bars=error_bars
-        self.ymax=10.
-        self.ymin=1.
         self.background=background #"background.histogram.pkl"
+        self.yrange=yrange
 
     def get_data(self):        
         data=None
@@ -171,33 +170,39 @@ class PlotHistogram(_Plot):
     def update_plot(self,nframe, data):
 
         hist=data["hist"]
+        total_count=hist.sum()
         bins=data["bins"]
         total_time=data["total_time"]
         hist,bins,yerr=self.convert_hist_bins(hist,bins,total_time)
+        self.bins=bins
         
         self._line.set_data(hist,bins)
         self._update_ylim(hist.max())
         if self.error_bars:
             self._top.set_data(hist+yerr,bins)
             self._bot.set_data(hist-yerr,bins)
-                
+
+        self._text.set_text(f"time(s): {total_time:10.2f}\ntotal counts: {total_count:09d}")
+
         return self.artists
 
-    def _update_ylim(self,ymax, ax=None):
+    def _update_ylim(self, ymax, ax=None):
         if ax is None:
             ax=self.ax
-        if self.log:
-            _ymax=ymax
-            if _ymax>self.ymax:
-                self.ymax=2*_ymax
-                ax.set_ylim(self.ymax/1.e5,2*self.ymax)
-                pyplot.draw()
-        else:
-            _ymax=ymax
-            if _ymax>self.ymax:
-                self.ymax=1.5*ymax
-                ax.set_ylim(0,1.3*self.ymax)      
-                pyplot.draw()
+        if ymax>self.ymax/1.2:
+            self.ymax=2*ymax
+            ymin=0
+            if self.log:
+                ymin=self.ymax/self.yrange
+            ax.set_ylim(ymin,self.ymax)
+            pyplot.draw()
+        if ymax<self.ymax/10:
+            self.ymax=self.ymax/10
+            ymin=0
+            if self.log:
+                ymin=self.ymax/self.yrange
+            ax.set_ylim(ymin,self.ymax)
+            pyplot.draw()
 
     def background_hist_bins(self):
         with open(self.background,'rb') as f:
@@ -205,6 +210,16 @@ class PlotHistogram(_Plot):
         hist=data["hist"]
         bins=data["bins"]
         total_time=data["total_time"]
+        if self.input_wire.unit != data["unit"]:
+            message=f"Background spectrum wrong unit, expect {self.input_wire.unit}, has {data['unit']}"
+            raise Exception(message)
+        if (len(bins)!=len(self.bins) or numpy.any(bins-self.bins>1.e-7)) and self.input_wire.histogram_mode=="normal": 
+            print(bins)
+            print(self.bins)
+            print(bins-self.bins)
+            message=f"Background spectrum binning does not match"
+            raise Exception(message)
+
         return self.convert_hist_bins(hist,bins,total_time)
         
 
@@ -217,6 +232,8 @@ class PlotHistogram(_Plot):
         vmin=self.input_wire.vmin
         vmax=self.input_wire.vmax
         hist,bins=numpy.histogram([], bins=nchannels, range=(vmin,vmax))
+        self.bins=bins
+
         if self.error_bars:
             yerr=hist**0.5
             self._top=ax.stairs(numpy.maximum(hist+yerr,1),bins,ls=":",color="tab:orange", zorder=0)
@@ -224,23 +241,29 @@ class PlotHistogram(_Plot):
         self._line=ax.stairs(hist,bins,lw=2, zorder=10)
         if self.background:
             hist,bins,err=self.background_hist_bins()
-            _line=ax.stairs(hist,bins,lw=2., zorder=6, color="tab:grey", ls="--")
+            _line=ax.stairs(hist,bins,lw=2., zorder=11, color="tab:grey", ls="--")
         if self.log:
-            pyplot.yscale("log")
+            ax.set_yscale("log", nonpositive="mask")
 
         if self.input_wire.histogram_mode=="normal":
             ax.set_ylabel("counts / s / bin")
         if self.input_wire.histogram_mode=="proportional":
             ax.set_ylabel(f"counts / s / {self.input_wire.unit}")
+        self._text=ax.text(0.95,0.95,f"time(s): {0.:10.2f}\ntotal counts: {0:09d}", va='top', ha='right',transform=ax.transAxes)
+            
 
         ax.set_xlabel(f"energy ({self.input_wire.unit})")
         ax.set_xlim(self.xmin,self.xmax)
-        self._update_ylim(max(hist.max(),50), ax=ax)
+        self.ymin, self.ymax=ax.get_ylim()
+        #~ print(max(hist.max(),1))
+        #~ self._update_ylim(max(hist.max(),1), ax=ax)
+        
+        pyplot.tight_layout()
         
         if self.error_bars:
-            artists=[self._line, self._top, self._bot]
+            artists=[self._text,self._line, self._top, self._bot]
         else:
-            artists=[self._line]
+            artists=[self._text,self._line]
         
         return fig,ax,artists
       
