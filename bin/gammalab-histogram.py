@@ -46,7 +46,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
     
     count=Count(outfile=outfile+".counts" if outfile is not None else None)
     histogram=AggregateHistogram(nchannels=int(nchannels*scale/vmax),
-                                 vmin=threshold, 
+                                 vmin=threshold*scale, 
                                  vmax=vmax, 
                                  outfile=outfile+".histogram" if outfile is not None else None,
                                  histogram_mode=histogram_mode)

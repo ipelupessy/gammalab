@@ -23,14 +23,19 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
         fac=(self.vmax/self.vmin)**(1./self.nchannels)        
         bins=[]
         x=self.vmin
-        while x<self.vmax:
+        for i in range(self.nchannels):
             bins.append(x)
             x=x*fac
-        bins[-1]=self.vmax
+        bins.append(self.vmax)
         
         return numpy.array(bins)
-            
 
+    def get_quadratic_bins(self):
+        nn=2
+        x=numpy.arange(self.nchannels+1)
+        bins= self.vmax*( (x/self.nchannels)+(self.vmin/self.vmax)**(1./nn)) **nn / (1+(self.vmin/self.vmax)**(1/nn))**nn
+        return bins
+  
     def get_histogram(self, data):
         if self.histogram_mode=="normal":
             return numpy.histogram(data, bins=self.nchannels, 
@@ -38,6 +43,10 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
         if self.histogram_mode=="proportional":
             bins=self.get_proportional_bins()
             return numpy.histogram(data, bins=bins)
+        if self.histogram_mode=="quadratic":
+            bins=self.get_quadratic_bins()
+            return numpy.histogram(data, bins=bins)
+
 
         raise Exception(f"Unknown histogram_mode {self.histogram_mode}")
 

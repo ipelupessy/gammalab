@@ -162,7 +162,7 @@ class PlotHistogram(_Plot):
         yerr=numpy.maximum(yerr,1)
         hist=hist/total_time
         yerr=yerr/total_time
-        if self.input_wire.histogram_mode=="proportional":
+        if self.input_wire.histogram_mode!="normal":
             binsize=(bins[1:]-bins[:-1])
             hist=hist/(binsize)
             yerr=yerr/(binsize)
@@ -190,6 +190,9 @@ class PlotHistogram(_Plot):
     def _update_ylim(self, ymax, ax=None):
         if ax is None:
             ax=self.ax
+        fac=2.5
+        if self.log:
+            fac=10
         if ymax>self.ymax/1.2:
             self.ymax=2*ymax
             ymin=0
@@ -197,8 +200,8 @@ class PlotHistogram(_Plot):
                 ymin=self.ymax/self.yrange
             ax.set_ylim(ymin,self.ymax)
             pyplot.draw()
-        if ymax<self.ymax/10:
-            self.ymax=self.ymax/10
+        if ymax<self.ymax/fac:
+            self.ymax=self.ymax/fac
             ymin=0
             if self.log:
                 ymin=self.ymax/self.yrange
@@ -215,9 +218,6 @@ class PlotHistogram(_Plot):
             message=f"Background spectrum wrong unit, expect {self.input_wire.unit}, has {data['unit']}"
             raise Exception(message)
         if (len(bins)!=len(self.bins) or numpy.any(bins-self.bins>1.e-7)) and self.input_wire.histogram_mode=="normal": 
-            print(bins)
-            print(self.bins)
-            print(bins-self.bins)
             message=f"Background spectrum binning does not match"
             raise Exception(message)
 
@@ -248,7 +248,7 @@ class PlotHistogram(_Plot):
 
         if self.input_wire.histogram_mode=="normal":
             ax.set_ylabel("counts / s / bin")
-        if self.input_wire.histogram_mode=="proportional":
+        else:
             ax.set_ylabel(f"counts / s / {self.input_wire.unit}")
         self._text=ax.text(0.95,0.95,f"time(s): {0.:10.2f}\ntotal counts: {0:09d}", va='top', ha='right',transform=ax.transAxes)
             
