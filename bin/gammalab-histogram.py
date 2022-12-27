@@ -17,14 +17,14 @@ from gammalab.transform import Raw2Float, Normalize, SecondOrder
 from gammalab.analysis import PulseDetection, FittedPulseDetection
 from gammalab.analysis import AggregateHistogram
 from gammalab.analysis import Count
-from gammalab.backend import PlotHistogram, CountPlot
+from gammalab.backend import PlotHistogram, CountPlot, PulsePlot
 
 def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000., 
         drift=0., runtime=None, outfile=None, log=True, do_plot=True,
         input_device_name="", inputfile=None, realtime=True,
         fitpulse=False, fit_threshold=0.95, raw_values=False,
         baseline=0., negative_peaks=False, amplitude=1., plot_count=False,
-        histogram_mode="normal", background=""):
+        histogram_mode="normal", background="", plot_pulses=False):
 
     if raw_values:
         scale=1.
@@ -39,10 +39,10 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
     pulse_file=outfile+".pulses" if outfile is not None else None
     if fitpulse:
         detect=FittedPulseDetection(threshold=threshold, fit_threshold=fit_threshold,
-                                    outfile=pulse_file)
+                                    outfile=pulse_file,emit_pulse_shapes=True)
     else:
         detect=PulseDetection(threshold=threshold, 
-                              outfile=pulse_file)
+                              outfile=pulse_file,emit_pulse_shapes=True)
     
     count=Count(outfile=outfile+".counts" if outfile is not None else None)
     histogram=AggregateHistogram(nchannels=int(nchannels*scale/vmax),
@@ -59,6 +59,11 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
     if plot_count:
         countplot=CountPlot(outfile=outfile+".count" if outfile is not None else None)
         count.plugs_into(countplot)
+
+    if plot_pulses:
+        pulseplot=PulsePlot(nplot=5,
+                            interval=1000)
+        detect.plugs_into(pulseplot)
 
     if raw_values:
         detect.plugs_into(histogram)
@@ -209,6 +214,12 @@ def new_argument_parser():
         action="store_true",
         help='show plot of counts',
     )
+    parser.add_argument(
+        '--plot_pulses',
+        dest='plot_pulses',
+        action="store_true",
+        help='Plot sampling of pulse shapes',
+    )    
     parser.add_argument(
         '--input_device_name',
         dest='input_device_name',

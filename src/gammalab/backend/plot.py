@@ -60,6 +60,7 @@ class _Plot(ThreadService, ReceivingService):
         self.fig, self.ax, self.artists=self.setup_plot()
 
         pyplot.connect('button_press_event', self.on_click)
+
         
         ani = FuncAnimation(self.fig, self._update_plot, interval=self.interval, blit=self.blit)
 
@@ -330,8 +331,8 @@ class CountPlot(_Plot):
 class PulsePlot(_Plot):
     input_wire_class=PulseWire
 
-    def __init__(self, nplot=1):                
-        super(PulsePlot, self).__init__()
+    def __init__(self, nplot=1, interval=250):                
+        super(PulsePlot, self).__init__(interval=interval)
         self.nplot=nplot
 
     def get_data(self):
@@ -390,25 +391,37 @@ class PulsePlot(_Plot):
             dmax=max(dmax,d.max())
 
         self.ax.set_xlim(tmin,tmax)
-        self.ax.set_ylim(dmin-.1*(dmax-dmin),dmax+0.2*(dmax-dmin))
+        self.ax.set_ylim(dmin-.15*(dmax-dmin),dmax+0.2*(dmax-dmin))
 
         return self.lines[0:len(self.data)]
             
     def setup_plot(self):
-        fig, ax = pyplot.subplots(figsize=(8,4))
+        fig, ax = pyplot.subplots(figsize=(5,2))
         fig.canvas.manager.set_window_title("GammaLab Pulse Monitor")
 
-        self.data=[numpy.array([0]*10)]*self.nplot
+        self.data=[numpy.array([0]*40)]*self.nplot
 
         self.lines=[]        
         for d in self.data:
             t=(numpy.arange(0,len(d))-5)
-            line,=ax.plot(t,d,"o-")
+            line,=ax.plot(t,d,"+-")
             self.lines.append(line)
 
-        ax.set_xlabel("time (samples)")
+        ax.set_xlim(-5,35)
+        ax.set_ylim(-.15,1.2)
+
+
+        ax.set_xlabel("time")
         ax.set_ylabel("level")
+        ax.set_xticks([],[])
+        ax.set_yticks([],[])
+        
+        #~ ax.yaxis.set_label_coords(0.0,0.5)
+        #~ ax.xaxis.set_label_coords(0.5,0.0)
+        
         #~ ax.set_title("selected pulses")
+        
+        pyplot.tight_layout()
         
         artists=self.lines
         
