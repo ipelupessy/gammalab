@@ -13,10 +13,10 @@ class SaveWav(ThreadService, ReceivingService):
         self.outputfile=filename
         
     def start_process(self):
-        global wav
+        global wave
         
         try:
-          import wav
+          import wave
         except Exception as ex:
             self.print_message( "import error: {0}".format(str(ex)))
 
@@ -34,3 +34,5 @@ class SaveWav(ThreadService, ReceivingService):
 
     def cleanup(self):
         self.output.close()
+        super(SaveWav, self).cleanup()
+                

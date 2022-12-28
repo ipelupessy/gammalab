@@ -53,6 +53,12 @@ class RawWire(Wire):
 class FloatWire(Wire):
     _description="numpy float array"
 
+class Int16Wire(Wire):
+    _description="numpy int16 array"
+
+class NumpyWire(Wire):
+    _description="numpy array (of flexible data type, determined by wire.FORMAT)"
+
 class PulseWire(Wire):
     _description="pulses"
 

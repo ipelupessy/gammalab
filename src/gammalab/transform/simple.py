@@ -1,5 +1,5 @@
 from ..service import ReceivingService, SourceService, ThreadService
-from ..wire import RawWire, FloatWire
+from ..wire import RawWire, FloatWire, Int16Wire, NumpyWire
 
 import numpy
 
@@ -18,7 +18,7 @@ class Identity(ThreadService, SourceService, ReceivingService):
 
 class Raw2Numpy(ThreadService, SourceService, ReceivingService):
     input_wire_class=RawWire
-    output_wire_class=FloatWire
+    output_wire_class=NumpyWire
 
     def output_protocol(self, wire):
         super(Raw2Numpy, self).output_protocol(wire)
@@ -84,3 +84,34 @@ class Normalize(ThreadService, SourceService, ReceivingService):
     def process(self, data):
         return numpy.clip(self.scale*(data-self.baseline), -1.,1., dtype="float32")
 
+class Float2Int16(ThreadService, SourceService, ReceivingService):
+    input_wire_class=FloatWire
+    output_wire_class=Int16Wire
+
+    def output_protocol(self, wire):
+        super(Float2Int16, self).output_protocol(wire)
+        wire.CHANNELS=self.input_wire.CHANNELS
+        wire.RATE=self.input_wire.RATE
+        wire.FORMAT="int16"
+
+    def process(self, data):
+        if self.input_wire.FORMAT=="float32":
+          return numpy.array(32767*data).astype("int16")
+        elif self.input_wire.FORMAT=="int16":
+          return data
+        else:
+          self.print_message("unknown data format in wire")
+          return None
+          
+class Int162Raw(ThreadService, SourceService, ReceivingService):
+    input_wire_class=Int16Wire
+    output_wire_class=RawWire
+
+    def output_protocol(self, wire):
+        super(Int162Raw, self).output_protocol(wire)
+        wire.CHANNELS=self.input_wire.CHANNELS
+        wire.RATE=self.input_wire.RATE
+        wire.FORMAT="int16"
+
+    def process(self, data):
+          return numpy.array(data).tobytes()

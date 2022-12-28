@@ -1,6 +1,8 @@
 from ..service import SourceService, ThreadService
 from ..wire import RawWire
 
+import time
+
 class SoundCard(ThreadService, SourceService):
     output_wire_class=RawWire
 
@@ -37,6 +39,8 @@ class SoundCard(ThreadService, SourceService):
 
         mic=soundcard.get_microphone(self.input_device_index or self.input_device_name)
         name=mic.name
+        t0=time.time()
+        total_samples=0
         with mic.recorder(samplerate=self.RATE, blocksize=self.frames_per_buffer, channels=self.CHANNELS) as recorder:
             while not self.stopped:    
                 try:
@@ -59,8 +63,13 @@ class SoundCard(ThreadService, SourceService):
                 if (not self.stopped and
                     data is not None):
                     self.send_output(data)
+                    total_samples+=len(data)/4
                 
             self.send_output(None)
+        t_wall=time.time()-t0
+        t_sample=total_samples/self.RATE
+        self.print_message(f"wallclock(s): {t_wall:6.2f}, sample time(s): {t_sample:6.2f},  difference: {100*(t_wall-t_sample)/t_wall:4.2f}%")
+
         self.stopped=True
 
     def output_protocol(self, wire):
