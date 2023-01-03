@@ -5,7 +5,7 @@ import time
 import numpy
 import wave
 
-pyaudio_nbytes=dict(int16=2, float32=4)
+format_nbytes=dict(int16=2, float32=4)
 
 class RawReplay(ThreadService, SourceService):
     output_wire_class=RawWire
@@ -26,7 +26,7 @@ class RawReplay(ThreadService, SourceService):
         wire.FORMAT=self.FORMAT
     
     def readframes(self,n):
-        return self._file.read(pyaudio_nbytes[self.FORMAT]*n)
+        return self._file.read(format_nbytes[self.FORMAT]*n)
     
     def process(self, data=None):
         if self.realtime:
