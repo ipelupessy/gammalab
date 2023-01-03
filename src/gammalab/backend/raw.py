@@ -14,6 +14,7 @@ class SaveRaw(ThreadService, ReceivingService):
     def start_process(self):    
         with open(self.outputfile, 'wb') as self.output:
             super().start_process()
+        self.print_message(f"done writing to {self.outputfile}")
 
     def process(self, data):
         self.output.write(data)

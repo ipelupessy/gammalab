@@ -80,6 +80,8 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
 
     def cleanup(self):
         if self.outfile is not None:
-            with open(self.outfile+".pkl","wb") as f:
+            outfile=self.outfile+".pkl"
+            with open(outfile,"wb") as f:
                 pickle.dump(self.outdata,f)
+            self.print_message(f"Data written to {outfile}")
         super().cleanup()

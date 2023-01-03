@@ -110,8 +110,10 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
 
     def cleanup(self):
         if self.outfile is not None:
-            with open(self.outfile+".pkl","wb") as f:
+            outfile=self.outfile+".pkl"
+            with open(outfile,"wb") as f:
                 pickle.dump(self.all_pulses,f)
+            self.print_message(f"Data written to {outfile}")
         super().cleanup()
 
 

@@ -37,7 +37,9 @@ class _Plot(ThreadService, ReceivingService):
         if self.stopped:
             self.do_update=False
             if self.outfile is not None:
-                self.fig.savefig(self.outfile+'.png')
+                outfile=self.outfile+'.png'
+                self.fig.savefig(outfile)
+                self.print_message(f"Image written to {outfile}")
             self.done=True
             return []
 
@@ -67,7 +69,9 @@ class _Plot(ThreadService, ReceivingService):
         pyplot.show(block=True)
 
         if self.outfile is not None:
-            self.fig.savefig(self.outfile+'.png')
+            outfile=self.outfile+'.png'
+            self.fig.savefig(outfile)
+            self.print_message(f"Image written to {outfile}")
 
         self.cleanup()
         

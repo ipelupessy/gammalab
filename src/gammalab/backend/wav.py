@@ -28,7 +28,7 @@ class SaveWav(ThreadService, ReceivingService):
             self.output.setframerate(self.input_wire.RATE)
             
             super().start_process()
-        self.print_message("File write done")
+        self.print_message(f"done writing to {self.outputfile}")
 
     def process(self, data):
         self.output.writeframes(data)
