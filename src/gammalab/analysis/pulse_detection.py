@@ -108,11 +108,15 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
        
         return result
 
+    @property            
+    def outdata(self):
+        return dict(pulses=self.all_pulses, total_time=self.itime, rate=self.RATE)
+
     def cleanup(self):
         if self.outfile is not None:
             outfile=self.outfile+".pkl"
             with open(outfile,"wb") as f:
-                pickle.dump(self.all_pulses,f)
+                pickle.dump(self.outdata,f)
             self.print_message(f"Data written to {outfile}")
         super().cleanup()
 
