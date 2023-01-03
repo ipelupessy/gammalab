@@ -49,6 +49,19 @@ class Raw2Float(ThreadService, SourceService, ReceivingService):
           self.print_message("unknown data format in wire")
           return None
 
+class Float2Raw(ThreadService, SourceService, ReceivingService):
+    input_wire_class=FloatWire
+    output_wire_class=RawWire
+
+    def output_protocol(self, wire):
+        super().output_protocol(wire)
+        wire.CHANNELS=self.input_wire.CHANNELS
+        wire.RATE=self.input_wire.RATE
+        wire.FORMAT=self.input_wire.FORMAT
+
+    def process(self, data):
+        return data.tobytes()
+
 class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
     input_wire_class=FloatWire
     output_wire_class=FloatWire

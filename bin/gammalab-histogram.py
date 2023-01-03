@@ -31,10 +31,11 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
         vmax=1.
 
     if inputfile is not None:
-        source=FileReplay(filename=inputfile, realtime=realtime)
+        file_=FileReplay(filename=inputfile, realtime=realtime)
+        source=Raw2Float()
+        file_.plugs_into(source)
     else:
         source=SoundCard(input_device_name=input_device_name)
-    convert=Raw2Float()
     normalize=Normalize(baseline=baseline, scale=-amplitude if negative_peaks else amplitude)
     pulse_file=outfile+".pulses" if outfile is not None else None
     if fitpulse:
@@ -51,8 +52,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
                                  outfile=outfile+".histogram" if outfile is not None else None,
                                  histogram_mode=histogram_mode)
     
-    source.plugs_into(convert)
-    convert.plugs_into(normalize)
+    source.plugs_into(normalize)
     normalize.plugs_into(detect)
     detect.plugs_into(count)
     

@@ -1,10 +1,10 @@
 from ..service import SourceService, ThreadService
-from ..wire import RawWire
+from ..wire import FloatWire
 
 import time
 
 class SoundCard(ThreadService, SourceService):
-    output_wire_class=RawWire
+    output_wire_class=FloatWire
 
     @staticmethod
     def devices():
@@ -30,13 +30,15 @@ class SoundCard(ThreadService, SourceService):
         self.input_device_name=input_device_name
         super().__init__()
 
-    def _process(self):
+    def start_process(self):
         global soundcard
         try:
             import soundcard
         except Exception as ex:
             self.print_message( f"import error: {str(ex)}")
+        super().start_process()
 
+    def _process(self):
         mic=soundcard.get_microphone(self.input_device_index or self.input_device_name)
         name=mic.name
         t0=time.time()
@@ -57,8 +59,6 @@ class SoundCard(ThreadService, SourceService):
                 if len(data)==0:
                     self.print_message("no data")
                     self.stopped=True
-                else:
-                    data=data.astype("float32").tobytes()
     
                 if (not self.stopped and
                     data is not None):

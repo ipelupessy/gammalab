@@ -16,7 +16,7 @@ from gammalab.acquisition import SoundCard, FileReplay
 from gammalab.backend import Monitor
 from gammalab.backend import SaveRaw
 from gammalab.backend import SoundCardPlay
-from gammalab.transform import Raw2Float, DownSampleMaxed
+from gammalab.transform import Raw2Float, Float2Raw, DownSampleMaxed
 
 def run(input_device_name="", runtime=None, list_input_devices=False, raw_output_file="",
         list_output_devices=False, output_device_name="", inputfile=None):
@@ -30,22 +30,24 @@ def run(input_device_name="", runtime=None, list_input_devices=False, raw_output
       exit(0)
 
     if inputfile is not None:
-        source=FileReplay(inputfile)
+        file_=FileReplay(inputfile)
+        source=Raw2Float()
+        file_.plugs_into(source)
     else:
         source=SoundCard(input_device_name=input_device_name)
 
     monitor=Monitor()
-    convert=Raw2Float()
     downsample=DownSampleMaxed(factor=8)
         
-    source.plugs_into(convert)
-    convert.plugs_into(downsample)
+    source.plugs_into(downsample)
     downsample.plugs_into(monitor)
 
     if raw_output_file!="":
         output_file=raw_output_file+"."+datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        convert=Float2Raw()
         save=SaveRaw(output_file)
-        source.plugs_into(save)
+        source.plugs_into(convert)
+        convert.plugs_into(save)
 
     if output_device_name!="":
         playback=SoundCardPlay(output_device_name=output_device_name)

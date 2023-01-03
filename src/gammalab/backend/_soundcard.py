@@ -1,6 +1,6 @@
 import numpy
 from ..service import ReceivingService, ThreadService
-from ..wire import RawWire
+from ..wire import FloatWire
 
 class SoundCardPlay(ThreadService, ReceivingService):
 
@@ -17,7 +17,7 @@ class SoundCardPlay(ThreadService, ReceivingService):
           result[m.name]=m.id
         return result
 
-    input_wire_class=RawWire
+    input_wire_class=FloatWire
 
     def __init__(self, frames_per_buffer=2048, output_device_index=None, output_device_name=""):
         self.frames_per_buffer=frames_per_buffer
@@ -30,13 +30,15 @@ class SoundCardPlay(ThreadService, ReceivingService):
         if self.input_wire.FORMAT != "float32":
             raise Exception("SoundCard playback only supports float32 format")
 
-    def _process(self):
+    def start_process(self):
         global soundcard
         try:
             import soundcard
         except Exception as ex:
             self.print_message( f"import error: {str(ex)}")
-            
+        super().start_process()
+
+    def _process(self):            
         speaker=soundcard.get_speaker(self.output_device_index or self.output_device_name)
         self.print_message( f"opening {str(speaker)} for audio output")
 
@@ -45,8 +47,6 @@ class SoundCardPlay(ThreadService, ReceivingService):
                 data=self.receive_input()
                 if data is None:
                     self.stopped=True
-                else:
-                    data=numpy.frombuffer(data,dtype=self.input_wire.FORMAT)
 
                 if not self.stopped:
                     try:

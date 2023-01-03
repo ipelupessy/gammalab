@@ -56,7 +56,7 @@ class SourceService(Service):
           raise ex      
         except AssertionError as ex:
           self.print_message(str(ex))
-          raise Exception("Wiring fault! Trying to connect incompatible services")
+          raise Exception(f"Wiring fault! Trying to connect incompatible services {self.__class__.__name__} and {other.__class__.__name__}" )
         except AttributeError as ex:
           self.print_message(str(ex))
           raise Exception("Wiring fault! Wires connected out of order?")
