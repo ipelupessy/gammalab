@@ -10,12 +10,10 @@ class SaveRaw(ThreadService, ReceivingService):
             filename="data.raw"
         
         self.outputfile=filename
-        
-        self.output=open(self.outputfile, 'wb')
+    
+    def start_process(self):    
+        with open(self.outputfile, 'wb') as self.output:
+            super(SaveRaw, self).start_process()
 
     def process(self, data):
         self.output.write(data)
-
-    def cleanup(self):
-        self.output.close()
-        super(SaveRaw, self).cleanup()

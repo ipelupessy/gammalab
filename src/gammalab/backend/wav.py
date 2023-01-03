@@ -20,19 +20,16 @@ class SaveWav(ThreadService, ReceivingService):
         except Exception as ex:
             self.print_message( "import error: {0}".format(str(ex)))
 
-        self.output=wave.open(self.outputfile, 'wb')
-        self.output.setnchannels(1)
-        if self.input_wire.FORMAT!="int16":
-            raise Exception("Format to be saved in wav needs to be int16")
-        self.output.setsampwidth(2)
-        self.output.setframerate(self.input_wire.RATE)
-        
-        super(SaveWav, self).start_process()
+        with wave.open(self.outputfile, 'wb') as self.output:
+            self.output.setnchannels(1)
+            if self.input_wire.FORMAT!="int16":
+                raise Exception("Format to be saved in wav needs to be int16")
+            self.output.setsampwidth(2)
+            self.output.setframerate(self.input_wire.RATE)
+            
+            super(SaveWav, self).start_process()
+        self.print_message("File write done")
 
     def process(self, data):
         self.output.writeframes(data)
-
-    def cleanup(self):
-        self.output.close()
-        super(SaveWav, self).cleanup()
                 

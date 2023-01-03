@@ -73,7 +73,6 @@ class Count(ThreadService, ReceivingService, SourceService):
                 
     def cleanup(self):
         if self.outfile is not None:
-            f=open(self.outfile+".pkl","wb")
-            pickle.dump(self.outdata,f)
-            f.close()
+            with open(self.outfile+".pkl","wb") as f:
+                pickle.dump(self.outdata,f)
         super(Count, self).cleanup()

@@ -46,13 +46,8 @@ class RawReplay(ThreadService, SourceService):
         
     def start_process(self):
         self.t0=time.time()
-        self._file=open(self.filename, "rb")
-        super(RawReplay, self).start_process()
-        
-
-    def cleanup(self):
-        self._file.close()
-        super(RawReplay, self).cleanup()
+        with open(self.filename, "rb") as self._file:
+            super(RawReplay, self).start_process()
 
 
 format_from_width={2 : "int16", 4 : "float32"}
@@ -73,9 +68,10 @@ class WavReplay(RawReplay):
         
     def start_process(self):
         self.t0=time.time()
-        self._file=wave.open(self.filename, "rb")
-        self._process
- 
+        with wave.open(self.filename, "rb") as self._file:
+            super(WavReplay, self).start_process()
+
+
 def FileReplay(filename, **kwargs):
     if filename.endswith("wav"):
         return WavReplay(filename, **kwargs)
