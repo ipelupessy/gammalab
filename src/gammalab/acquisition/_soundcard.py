@@ -40,6 +40,7 @@ class SoundCard(ThreadService, SourceService):
 
     def _process(self):
         mic=soundcard.get_microphone(self.input_device_index or self.input_device_name)
+        self.print_message( f"opening {str(mic)} for data acquisition")
         name=mic.name
         t0=time.time()
         total_samples=0
