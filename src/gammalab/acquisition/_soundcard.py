@@ -57,9 +57,11 @@ class SoundCard(ThreadService, SourceService):
                 except Exception as ex:
                     self.print_message( f"error: {str(ex)}")
                     self.stopped=True
-                if len(data)==0:
+                if len(data)==0 or data is None:
                     self.print_message("no data")
                     self.stopped=True
+                else:
+                    data=dict(data=data.flatten()) # flatten because we have hardcoded nchannels=1
     
                 if (not self.stopped and
                     data is not None):

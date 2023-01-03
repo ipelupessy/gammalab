@@ -78,6 +78,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         return pulses
 
     def process(self, data):
+        data=data["data"]
         detect_ran=False
         pulses=[]
         dtime=0.
@@ -87,6 +88,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
             self.data[start:end]=data[:end-start]
             data=data[end-start:]
             self.ndata=end
+
             # if detection buffer filled, run detection
             if self.ndata>=self.window:
                 pulses.extend(self.detect_pulses())

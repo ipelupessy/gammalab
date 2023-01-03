@@ -47,6 +47,8 @@ class SoundCardPlay(ThreadService, ReceivingService):
                 data=self.receive_input()
                 if data is None:
                     self.stopped=True
+                else:
+                    data=data["data"]
 
                 if not self.stopped:
                     try:

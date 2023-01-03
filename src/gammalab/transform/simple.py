@@ -27,7 +27,8 @@ class Raw2Numpy(ThreadService, SourceService, ReceivingService):
         wire.FORMAT=self.input_wire.FORMAT
 
     def process(self, data):
-        return numpy.frombuffer(data,dtype=self.input_wire.FORMAT)
+        data["data"]=numpy.frombuffer(data["data"],dtype=self.input_wire.FORMAT)
+        return data
 
 class Numpy2Raw(ThreadService, SourceService, ReceivingService):
     input_wire_class=NumpyWire
@@ -40,7 +41,8 @@ class Numpy2Raw(ThreadService, SourceService, ReceivingService):
         wire.FORMAT=self.input_wire.FORMAT
 
     def process(self, data):
-        return data.tobytes()
+        data["data"]=data["data"].tobytes()
+        return data
 
 
 class Raw2Float(ThreadService, SourceService, ReceivingService):
@@ -55,13 +57,14 @@ class Raw2Float(ThreadService, SourceService, ReceivingService):
 
     def process(self, data):
         if self.input_wire.FORMAT=="float32":
-          return numpy.frombuffer(data,dtype=self.input_wire.FORMAT)
+          data["data"]=numpy.frombuffer(data["data"],dtype=self.input_wire.FORMAT)
         elif self.input_wire.FORMAT=="int16":
-          data=numpy.frombuffer(data,dtype=self.input_wire.FORMAT)
-          return data.astype("float32")/32768
+          data["data"]=numpy.frombuffer(data["data"],dtype=self.input_wire.FORMAT)
+          data["data"]=data["data"].astype("float32")/32768
         else:
           self.print_message("unknown data format in wire")
           return None
+        return data
 
 class Float2Raw(ThreadService, SourceService, ReceivingService):
     input_wire_class=FloatWire
@@ -74,7 +77,8 @@ class Float2Raw(ThreadService, SourceService, ReceivingService):
         wire.FORMAT=self.input_wire.FORMAT
 
     def process(self, data):
-        return data.tobytes()
+        data["data"]=data["data"].tobytes()
+        return data
 
 class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
     input_wire_class=FloatWire
@@ -91,7 +95,8 @@ class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
         wire.RATE=self.input_wire.RATE/self.factor
 
     def process(self, data):
-        return numpy.max(data.reshape(-1, self.factor),axis=1)
+        data["data"]=numpy.max(data["data"].reshape(-1, self.factor),axis=1)
+        return data
 
 class Normalize(ThreadService, SourceService, ReceivingService):
     input_wire_class=FloatWire
@@ -109,7 +114,8 @@ class Normalize(ThreadService, SourceService, ReceivingService):
         wire.FORMAT="float32"
 
     def process(self, data):
-        return numpy.clip(self.scale*(data-self.baseline), -1.,1., dtype="float32")
+        data["data"]=numpy.clip(self.scale*(data["data"]-self.baseline), -1.,1., dtype="float32")
+        return data
 
 class Float2Int16(ThreadService, SourceService, ReceivingService):
     input_wire_class=FloatWire
@@ -123,12 +129,13 @@ class Float2Int16(ThreadService, SourceService, ReceivingService):
 
     def process(self, data):
         if self.input_wire.FORMAT=="float32":
-          return numpy.array(32767*data).astype("int16")
+            data["data"]=numpy.array(32767*data["data"]).astype("int16")
         elif self.input_wire.FORMAT=="int16":
-          return data
+            pass
         else:
-          self.print_message("unknown data format in wire")
-          return None
+            self.print_message("unknown data format in wire")
+            return None
+        return data
           
 class Int162Raw(ThreadService, SourceService, ReceivingService):
     input_wire_class=Int16Wire
@@ -141,4 +148,5 @@ class Int162Raw(ThreadService, SourceService, ReceivingService):
         wire.FORMAT="int16"
 
     def process(self, data):
-          return numpy.array(data).tobytes()
+          data["data"]=numpy.array(data["data"]).tobytes()
+          return data

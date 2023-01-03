@@ -31,5 +31,5 @@ class SaveWav(ThreadService, ReceivingService):
         self.print_message(f"done writing to {self.outputfile}")
 
     def process(self, data):
-        self.output.writeframes(data)
+        self.output.writeframes(data["data"])
                 

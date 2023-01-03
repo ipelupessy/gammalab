@@ -42,7 +42,7 @@ class RawReplay(ThreadService, SourceService):
           self.print_message("End of file")
           data=None
           self.stopped=True
-        return data
+        return dict(data=data)
         
     def start_process(self):
         self.t0=time.time()

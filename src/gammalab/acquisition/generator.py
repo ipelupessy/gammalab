@@ -1,10 +1,10 @@
 import numpy
 import time
 from ..service import SourceService, ThreadService
-from ..wire import RawWire
+from ..wire import FloatWire
 
 class Noise(ThreadService, SourceService):
-    output_wire_class=RawWire
+    output_wire_class=FloatWire
     def __init__(self, frames_per_buffer=2048):
         super().__init__()
         self.CHANNELS=1
@@ -26,6 +26,6 @@ class Noise(ThreadService, SourceService):
         self.t0=t
         
         n=int(numpy.floor(dt*self.RATE))
-        data=numpy.random.random(n)
-        return data.astype("float32").tobytes()
+        data=numpy.random.random(n).astype("float32")
+        return dict(data=data)
 

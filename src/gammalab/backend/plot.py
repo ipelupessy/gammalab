@@ -99,7 +99,7 @@ class Monitor(_Plot):
             _data=self.receive_input(False)
             if _data is None:
                 break
-            data.append(_data)
+            data.append(_data["data"])
 
         if data:
             data=numpy.concatenate(data)
