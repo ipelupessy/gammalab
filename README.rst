@@ -134,7 +134,7 @@ example of a service with input and output is the following::
 
   class Identity(ThreadService, SourceService, ReceivingService):
       def __init__(self):
-         super(Identity, self).__init__()
+         super().__init__()
          self.input_wire=RawWire()
          
      def output_protocol(self, wire):

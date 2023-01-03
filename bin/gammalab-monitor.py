@@ -22,11 +22,11 @@ def run(input_device_name="", runtime=None, list_input_devices=False, raw_output
         list_output_devices=False, output_device_name="", inputfile=None):
     if list_input_devices:
       for name, id_ in SoundCard.devices().items():
-        print("{0}: {1}".format(name, id_))
+        print(f"{name}: {id_}")
       exit(0)
     if list_output_devices:
       for name, id_ in SoundCardPlay.devices().items():
-        print("{0}: {1}".format(name, id_))
+        print(f"{name}: {id_}")
       exit(0)
 
     if inputfile is not None:

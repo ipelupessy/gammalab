@@ -11,7 +11,7 @@ class RawReplay(ThreadService, SourceService):
     output_wire_class=RawWire
     def __init__(self, filename="data.raw", frames_per_buffer=1024, realtime=True, 
         sample_rate=48000, sample_format="float32"):
-        super(RawReplay, self).__init__()
+        super().__init__()
         self.CHANNELS=1
         self.RATE=sample_rate
         self.FORMAT=sample_format
@@ -20,7 +20,7 @@ class RawReplay(ThreadService, SourceService):
         self.realtime=realtime
 
     def output_protocol(self, wire):
-        super(RawReplay, self).output_protocol(wire)      
+        super().output_protocol(wire)      
         wire.CHANNELS=self.CHANNELS
         wire.RATE=self.RATE
         wire.FORMAT=self.FORMAT
@@ -47,14 +47,14 @@ class RawReplay(ThreadService, SourceService):
     def start_process(self):
         self.t0=time.time()
         with open(self.filename, "rb") as self._file:
-            super(RawReplay, self).start_process()
+            super().start_process()
 
 
 format_from_width={2 : "int16", 4 : "float32"}
 
 class WavReplay(RawReplay):
     def __init__(self, filename, frames_per_buffer=1024, realtime=True):
-        super(WavReplay, self).__init__()
+        super().__init__()
         self.filename=filename
         self.frames_per_buffer=frames_per_buffer
         self.realtime=realtime
@@ -69,7 +69,7 @@ class WavReplay(RawReplay):
     def start_process(self):
         self.t0=time.time()
         with wave.open(self.filename, "rb") as self._file:
-            super(WavReplay, self).start_process()
+            super().start_process()
 
 
 def FileReplay(filename, **kwargs):

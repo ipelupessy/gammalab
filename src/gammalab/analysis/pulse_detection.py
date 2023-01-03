@@ -9,7 +9,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
     input_wire_class=FloatWire
     output_wire_class=PulseWire
     def __init__(self, threshold=0.005, window=24*1024, emit_pulse_shapes=False, outfile=None):
-        super(PulseDetection, self).__init__()
+        super().__init__()
         self.threshold=threshold
         self.window=window
         self.emit_pulse_shapes=emit_pulse_shapes
@@ -18,7 +18,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         self.all_pulses=[]
 
     def output_protocol(self, wire):
-        super(PulseDetection, self).output_protocol(wire)
+        super().output_protocol(wire)
         wire._emit_pulse_shapes=self.emit_pulse_shapes
         wire.unit="raw value"
 
@@ -28,7 +28,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         self.RATE=self.input_wire.RATE
         self.itime=0
         self.dtime=self.window/(1.*self.RATE)
-        super(PulseDetection, self).start_process()
+        super().start_process()
   
     def amplitude_and_quality(self, start,end):
         return numpy.max(self.data[start:end]),0
@@ -112,7 +112,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         if self.outfile is not None:
             with open(self.outfile+".pkl","wb") as f:
                 pickle.dump(self.all_pulses,f)
-        super(PulseDetection, self).cleanup()
+        super().cleanup()
 
 
 def pulse(x, A, x0,  y, tau):
@@ -133,7 +133,7 @@ class FittedPulseDetection(PulseDetection):
     def __init__(self, threshold=0.005, window=24*1024, emit_pulse_shapes=False, 
                   fit_threshold=0., signal_noise=0.0035, pulse_decay_time=2.7247/48000):
 
-        super(FittedPulseDetection, self).__init__(threshold=threshold, 
+        super().__init__(threshold=threshold, 
                                                    window=window, 
                                                    emit_pulse_shapes=emit_pulse_shapes,
                                                    outfile=outfile)
@@ -188,8 +188,8 @@ class FittedPulseDetection(PulseDetection):
             import scipy
             from scipy.optimize import curve_fit
         except Exception as ex:
-            self.print_message( "import error: {0}".format(str(ex)))
+            self.print_message( f"import error: {str(ex)}")
             #~ self.stopped=True
             #~ self.done=True
 
-        super(FittedPulseDetection,self).start_process()
+        super().start_process()

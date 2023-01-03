@@ -5,7 +5,7 @@ class SaveWav(ThreadService, ReceivingService):
     input_wire_class=RawWire
     
     def __init__(self, filename=None):
-        super(SaveWav, self).__init__()
+        super().__init__()
 
         if filename is None:
             filename="data.wav"
@@ -18,7 +18,7 @@ class SaveWav(ThreadService, ReceivingService):
         try:
           import wave
         except Exception as ex:
-            self.print_message( "import error: {0}".format(str(ex)))
+            self.print_message( f"import error: {str(ex)}")
 
         with wave.open(self.outputfile, 'wb') as self.output:
             self.output.setnchannels(1)
@@ -27,7 +27,7 @@ class SaveWav(ThreadService, ReceivingService):
             self.output.setsampwidth(2)
             self.output.setframerate(self.input_wire.RATE)
             
-            super(SaveWav, self).start_process()
+            super().start_process()
         self.print_message("File write done")
 
     def process(self, data):

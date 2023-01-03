@@ -8,7 +8,7 @@ import pickle
 
 class _Plot(ThreadService, ReceivingService):
     def __init__(self, outfile=None, interval=250):                
-        super(_Plot, self).__init__()
+        super().__init__()
         self.thread.daemon=True
         self.outfile=outfile
         self.interval=interval
@@ -55,7 +55,7 @@ class _Plot(ThreadService, ReceivingService):
             from matplotlib.animation import FuncAnimation
             from matplotlib import pyplot    
         except Exception as ex:
-            self.print_message("import error: {0}".format(str(ex)))
+            self.print_message(f"import error: {str(ex)}")
             
         self.fig, self.ax, self.artists=self.setup_plot()
 
@@ -83,7 +83,7 @@ class Monitor(_Plot):
     input_wire_class=FloatWire
 
     def __init__(self, window=5, vmin=-0.01, vmax=1.1, outfile=None):                
-        super(Monitor, self).__init__(outfile=outfile)
+        super().__init__(outfile=outfile)
         self.window=window
         self.vmin=vmin
         self.vmax=vmax
@@ -139,7 +139,7 @@ class PlotHistogram(_Plot):
     def __init__(self, xmin=0, xmax=1., log=True, 
                     error_bars=True, outfile="histogram",
                     background="", yrange=1.e4):        
-        super(PlotHistogram, self).__init__(outfile=outfile)
+        super().__init__(outfile=outfile)
         self.xmin=xmin
         self.xmax=xmax
         self.log=log
@@ -272,7 +272,7 @@ class CountPlot(_Plot):
     input_wire_class=CountWire
 
     def __init__(self, outfile=None):                
-        super(CountPlot, self).__init__(outfile=outfile)
+        super().__init__(outfile=outfile)
         self.time=[]
         self.count=[]
         self.total_time=0
@@ -332,7 +332,7 @@ class PulsePlot(_Plot):
     input_wire_class=PulseWire
 
     def __init__(self, nplot=1, interval=250):                
-        super(PulsePlot, self).__init__(interval=interval)
+        super().__init__(interval=interval)
         self.nplot=nplot
 
     def get_data(self):

@@ -4,7 +4,7 @@ from ..wire import RawWire
 class SaveRaw(ThreadService, ReceivingService):
     input_wire_class=RawWire
     def __init__(self, filename=None):
-        super(SaveRaw, self).__init__()
+        super().__init__()
         
         if filename is None:
             filename="data.raw"
@@ -13,7 +13,7 @@ class SaveRaw(ThreadService, ReceivingService):
     
     def start_process(self):    
         with open(self.outputfile, 'wb') as self.output:
-            super(SaveRaw, self).start_process()
+            super().start_process()
 
     def process(self, data):
         self.output.write(data)

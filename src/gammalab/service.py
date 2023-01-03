@@ -7,9 +7,9 @@ import time
 class ServiceError(Exception):
     pass
 
-class Service(object):
+class Service:
     def __init__(self, **kwargs):
-        super(Service, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         all_services.add(self)
         self._output=shared_output
     
@@ -30,10 +30,10 @@ class SourceService(Service):
     output_wire_class=None
 
     def __init__(self, **kwargs):
-        super(SourceService, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.output_wires=[]
         if self.output_wire_class is None:
-            raise Exception("SourceService {0} does not specify output_wire_class".format(self))
+            raise Exception(f"SourceService {self.__class__.__name__} does not specify output_wire_class")
 
     def output_protocol(self, wire):
         assert isinstance(wire, self.output_wire_class)
@@ -65,9 +65,9 @@ class ReceivingService(Service):
     input_wire_class=None
 
     def __init__(self, **kwargs):
-        super(ReceivingService, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         if self.input_wire_class is None:
-            raise Exception("ReceivingService {0} does not specify input_wire_class".format(self))
+            raise Exception(f"ReceivingService {self.__class__.__name__} does not specify input_wire_class")
     def connect_input(self, service):
         self.input_wire=self.input_wire_class()
         service.connect(self.input_wire)
@@ -89,7 +89,7 @@ class ReceivingService(Service):
 
 class ThreadService(Service):
     def __init__(self, **kwargs):
-        super(ThreadService, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.__stopped=multiprocessing.Value(ctypes.c_bool)
         self.__done=multiprocessing.Value(ctypes.c_bool)
         self.stopped=True

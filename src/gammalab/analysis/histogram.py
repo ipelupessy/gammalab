@@ -9,7 +9,7 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
     output_wire_class=HistogramWire
     def __init__(self, nchannels=100, vmin=0.003, vmax=1., outfile="histogram",
         histogram_mode="normal"):
-        super(AggregateHistogram, self).__init__()
+        super().__init__()
 
         self.vmin=vmin
         self.vmax=vmax
@@ -53,10 +53,10 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
     def start_process(self):
         self.hist, self.bins=self.get_histogram([])
         self.total_time=0
-        super(AggregateHistogram, self).start_process()
+        super().start_process()
 
     def output_protocol(self, wire):
-        super(AggregateHistogram, self).output_protocol(wire)
+        super().output_protocol(wire)
         wire.nchannels=self.nchannels
         wire.vmin=self.vmin
         wire.vmax=self.vmax
@@ -82,4 +82,4 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
         if self.outfile is not None:
             with open(self.outfile+".pkl","wb") as f:
                 pickle.dump(self.outdata,f)
-        super(AggregateHistogram, self).cleanup()
+        super().cleanup()

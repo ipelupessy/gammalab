@@ -9,7 +9,7 @@ class Count(ThreadService, ReceivingService, SourceService):
     input_wire_class=PulseWire
     output_wire_class=CountWire
     def __init__(self, outfile=None, runtime=None, interval=1., silent=False):
-        super(Count, self).__init__()
+        super().__init__()
         self.outfile=outfile
         self.runtime=runtime
         self.tmax=10
@@ -27,7 +27,7 @@ class Count(ThreadService, ReceivingService, SourceService):
     def start_process(self):
         self.cps, self.tbins=numpy.histogram([], bins=self.nbins, 
             range=(self.tmin,self.tmax))
-        super(Count, self).start_process() 
+        super().start_process() 
     
     def process(self, data):      
 
@@ -59,8 +59,8 @@ class Count(ThreadService, ReceivingService, SourceService):
         else:
           cps=0
 
-        message="time: {0:7.2f} | counts: {1:5.3e} | average cps: {2:5.2f} | current cps: {3:5.2f}".format(
-                 self.total_time, self.total_count, avgcps, cps)
+        message=f"time: {self.total_time:7.2f} | counts: {self.total_count:5.3e} | "\
+                f"average cps: {avgcps:5.2f} | current cps: {cps:5.2f}"
         if not self.silent:
             self.print_message(message)
         
@@ -75,4 +75,4 @@ class Count(ThreadService, ReceivingService, SourceService):
         if self.outfile is not None:
             with open(self.outfile+".pkl","wb") as f:
                 pickle.dump(self.outdata,f)
-        super(Count, self).cleanup()
+        super().cleanup()

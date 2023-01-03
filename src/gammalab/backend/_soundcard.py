@@ -11,7 +11,7 @@ class SoundCardPlay(ThreadService, ReceivingService):
         try:
             import soundcard
         except Exception as ex:
-            raise Exception( "import error: {0}".format(str(ex)))
+            raise Exception( f"import error: {str(ex)}")
 
         for m in soundcard.all_speakers():
           result[m.name]=m.id
@@ -23,10 +23,10 @@ class SoundCardPlay(ThreadService, ReceivingService):
         self.frames_per_buffer=frames_per_buffer
         self.output_device_index=output_device_index
         self.output_device_name=output_device_name
-        super(SoundCardPlay, self).__init__()
+        super().__init__()
 
     def connect_input(self,service):
-        super(SoundCardPlay, self).connect_input(service)
+        super().connect_input(service)
         if self.input_wire.FORMAT != "float32":
             raise Exception("SoundCard playback only supports float32 format")
 
@@ -35,7 +35,7 @@ class SoundCardPlay(ThreadService, ReceivingService):
         try:
             import soundcard
         except Exception as ex:
-            self.print_message( "import error: {0}".format(str(ex)))
+            self.print_message( f"import error: {str(ex)}")
             
         speaker=soundcard.get_speaker(self.output_device_index or self.output_device_name)
         self.print_message( f"opening {str(speaker)} for audio output")
@@ -52,7 +52,7 @@ class SoundCardPlay(ThreadService, ReceivingService):
                     try:
                         player.play(data)
                     except Exception as ex:
-                        self.print_message( "error: {0}".format(str(ex)))
+                        self.print_message( f"error: {str(ex)}")
                         self.stopped=True
         self.stopped=True
 

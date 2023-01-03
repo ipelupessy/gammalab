@@ -1,7 +1,7 @@
 
 from multiprocessing import Queue as Queue
 
-class Wire(object):
+class Wire:
     _initialized=False
     _description="none"
 

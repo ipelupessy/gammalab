@@ -8,7 +8,7 @@ class Identity(ThreadService, SourceService, ReceivingService):
     output_wire_class=RawWire
     
     def output_protocol(self, wire):
-        super(Identity, self).output_protocol(wire)
+        super().output_protocol(wire)
         wire.CHANNELS=self.input_wire.CHANNELS
         wire.RATE=self.input_wire.RATE
         wire.FORMAT=self.input_wire.FORMAT
@@ -21,7 +21,7 @@ class Raw2Numpy(ThreadService, SourceService, ReceivingService):
     output_wire_class=NumpyWire
 
     def output_protocol(self, wire):
-        super(Raw2Numpy, self).output_protocol(wire)
+        super().output_protocol(wire)
         wire.CHANNELS=self.input_wire.CHANNELS
         wire.RATE=self.input_wire.RATE
         wire.FORMAT=self.input_wire.FORMAT
@@ -34,7 +34,7 @@ class Raw2Float(ThreadService, SourceService, ReceivingService):
     output_wire_class=FloatWire
 
     def output_protocol(self, wire):
-        super(Raw2Float, self).output_protocol(wire)
+        super().output_protocol(wire)
         wire.CHANNELS=self.input_wire.CHANNELS
         wire.RATE=self.input_wire.RATE
         wire.FORMAT="float32"
@@ -54,11 +54,11 @@ class DownSampleMaxed(ThreadService, SourceService, ReceivingService):
     output_wire_class=FloatWire
 
     def __init__(self, factor=8):
-        super(DownSampleMaxed, self).__init__()
+        super().__init__()
         self.factor=factor
 
     def output_protocol(self, wire):
-        super(DownSampleMaxed, self).output_protocol(wire)
+        super().output_protocol(wire)
         wire.CHANNELS=self.input_wire.CHANNELS
         wire.FORMAT=self.input_wire.FORMAT
         wire.RATE=self.input_wire.RATE/self.factor
@@ -71,12 +71,12 @@ class Normalize(ThreadService, SourceService, ReceivingService):
     output_wire_class=FloatWire
 
     def __init__(self, baseline=0., scale=1.):
-        super(Normalize, self).__init__()
+        super().__init__()
         self.scale=scale
         self.baseline=baseline
 
     def output_protocol(self, wire):
-        super(Normalize, self).output_protocol(wire)
+        super().output_protocol(wire)
         wire.CHANNELS=self.input_wire.CHANNELS
         wire.RATE=self.input_wire.RATE
         wire.FORMAT="float32"
@@ -89,7 +89,7 @@ class Float2Int16(ThreadService, SourceService, ReceivingService):
     output_wire_class=Int16Wire
 
     def output_protocol(self, wire):
-        super(Float2Int16, self).output_protocol(wire)
+        super().output_protocol(wire)
         wire.CHANNELS=self.input_wire.CHANNELS
         wire.RATE=self.input_wire.RATE
         wire.FORMAT="int16"
@@ -108,7 +108,7 @@ class Int162Raw(ThreadService, SourceService, ReceivingService):
     output_wire_class=RawWire
 
     def output_protocol(self, wire):
-        super(Int162Raw, self).output_protocol(wire)
+        super().output_protocol(wire)
         wire.CHANNELS=self.input_wire.CHANNELS
         wire.RATE=self.input_wire.RATE
         wire.FORMAT="int16"

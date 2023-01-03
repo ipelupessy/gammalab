@@ -12,7 +12,7 @@ class SoundCard(ThreadService, SourceService):
         try:
             import soundcard
         except Exception as ex:
-            raise Exception( "import error: {0}".format(str(ex)))
+            raise Exception( f"import error: {str(ex)}")
         result=dict()
         for m in soundcard.all_microphones():
           result[m.name]=m.id
@@ -28,14 +28,14 @@ class SoundCard(ThreadService, SourceService):
         self.frames_per_buffer=frames_per_buffer
         self.input_device_index=input_device_index
         self.input_device_name=input_device_name
-        super(SoundCard, self).__init__()
+        super().__init__()
 
     def _process(self):
         global soundcard
         try:
             import soundcard
         except Exception as ex:
-            self.print_message( "import error: {0}".format(str(ex)))
+            self.print_message( f"import error: {str(ex)}")
 
         mic=soundcard.get_microphone(self.input_device_index or self.input_device_name)
         name=mic.name
@@ -52,7 +52,7 @@ class SoundCard(ThreadService, SourceService):
                 try:
                     data=recorder.record(self.frames_per_buffer)
                 except Exception as ex:
-                    self.print_message( "error: {0}".format(str(ex)))
+                    self.print_message( f"error: {str(ex)}")
                     self.stopped=True
                 if len(data)==0:
                     self.print_message("no data")
@@ -73,7 +73,7 @@ class SoundCard(ThreadService, SourceService):
         self.stopped=True
 
     def output_protocol(self, wire):
-        super(SoundCard, self).output_protocol(wire)
+        super().output_protocol(wire)
         wire.CHANNELS=self.CHANNELS
         wire.RATE=self.RATE
         wire.FORMAT=self.FORMAT
