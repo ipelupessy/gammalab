@@ -77,7 +77,7 @@ class WavReplay(RawReplay):
     def start_process(self):
         self.t0=time.time()
         self.print_message(f"reading from {self.filename}")
-        super().start_process()
+        self._process()
         
     def cleanup(self):
         self._file.close()
