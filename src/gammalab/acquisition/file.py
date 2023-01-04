@@ -19,6 +19,7 @@ class RawReplay(ThreadService, SourceService):
         self.filename=filename
         self.frames_per_buffer=frames_per_buffer
         self.realtime=realtime
+        self.total_frames=0
 
     def output_protocol(self, wire):
         super().output_protocol(wire)      
@@ -39,11 +40,12 @@ class RawReplay(ThreadService, SourceService):
         else:
           n=int(self.frames_per_buffer/16)*16
         data=self.readframes(n)
+        self.total_frames+=n
         if len(data)==0:
           self.print_message("End of file")
           self.stopped=True
           return None
-        return dict(data=numpy.frombuffer(data, dtype=self.FORMAT))
+        return dict(data=numpy.frombuffer(data, dtype=self.FORMAT), wallclock_time=self.total_frames/self.RATE)
         
     def start_process(self):
         self.t0=time.time()

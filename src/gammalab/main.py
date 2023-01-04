@@ -4,6 +4,7 @@ import multiprocessing
 import threading
 import time
 
+
 try:
     input=raw_input
 except:
@@ -46,12 +47,14 @@ def shutdown():
 def check_user_input():
     input()
 
-def main(timeout=None):
+def main(timeout=None, debug=False):
 
     startup()
 
-    #~ for p in multiprocessing.active_children():
-        #~ print(p)
+    if debug:
+        shared_output.put("[Main] processes spawned:")
+        for p in multiprocessing.active_children():
+            shared_output.put(f"[Main] {str(p)}")
 
     shared_output.put("[Main] running")
 

@@ -150,6 +150,7 @@ class PlotHistogram(_Plot):
         self.error_bars=error_bars
         self.background=background #"background.histogram.pkl"
         self.yrange=yrange
+        self.blit=True
 
     def get_data(self):        
         data=None
@@ -180,14 +181,15 @@ class PlotHistogram(_Plot):
         total_time=data["total_time"]
         hist,bins,yerr=self.convert_hist_bins(hist,bins,total_time)
         self.bins=bins
-        
+                
         self._line.set_data(hist,bins)
-        self._update_ylim(hist.max())
         if self.error_bars:
             self._top.set_data(hist+yerr,bins)
             self._bot.set_data(hist-yerr,bins)
 
         self._text.set_text(f"time(s): {total_time:10.2f}\ntotal counts: {total_count:09d}")
+
+        self._update_ylim(hist.max())
 
         return self.artists
 
@@ -211,6 +213,7 @@ class PlotHistogram(_Plot):
                 ymin=self.ymax/self.yrange
             ax.set_ylim(ymin,self.ymax)
             pyplot.draw()
+
 
     def background_hist_bins(self):
         with open(self.background,'rb') as f:
@@ -260,8 +263,9 @@ class PlotHistogram(_Plot):
         ax.set_xlabel(f"energy ({self.input_wire.unit})")
         ax.set_xlim(self.xmin,self.xmax)
         self.ymin, self.ymax=ax.get_ylim()
-        #~ print(max(hist.max(),1))
-        #~ self._update_ylim(max(hist.max(),1), ax=ax)
+        if self.log:
+            self.ymin=self.ymax/self.yrange
+            ax.set_ylim(self.ymin,self.ymax)
         
         pyplot.tight_layout()
         
@@ -281,7 +285,7 @@ class CountPlot(_Plot):
         self.count=[]
         self.total_time=0
         self.avgcps=0
-        self.blit=False
+        self.blit=True
 
     def get_data(self):        
         data=None
@@ -307,13 +311,19 @@ class CountPlot(_Plot):
             self.avgcps=self.count.sum()*interval/self.total_time
         else:
             self.avgcps=0.
-              
-        self.ax.set_xlim(0,self.time[-1])
-        self.ax.set_ylim(0,1.5*max(self.count))
-
+        
         self.artists[0].set_data(self.time, self.count)
         self.artists[1].set_data([self.time[0],self.total_time], [self.avgcps,self.avgcps])
-                
+
+        xmin,xmax=self.ax.get_xlim()
+        ymin,ymax=self.ax.get_ylim()
+        _xmax=self.time[-1]
+        _ymax=1.5*max(self.count)
+        if _xmax>xmax or _ymax>ymax:   
+            self.ax.set_xlim(0,_xmax)
+            self.ax.set_ylim(0,_ymax)
+            pyplot.draw()
+
         return self.artists
   
     def setup_plot(self):

@@ -28,6 +28,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         self.RATE=self.input_wire.RATE
         self.itime=0
         self.dtime=self.window/(1.*self.RATE)
+        self.wallclock_time=0
         super().start_process()
   
     def amplitude_and_quality(self, start,end):
@@ -78,6 +79,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
         return pulses
 
     def process(self, data):
+        self.wallclock_time=data["wallclock_time"]
         data=data["data"]
         detect_ran=False
         pulses=[]
@@ -104,7 +106,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
             self.all_pulses.extend(pulses)
 
         if detect_ran:
-            result=dict(pulses=pulses, total_time=self.itime, dtime=dtime, rate=self.RATE)
+            result=dict(pulses=pulses, total_time=self.itime, dtime=dtime, rate=self.RATE, wallclock_time=self.wallclock_time)
         else:
             result=None # do not send data if detection did not run
        
@@ -112,7 +114,7 @@ class PulseDetection(ThreadService, SourceService, ReceivingService):
 
     @property            
     def outdata(self):
-        return dict(pulses=self.all_pulses, total_time=self.itime, rate=self.RATE)
+        return dict(pulses=self.all_pulses, total_time=self.itime, rate=self.RATE, wallclock_time=self.wallclock_time)
 
     def cleanup(self):
         if self.outfile is not None:

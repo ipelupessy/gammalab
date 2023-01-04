@@ -54,6 +54,7 @@ class SoundCard(ThreadService, SourceService):
 
                 try:
                     data=recorder.record(self.frames_per_buffer)
+                    t_wall=time.time()-t0
                 except Exception as ex:
                     self.print_message( f"error: {str(ex)}")
                     self.stopped=True
@@ -61,7 +62,7 @@ class SoundCard(ThreadService, SourceService):
                     self.print_message("no data")
                     self.stopped=True
                 else:
-                    data=dict(data=data.flatten()) # flatten because we have hardcoded nchannels=1
+                    data=dict(data=data.flatten(), wallclock_time=t_wall) # flatten because we have hardcoded nchannels=1
     
                 if (not self.stopped and
                     data is not None):
