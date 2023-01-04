@@ -1,5 +1,5 @@
 from ..service import ThreadService, SourceService
-from ..wire import RawWire
+from ..wire import FloatWire, Int16Wire
 
 import time
 import numpy
@@ -8,12 +8,13 @@ import wave
 format_nbytes=dict(int16=2, float32=4)
 
 class RawReplay(ThreadService, SourceService):
-    output_wire_class=RawWire
+    output_wire_class=FloatWire
     def __init__(self, filename="data.raw", frames_per_buffer=1024, realtime=True, 
         sample_rate=48000, sample_format="float32"):
         super().__init__()
         self.CHANNELS=1
         self.RATE=sample_rate
+        assert sample_format=="float32"
         self.FORMAT=sample_format
         self.filename=filename
         self.frames_per_buffer=frames_per_buffer
@@ -40,12 +41,13 @@ class RawReplay(ThreadService, SourceService):
         data=self.readframes(n)
         if len(data)==0:
           self.print_message("End of file")
-          data=None
           self.stopped=True
-        return dict(data=data)
+          return None
+        return dict(data=numpy.frombuffer(data, dtype=self.FORMAT))
         
     def start_process(self):
         self.t0=time.time()
+        self.print_message(f"reading from {self.filename}")
         with open(self.filename, "rb") as self._file:
             super().start_process()
 
@@ -53,24 +55,31 @@ class RawReplay(ThreadService, SourceService):
 format_from_width={2 : "int16", 4 : "float32"}
 
 class WavReplay(RawReplay):
+    output_wire_class=Int16Wire
     def __init__(self, filename, frames_per_buffer=1024, realtime=True):
         super().__init__()
         self.filename=filename
         self.frames_per_buffer=frames_per_buffer
         self.realtime=realtime
-        self.CHANNELS=self._file.getnchannels()==1
+        self._file=wave.open(self.filename, "rb")
+        self.CHANNELS=1
+        assert self._file.getnchannels()==1
         self.RATE=self._file.getframerate()
         self.SAMPLEWIDTH=self._file.getsampwidth()
         self.FORMAT=format_from_width[self.SAMPLEWIDTH]
-
+        assert self.FORMAT=="int16"
+        
     def readframes(self,n):
         return self._file.readframes(n)
-        
+
     def start_process(self):
         self.t0=time.time()
-        with wave.open(self.filename, "rb") as self._file:
-            super().start_process()
-
+        self.print_message(f"reading from {self.filename}")
+        super().start_process()
+        
+    def cleanup(self):
+        self._file.close()
+        super().cleanup()
 
 def FileReplay(filename, **kwargs):
     if filename.endswith("wav"):

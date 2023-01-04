@@ -129,11 +129,7 @@ class ThreadService(Service):
             # if stopped reveive input, but do not process, nor output
 
             if not self.stopped:
-# lets try ignoring exceptions for a while:
-                try:
-                    data=self.process(data)
-                except:
-                    data=None
+                data=self.process(data)
 
             if hasattr(self,"send_output"):
                 if (not self.stopped and 

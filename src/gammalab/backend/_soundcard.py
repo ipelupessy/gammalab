@@ -25,11 +25,6 @@ class SoundCardPlay(ThreadService, ReceivingService):
         self.output_device_name=output_device_name
         super().__init__()
 
-    def connect_input(self,service):
-        super().connect_input(service)
-        if self.input_wire.FORMAT != "float32":
-            raise Exception("SoundCard playback only supports float32 format")
-
     def start_process(self):
         global soundcard
         try:

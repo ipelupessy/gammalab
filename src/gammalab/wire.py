@@ -50,14 +50,14 @@ class Wire:
 class RawWire(Wire):
     _description="Raw byte (string)"
 
+class NumpyWire(Wire):
+    _description="numpy array of flexible format (deprecated)"
+
 class FloatWire(Wire):
     _description="numpy float array"
 
 class Int16Wire(Wire):
     _description="numpy int16 array"
-
-class NumpyWire(Wire):
-    _description="numpy array (of flexible data type, determined by wire.FORMAT)"
 
 class PulseWire(Wire):
     _description="pulses"

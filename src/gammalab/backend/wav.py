@@ -1,8 +1,8 @@
 from ..service import ReceivingService, ThreadService
-from ..wire import RawWire
+from ..wire import Int16Wire
 
 class SaveWav(ThreadService, ReceivingService):
-    input_wire_class=RawWire
+    input_wire_class=Int16Wire
     
     def __init__(self, filename=None):
         super().__init__()
@@ -22,8 +22,6 @@ class SaveWav(ThreadService, ReceivingService):
 
         with wave.open(self.outputfile, 'wb') as self.output:
             self.output.setnchannels(1)
-            if self.input_wire.FORMAT!="int16":
-                raise Exception("Format to be saved in wav needs to be int16")
             self.output.setsampwidth(2)
             self.output.setframerate(self.input_wire.RATE)
             
@@ -31,5 +29,5 @@ class SaveWav(ThreadService, ReceivingService):
         self.print_message(f"done writing to {self.outputfile}")
 
     def process(self, data):
-        self.output.writeframes(data["data"])
+        self.output.writeframes(data["data"].tobytes())
                 

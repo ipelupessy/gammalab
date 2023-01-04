@@ -1,8 +1,8 @@
 from ..service import ReceivingService, ThreadService
-from ..wire import RawWire
+from ..wire import FloatWire
 
 class SaveRaw(ThreadService, ReceivingService):
-    input_wire_class=RawWire
+    input_wire_class=FloatWire
     def __init__(self, filename=None):
         super().__init__()
         
@@ -17,4 +17,4 @@ class SaveRaw(ThreadService, ReceivingService):
         self.print_message(f"done writing to {self.outputfile}")
 
     def process(self, data):
-        self.output.write(data["data"])
+        self.output.write(data["data"].tobytes())

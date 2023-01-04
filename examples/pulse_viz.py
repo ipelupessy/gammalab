@@ -1,6 +1,5 @@
 from gammalab import main
 from gammalab.acquisition import SoundCard
-from gammalab.transform import Raw2Float
 from gammalab.analysis import PulseDetection
 from gammalab.analysis import Count
 from gammalab.backend import PulsePlot

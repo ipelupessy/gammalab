@@ -128,13 +128,7 @@ class Float2Int16(ThreadService, SourceService, ReceivingService):
         wire.FORMAT="int16"
 
     def process(self, data):
-        if self.input_wire.FORMAT=="float32":
-            data["data"]=numpy.array(32767*data["data"]).astype("int16")
-        elif self.input_wire.FORMAT=="int16":
-            pass
-        else:
-            self.print_message("unknown data format in wire")
-            return None
+        data["data"]=numpy.array(32767*data["data"]).astype("int16")
         return data
           
 class Int162Raw(ThreadService, SourceService, ReceivingService):
@@ -150,3 +144,18 @@ class Int162Raw(ThreadService, SourceService, ReceivingService):
     def process(self, data):
           data["data"]=numpy.array(data["data"]).tobytes()
           return data
+
+class Int162Float(ThreadService, SourceService, ReceivingService):
+    input_wire_class=Int16Wire
+    output_wire_class=FloatWire
+
+    def output_protocol(self, wire):
+        super().output_protocol(wire)
+        wire.CHANNELS=self.input_wire.CHANNELS
+        wire.RATE=self.input_wire.RATE
+        wire.FORMAT="float32"
+
+    def process(self, data):
+        data["data"]=data["data"].astype("float32")/32768
+        return data
+

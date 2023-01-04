@@ -66,7 +66,7 @@ class SoundCard(ThreadService, SourceService):
                 if (not self.stopped and
                     data is not None):
                     self.send_output(data)
-                    total_samples+=len(data)/4
+                    total_samples+=len(data["data"])
                 
             self.send_output(None)
         t_wall=time.time()-t0

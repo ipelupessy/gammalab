@@ -4,7 +4,7 @@ matplotlib.use('TkAgg')
 from gammalab import main
 from gammalab.acquisition import SoundCard
 from gammalab.backend import Monitor
-from gammalab.transform import Raw2Float, DownSampleMaxed, Scale
+from gammalab.transform import DownSampleMaxed, Scale
 from gammalab.analysis import PulseDetection
 from gammalab.analysis import AggregateHistogram
 from gammalab.analysis import Count

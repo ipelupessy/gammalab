@@ -13,7 +13,7 @@ except:
 
 from gammalab import main
 from gammalab.acquisition import SoundCard, FileReplay
-from gammalab.transform import Raw2Float, Normalize, SecondOrder
+from gammalab.transform import Normalize, SecondOrder
 from gammalab.analysis import PulseDetection, FittedPulseDetection
 from gammalab.analysis import AggregateHistogram
 from gammalab.analysis import Count
@@ -31,12 +31,12 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
         vmax=1.
 
     if inputfile is not None:
-        file_=FileReplay(filename=inputfile, realtime=realtime)
-        source=Raw2Float()
-        file_.plugs_into(source)
+        source=FileReplay(filename=inputfile, realtime=realtime)
     else:
         source=SoundCard(input_device_name=input_device_name)
+
     normalize=Normalize(baseline=baseline, scale=-amplitude if negative_peaks else amplitude)
+
     pulse_file=outfile+".pulses" if outfile is not None else None
     if fitpulse:
         detect=FittedPulseDetection(threshold=threshold, fit_threshold=fit_threshold,
