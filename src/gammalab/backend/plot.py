@@ -142,7 +142,7 @@ class PlotHistogram(_Plot):
   
     def __init__(self, xmin=0, xmax=1., log=True, 
                     error_bars=True, outfile="histogram",
-                    background="", yrange=1.e4):        
+                    background="", yrange=1.e4, time_normalized=False):        
         super().__init__(outfile=outfile)
         self.xmin=xmin
         self.xmax=xmax
@@ -151,6 +151,7 @@ class PlotHistogram(_Plot):
         self.background=background #"background.histogram.pkl"
         self.yrange=yrange
         self.blit=True
+        self.time_normalized=time_normalized
 
     def get_data(self):        
         data=None
@@ -165,8 +166,9 @@ class PlotHistogram(_Plot):
     def convert_hist_bins(self,hist,bins,total_time):
         yerr=hist**0.5
         yerr=numpy.maximum(yerr,1)
-        hist=hist/total_time
-        yerr=yerr/total_time
+        if self.time_normalized:
+            hist=hist/total_time
+            yerr=yerr/total_time
         if self.input_wire.histogram_mode!="normal":
             binsize=(bins[1:]-bins[:-1])
             hist=hist/(binsize)
@@ -189,29 +191,26 @@ class PlotHistogram(_Plot):
 
         self._text.set_text(f"time(s): {total_time:10.2f}\ntotal counts: {total_count:09d}")
 
-        self._update_ylim(hist.max())
+        self._update_ylim(hist[hist!=0].min(), hist.max())
 
         return self.artists
 
-    def _update_ylim(self, ymax, ax=None):
+    def _update_ylim(self, ymin, ymax, ax=None):
         if ax is None:
             ax=self.ax
-        fac=2.5
+        _ymin,_ymax=ax.get_ylim()
+        ymin_=_ymin
+        ymax_=_ymax
+        
         if self.log:
-            fac=10
-        if ymax>self.ymax/1.2:
-            self.ymax=2*ymax
-            ymin=0
-            if self.log:
-                ymin=self.ymax/self.yrange
-            ax.set_ylim(ymin,self.ymax)
-            pyplot.draw()
-        if ymax<self.ymax/fac:
-            self.ymax=self.ymax/fac
-            ymin=0
-            if self.log:
-                ymin=self.ymax/self.yrange
-            ax.set_ylim(ymin,self.ymax)
+            ymin_=10**(numpy.floor(numpy.log10(ymin))-0.2)
+            ymax_=10**numpy.ceil(numpy.log10(ymax*1.2))
+        else:
+            ymin_=0
+            ymax_=2**numpy.ceil(numpy.log2(ymax*1.2))
+            
+        if _ymax!=ymax_ or _ymin!=ymin_:
+            ax.set_ylim(ymin_,ymax_)
             pyplot.draw()
 
 
@@ -253,10 +252,16 @@ class PlotHistogram(_Plot):
         if self.log:
             ax.set_yscale("log", nonpositive="mask")
 
+        ylabel="counts"
+        if self.time_normalized:
+          ylabel=ylabel+" / s"
+
         if self.input_wire.histogram_mode=="normal":
-            ax.set_ylabel("counts / s / bin")
+            ylabel=ylabel+" / bin"
         else:
-            ax.set_ylabel(f"counts / s / {self.input_wire.unit}")
+            ylabel=ylabel+f" / {self.input_wire.unit}"
+        ax.set_ylabel(ylabel)
+
         self._text=ax.text(0.95,0.95,f"time(s): {0.:10.2f}\ntotal counts: {0:09d}", va='top', ha='right',transform=ax.transAxes)
             
 

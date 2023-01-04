@@ -24,7 +24,8 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
         input_device_name="", inputfile=None, realtime=True,
         fitpulse=False, fit_threshold=0.95, raw_values=False,
         baseline=0., negative_peaks=False, amplitude=1., plot_count=False,
-        histogram_mode="normal", background="", plot_pulses=False):
+        histogram_mode="normal", background="", plot_pulses=False,
+        time_normalized=False):
 
     if raw_values:
         scale=1.
@@ -77,7 +78,8 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
                                     xmax=vmax, 
                                     outfile=outfile,
                                     log=log,
-                                    background=background)
+                                    background=background,
+                                    time_normalized=time_normalized)
         histogram.plugs_into(plothistogram)
 
     main(runtime)
@@ -202,11 +204,17 @@ def new_argument_parser():
         help='mode for histogram binning (normal, proportional)',
     )
     parser.add_argument(
+        '--time_normalized',
+        dest='time_normalized',
+        action="store_true",
+        help='plot time normalized histogram',
+    )
+    parser.add_argument(
         '--background',
         dest='background',
         default="",
         type=str,
-        help='optional filename for background spectrum',
+        help='optional filename for background spectrum in histogram plot (recommended to add --time_normalized)',
     )    
     parser.add_argument(
         '--plot_count',
