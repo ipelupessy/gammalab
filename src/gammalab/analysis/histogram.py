@@ -30,6 +30,30 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
         
         return numpy.array(bins)
 
+    def get_semi_proportional_bins(self):
+        nextra=int(0.333*self.nchannels)
+        if self.vmin==0:
+            raise Exception("For proportional bins, vmin cant be zero")
+        
+        nchannels2=self.nchannels+nextra
+        
+        fac=(self.vmax/self.vmin)**(1./(nchannels2))        
+        bins=[]
+        x=self.vmin
+        for i in range(nchannels2):
+            bins.append(x)
+            x=x*fac
+        bins.append(self.vmax)
+        bins=bins[nextra:]
+        bins=numpy.array(bins)
+
+        bins=bins/bins[0]*self.vmin
+        l=bins[-1]-bins[0]
+        bins=bins[0]+(bins-bins[0])/l*(self.vmax-self.vmin)
+
+        return numpy.array(bins)
+
+
     def get_quadratic_bins(self):
         nn=2
         x=numpy.arange(self.nchannels+1)
@@ -42,6 +66,9 @@ class AggregateHistogram(ThreadService,ReceivingService, SourceService):
                 range=(self.vmin,self.vmax))
         if self.histogram_mode=="proportional":
             bins=self.get_proportional_bins()
+            return numpy.histogram(data, bins=bins)
+        if self.histogram_mode=="semiprop":
+            bins=self.get_semi_proportional_bins()
             return numpy.histogram(data, bins=bins)
         if self.histogram_mode=="quadratic":
             bins=self.get_quadratic_bins()

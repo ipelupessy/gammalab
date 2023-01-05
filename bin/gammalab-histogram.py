@@ -47,7 +47,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
                               outfile=pulse_file,emit_pulse_shapes=True)
     
     count=Count(outfile=outfile+".counts" if outfile is not None else None)
-    histogram=AggregateHistogram(nchannels=int(nchannels*scale/vmax),
+    histogram=AggregateHistogram(nchannels=int(nchannels),
                                  vmin=threshold*scale, 
                                  vmax=vmax, 
                                  outfile=outfile+".histogram" if outfile is not None else None,
@@ -107,7 +107,7 @@ def new_argument_parser():
         dest='vmax',
         default=2000,
         type=float,
-        help='maximum energy bin for histogram (keV)',
+        help='maximum energy bin for histogram (keV, ignored for --raw)',
     )
     parser.add_argument(
         '--baseline',
@@ -149,7 +149,7 @@ def new_argument_parser():
         dest='scale',
         default=5400,
         type=float,
-        help='signal energy scale (in keV)',
+        help='signal energy scale (in keV, ignored for --raw)',
     )
     parser.add_argument(
         '--drift',
@@ -201,7 +201,7 @@ def new_argument_parser():
         dest='histogram_mode',
         default="normal",
         type=str,
-        help='mode for histogram binning (normal, proportional)',
+        help='mode for histogram binning (normal, proportional, semiprop, quadratic)',
     )
     parser.add_argument(
         '--time_normalized',
