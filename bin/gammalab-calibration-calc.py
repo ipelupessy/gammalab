@@ -33,9 +33,20 @@ def new_argument_parser():
         default=False,
         help='force offset to be 0.',
     )
+    parser.add_argument(
+        '--write_ini',
+        dest='write_ini',
+        action="store_true",
+        default=False,
+        help='write calibration data to a file (gammalab.ini)',
+    )
   
     return parser.parse_args()
 
 if __name__=="__main__":
     args=new_argument_parser()
     offset,scale,drift=get_calibration_coeff(**vars(args))
+    print("calibration parameters:")
+    print(f"the offset is: {offset}")
+    print(f"the scale is: {scale}")
+    print(f"the drift is: {drift}")

@@ -1,3 +1,4 @@
+import configparser
 import numpy
 
 def calibration_pair(s):
@@ -7,8 +8,8 @@ def calibration_pair(s):
     """
     return list(map(float, s.split(",")))
 
-
-def get_calibration_coeff(data=None, order=2, no_offset=False, return_coeff=False):
+def get_calibration_coeff(data=None, order=2, no_offset=False, 
+        return_coeff=False,write_ini=False, read_ini=False):
     """
       calculate calibration coefficients from (raw, energy) pairs
       
@@ -18,12 +19,18 @@ def get_calibration_coeff(data=None, order=2, no_offset=False, return_coeff=Fals
         no_offset: boolean indicating whether to force offset to be zero,
         return_coeff: boolean indicating  whether to return raw coefficients or 
                       offset, scale and drift (default).
+        write_ini: whether to write out a ini file with calibration data
+        read_ini: whether to read ini file with calibration, ignoring any other arguments
+        
       Returns:
         tuple of offset, scale and drift: (E=offset+scale*d*(1+d*x))
           or 
         raw coefficients c_i: E=c_0 + c_1*d + ... + c_n*d**n
       
     """
+    if read_ini:
+        return read_calibration_file()
+    
     if data is None:
         raise Exception("no data, provide data ..")
 
@@ -57,12 +64,36 @@ def get_calibration_coeff(data=None, order=2, no_offset=False, return_coeff=Fals
     if order>=2:
       drift=coeff[2]/coeff[1]
     
-    print(f"raw coefficents: {coeff}")
-    print(f"the offset is: {offset}")
-    print(f"the scale is: {scale}")
-    print(f"the drift is: {drift}")
+    # ~ print(f"raw coefficents: {coeff}")
+    # ~ print(f"the offset is: {offset}")
+    # ~ print(f"the scale is: {scale}")
+    # ~ print(f"the drift is: {drift}")
+    
+    if write_ini:
+        write_calibration_file(data,order=order,no_offset=no_offset)
     
     if return_coeff:
         return coeff
     else:
         return offset,scale,drift
+
+def read_calibration_file(filename="gammalab.ini"):
+
+    config = configparser.ConfigParser()
+    config.read(filename)
+    
+    s=config["calibration"].get("data").split(" ")
+    s=[x for x in s if x!=""]
+    s=[calibration_pair(x) for x in s]
+      
+    order=config["calibration"].getint("order", 1)
+    no_offset=config["calibration"].getboolean("no_offset", True)
+    print(f"[util] calibration read from {filename}")
+    
+    return get_calibration_coeff(s, order=order, no_offset=no_offset)
+
+def write_calibration_file(data, filename="gammalab.ini", order=1, no_offset=True):
+    config = configparser.ConfigParser()
+    config["calibration"]=dict(data=data, order=order, no_offset=no_offset)
+    config.write(filename)
+    print(f"[util] calibration written to {filename}")
