@@ -41,10 +41,10 @@ def new_argument_parser():
         help='write calibration data to a file (gammalab.ini)',
     )
   
-    return parser.parse_args()
+    return parser
 
 if __name__=="__main__":
-    args=new_argument_parser()
+    args=new_argument_parser().parse_args()
     offset,scale,drift=get_calibration_coeff(**vars(args))
     print("[gammalab-calibration-calc] Calibration parameters:")
     print(f" the offset is: {offset}")

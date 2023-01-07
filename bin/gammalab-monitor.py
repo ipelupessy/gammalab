@@ -104,8 +104,8 @@ def new_argument_parser():
         default=None,
         help='Optionally playback from input file',
     ) 
-    return parser.parse_args()
+    return parser
 
 if __name__=="__main__":
-    args = new_argument_parser()
+    args = new_argument_parser().parse_args()
     run(**vars(args))
