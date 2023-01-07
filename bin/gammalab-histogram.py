@@ -2,7 +2,7 @@
 """
 gammalab-histogram makes a histogram of detected peak heights. 
 """
-
+import os
 import argparse
 
 try:
@@ -12,6 +12,7 @@ except:
   pass
 
 from gammalab import main
+from gammalab.util import read_calibration_file
 from gammalab.acquisition import SoundCard, FileReplay
 from gammalab.transform import Normalize, SecondOrder
 from gammalab.analysis import PulseDetection, FittedPulseDetection
@@ -30,6 +31,9 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
     if raw_values:
         scale=1.
         vmax=1.
+    else:
+        if os.path.isfile("gammalab.ini"):
+            offset,scale,drift=read_calibration_file("gammalab.ini")
 
     if inputfile is not None:
         source=FileReplay(filename=inputfile, realtime=realtime)
@@ -248,9 +252,9 @@ def new_argument_parser():
         help='file input in realtime',
     )       
     
-    return parser.parse_args()
+    return parser
 
 if __name__=="__main__":
-    args = new_argument_parser()
+    args = new_argument_parser().parse_args()
     run(**vars(args))
 

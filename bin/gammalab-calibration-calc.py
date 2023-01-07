@@ -24,7 +24,7 @@ def new_argument_parser():
         dest='order',
         default=2,
         type=int,
-        help='order of calibration polynomial fit',
+        help='order of calibration polynomial fit (1 or 2)',
     )
     parser.add_argument(
         '--no_offset',
@@ -33,9 +33,20 @@ def new_argument_parser():
         default=False,
         help='force offset to be 0.',
     )
+    parser.add_argument(
+        '--write_ini',
+        dest='write_ini',
+        action="store_true",
+        default=False,
+        help='write calibration data to a file (gammalab.ini)',
+    )
   
-    return parser.parse_args()
+    return parser
 
 if __name__=="__main__":
-    args=new_argument_parser()
+    args=new_argument_parser().parse_args()
     offset,scale,drift=get_calibration_coeff(**vars(args))
+    print("[gammalab-calibration-calc] Calibration parameters:")
+    print(f" the offset is: {offset}")
+    print(f" the scale is: {scale}")
+    print(f" the drift is: {drift}")
