@@ -1,6 +1,8 @@
 import configparser
 import numpy
 
+from datetime import datetime
+
 def calibration_pair(s):
     """
       type for argument parser in order to interpret space seperated list of
@@ -82,20 +84,23 @@ def read_calibration_file(filename="gammalab.ini"):
     config = configparser.ConfigParser()
     config.read(filename)
     
+    label=config["calibration"].get("label","(no label)")
     s=config["calibration"].get("data").split(" ")
     s=[x for x in s if x!=""]
     s=[calibration_pair(x) for x in s]
       
     order=config["calibration"].getint("order", 1)
     no_offset=config["calibration"].getboolean("no_offset", True)
-    print(f"[util] calibration read from {filename}")
+    print(f"[util] calibration read from {filename}, labelled {label}")
     
     return get_calibration_coeff(s, order=order, no_offset=no_offset)
 
-def write_calibration_file(data, filename="gammalab.ini", order=1, no_offset=True):
+def write_calibration_file(data, filename="gammalab.ini", order=1, no_offset=True, label=None):
     data=" ".join([f"{x[0]},{x[1]}" for x in data])
+    if label is None:
+        label=f"{datetime.now()}"
     config = configparser.ConfigParser()
-    config["calibration"]=dict(data=data, order=order, no_offset=no_offset)
+    config["calibration"]=dict(data=data, order=order, no_offset=no_offset, label=label)
     with open(filename,'w') as f:
         config.write(f)
     print(f"[util] calibration written to {filename}")
