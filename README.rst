@@ -1,5 +1,5 @@
-Gamma Lab
-=========
+GammaLab
+========
 
 Python toolkit for soundcard gamma spectroscopy.
 
