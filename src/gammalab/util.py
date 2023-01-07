@@ -31,7 +31,7 @@ def get_calibration_coeff(data=None, order=2, no_offset=False,
     if read_ini:
         return read_calibration_file()
     
-    if data is None:
+    if data is None or len(data)==0:
         raise Exception("no data, provide data ..")
 
     if no_offset:
@@ -96,5 +96,6 @@ def write_calibration_file(data, filename="gammalab.ini", order=1, no_offset=Tru
     data=" ".join([f"{x[0]},{x[1]}" for x in data])
     config = configparser.ConfigParser()
     config["calibration"]=dict(data=data, order=order, no_offset=no_offset)
-    config.write(filename)
+    with open(filename,'w') as f:
+        config.write(f)
     print(f"[util] calibration written to {filename}")
