@@ -142,7 +142,8 @@ class PlotHistogram(_Plot):
   
     def __init__(self, xmin=0, xmax=1., log=True, 
                     error_bars=True, outfile="histogram",
-                    background="", yrange=1.e4, time_normalized=False):        
+                    background="", yrange=1.e4, time_normalized=False,
+                    plot_excess=False):        
         super().__init__(outfile=outfile)
         self.xmin=xmin
         self.xmax=xmax
@@ -152,6 +153,9 @@ class PlotHistogram(_Plot):
         self.yrange=yrange
         self.blit=True
         self.time_normalized=time_normalized
+        self.plot_excess=plot_excess
+        if plot_excess and background=="":
+            raise Exception("plot excess needs background spectrum")
 
     def get_data(self):        
         data=None
@@ -182,6 +186,14 @@ class PlotHistogram(_Plot):
         bins=data["bins"]
         total_time=data["total_time"]
         hist,bins,yerr=self.convert_hist_bins(hist,bins,total_time)
+        if self.plot_excess:
+            midpoints=(bins[1:]+bins[:-1])/2
+            index=numpy.digitize(midpoints, self.bkgrnd_bins)
+            index=numpy.maximum(index,1)
+            index=numpy.minimum(index, len(self.bkgrnd_hist))
+            bkgrnd_hist=self.bkgrnd_hist[index-1]
+            hist=numpy.maximum(hist-bkgrnd_hist,0)
+
         self.bins=bins
                 
         self._line.set_data(hist,bins)
@@ -189,9 +201,18 @@ class PlotHistogram(_Plot):
             self._top.set_data(hist+yerr,bins)
             self._bot.set_data(hist-yerr,bins)
 
-        self._text.set_text(f"time(s): {total_time:10.2f}\ntotal counts: {total_count:09d}")
+        if self.plot_excess:
+            if self.input_wire.histogram_mode!="normal":
+                binsize=(bins[1:]-bins[:-1])
+                excess_counts=(hist*binsize).sum()
+            else:
+                excess_counts=hist.sum()              
+            if self.time_normalized: excess_counts*=total_time
+            self._text.set_text(f"time(s): {total_time:10.2f}\ntotal counts: {total_count:09d}\nexcess counts: {int(excess_counts):09d}")
+        else:
+            self._text.set_text(f"time(s): {total_time:10.2f}\ntotal counts: {total_count:09d}")
 
-        self._update_ylim(hist[hist!=0].min(), hist.max())
+        if numpy.any(hist!=0): self._update_ylim(hist[hist!=0].min(), hist.max())
 
         return self.artists
 
@@ -248,11 +269,18 @@ class PlotHistogram(_Plot):
         self._line=ax.stairs(hist,bins,lw=2, zorder=10)
         if self.background:
             hist,bins,err=self.background_hist_bins()
-            _line=ax.stairs(hist,bins,lw=2., zorder=11, color="tab:grey", ls="--")
+            if self.plot_excess:
+                self.bkgrnd_hist=hist
+                self.bkgrnd_bins=bins
+            else:
+                self._bkgrnd_line=ax.stairs(hist,bins,lw=2., zorder=11, color="tab:grey", ls="--")
+
         if self.log:
             ax.set_yscale("log", nonpositive="mask")
 
         ylabel="counts"
+        if self.plot_excess:
+          ylabel="(excess) "+ylabel
         if self.time_normalized:
           ylabel=ylabel+" / s"
 
@@ -278,6 +306,9 @@ class PlotHistogram(_Plot):
             artists=[self._text,self._line, self._top, self._bot]
         else:
             artists=[self._text,self._line]
+        
+        if self.background and not self.plot_excess:
+            artists+=[self._bkgrnd_line]
         
         return fig,ax,artists
       

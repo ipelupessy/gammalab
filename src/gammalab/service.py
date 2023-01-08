@@ -23,8 +23,10 @@ class Service:
         raise ServiceError("service %s has no outputs"%str(self))
     def connect_to(self, other):
         raise ServiceError("service %s has no inputs"%str(self))
-    def print_message(self, message):
-        self._output.put('['+self.__class__.__name__+'] '+message)
+    def print_message(self, message, end=None):
+        message=f'\33[2K[{self.__class__.__name__}] '+message
+        message=dict(message=message,end=end)
+        self._output.put(message)
 
 class SourceService(Service):
     output_wire_class=None

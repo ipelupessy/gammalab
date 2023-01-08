@@ -26,7 +26,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
         fitpulse=False, fit_threshold=0.95, raw_values=False,
         baseline=0., negative_peaks=False, amplitude=1., plot_count=False,
         histogram_mode="normal", background="", plot_pulses=False,
-        time_normalized=False):
+        time_normalized=False, plot_excess=False):
 
     if raw_values:
         scale=1.
@@ -83,7 +83,8 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
                                     outfile=outfile,
                                     log=log,
                                     background=background,
-                                    time_normalized=time_normalized)
+                                    time_normalized=time_normalized,
+                                    plot_excess=plot_excess)
         histogram.plugs_into(plothistogram)
 
     main(runtime)
@@ -213,6 +214,12 @@ def new_argument_parser():
         action="store_true",
         help='plot time normalized histogram',
     )
+    parser.add_argument(
+        '--plot_excess',
+        dest='plot_excess',
+        action="store_true",
+        help='Plot excess counts in histogram (needs --background)',
+    )        
     parser.add_argument(
         '--background',
         dest='background',

@@ -14,7 +14,11 @@ def output_thread():
     message=None
     while message!="[Shutdown] done":
         message=shared_output.get(True)
-        print(message)
+        end=None
+        if isinstance(message, dict):
+          end=message.get("end", None)
+          message=message["message"]
+        print(message, end=end)
 
 def startup():
     print("[Startup] entry")
