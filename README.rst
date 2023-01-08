@@ -100,15 +100,27 @@ The following services are available::
 
   from gammalab.acquisition import SoundCard
   from gammalab.acquisition import Noise
+  from gammalab.acquisition import FileReplay
   from gammalab.transform import Raw2Float
   from gammalab.transform import DownSampleMaxed
-  from gammalab.transform import Identity
+  from gammalab.transform import Normalize
+  from gammalab.transform import Int162Float 
+  from gammalab.transform import Float2Int16
   from gammalab.analysis import PulseDetection
+  from gammalab.analysis import FittedPulseDetection
   from gammalab.analysis import Histogram
   from gammalab.analysis import Count
   from gammalab.backend import SoundCardPlay
   from gammalab.backend import Monitor
   from gammalab.backend import SaveRaw
+  from gammalab.backend import SaveWav
+  
+And a number of plotting services::  
+  
+  from gammalab.backend import Monitor
+  from gammalab.backend import PlotHistogram
+  from gammalab.backend import CountPlot
+  from gammalab.backend import PulsePlot
   
 Note that most of these provide rudementary implementations and are open to 
 improvement, though the code is somewhat conceptual in nature and probably will 
@@ -134,8 +146,8 @@ computations. The simplest example of a service with input and output is
 the following::
 
   class Identity(ThreadService, SourceService, ReceivingService):
-      input_wire_class=RawWire
-      output_wire_class=RawWire
+      input_wire_class=FloatWire
+      output_wire_class=FloatWire
       
       def output_protocol(self, wire):
           super().output_protocol(wire)
@@ -147,7 +159,10 @@ the following::
           return data
 
 This service just forwards the input data (a dict containing a key ``data`` 
-with the raw byte stream) to its output, retaining its sample rate, format 
+with the data as float32 stream) to its output, retaining its sample rate, format 
 and number of channels.In this case the necessary ``start`` etc methods are 
 provided by inheritance from ThreadService. The process method defines the 
-actual processing done.
+actual processing done. The function ```output_protocol``` defines immutable
+meta data for the output (```CHANNELS``` etc), and checks whether the wires 
+are correctly connected.
+ 
