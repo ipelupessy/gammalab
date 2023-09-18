@@ -155,7 +155,8 @@ class FittedPulseDetection(PulseDetection):
         self.pulse_decay_time=pulse_decay_time
 
     def _fit_pulse(self, x, yp):
-
+        global scipy, curve_fit
+        
         A_=numpy.max(yp) # initial amplitude
         x0_=4.5 # initial timeshift
         tau=self.pulse_decay_time*self.input_wire.RATE
