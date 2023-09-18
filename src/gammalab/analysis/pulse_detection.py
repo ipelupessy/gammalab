@@ -140,7 +140,7 @@ class FittedPulseDetection(PulseDetection):
     recovered by fitting the rising and falling edges. 
 
     """
-    def __init__(self, threshold=0.005, window=24*1024, emit_pulse_shapes=False, 
+    def __init__(self, threshold=0.005, window=24*1024, emit_pulse_shapes=False,outfile=None, 
                   fit_threshold=0., signal_noise=0.0035, pulse_decay_time=2.7247/48000):
 
         super().__init__(threshold=threshold, 
