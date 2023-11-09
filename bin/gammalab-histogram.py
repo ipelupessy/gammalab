@@ -26,7 +26,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
         fitpulse=False, fit_threshold=0.95, raw_values=False,
         baseline=0., negative_peaks=False, amplitude=1., plot_count=False,
         histogram_mode="normal", background="", plot_pulses=False,
-        time_normalized=False, plot_excess=False):
+        time_normalized=False, plot_excess=False,sound_api="soundcard"):
 
     if raw_values:
         scale=1.
@@ -38,7 +38,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
     if inputfile is not None:
         source=FileReplay(filename=inputfile, realtime=realtime)
     else:
-        source=SoundCard(input_device_name=input_device_name)
+        source=SoundCard(sound_api=sound_api,input_device_name=input_device_name)
 
     normalize=Normalize(baseline=baseline, scale=-amplitude if negative_peaks else amplitude)
 
@@ -258,7 +258,12 @@ def new_argument_parser():
         action="store_true",
         help='file input in realtime',
     )       
-    
+    parser.add_argument(
+        '--sound_api',
+        dest='sound_api',
+        default="SoundCard",
+        help='Sound Card API to use [soundcard, sounddevice]',
+    )    
     return parser
 
 if __name__=="__main__":

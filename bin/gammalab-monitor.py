@@ -19,20 +19,20 @@ from gammalab.backend import SoundCardPlay
 from gammalab.transform import DownSampleMaxed
 
 def run(input_device_name="", runtime=None, list_input_devices=False, raw_output_file="",
-        list_output_devices=False, output_device_name="", inputfile=None):
+        list_output_devices=False, output_device_name="", inputfile=None, sound_api="soundcard"):
     if list_input_devices:
-      for name, id_ in SoundCard.devices().items():
+      for name, id_ in SoundCard(sound_api=sound_api).devices().items():
         print(f"{name}: {id_}")
       exit(0)
     if list_output_devices:
-      for name, id_ in SoundCardPlay.devices().items():
+      for name, id_ in SoundCardPlay(sound_api=sound_api).devices().items():
         print(f"{name}: {id_}")
       exit(0)
 
     if inputfile is not None:
         source=FileReplay(inputfile)
     else:
-        source=SoundCard(input_device_name=input_device_name)
+        source=SoundCard(sound_api=sound_api, input_device_name=input_device_name)
 
     monitor=Monitor()
     downsample=DownSampleMaxed(factor=8)
@@ -46,7 +46,7 @@ def run(input_device_name="", runtime=None, list_input_devices=False, raw_output
         source.plugs_into(save)
 
     if output_device_name!="":
-        playback=SoundCardPlay(output_device_name=output_device_name)
+        playback=SoundCardPlay(sound_api=sound_api,output_device_name=output_device_name)
         source.plugs_into(playback)
 
 
@@ -104,6 +104,12 @@ def new_argument_parser():
         default=None,
         help='Optionally playback from input file',
     ) 
+    parser.add_argument(
+        '--sound_api',
+        dest='sound_api',
+        default="SoundCard",
+        help='Sound Card API to use [soundcard, sounddevice]',
+    )    
     return parser
 
 if __name__=="__main__":
