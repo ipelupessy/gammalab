@@ -64,7 +64,7 @@ class _Plot(ThreadService, ReceivingService):
         pyplot.connect('button_press_event', self.on_click)
 
         
-        ani = FuncAnimation(self.fig, self._update_plot, interval=self.interval, blit=self.blit)
+        ani = FuncAnimation(self.fig, self._update_plot, interval=self.interval, blit=self.blit,cache_frame_data=False)
 
         pyplot.show(block=True)
 
@@ -276,7 +276,7 @@ class PlotHistogram(_Plot):
                 self._bkgrnd_line=ax.stairs(hist,bins,lw=2., zorder=11, color="tab:grey", ls="--")
 
         if self.log:
-            ax.set_yscale("log", nonpositive="mask")
+            ax.set_yscale("log", nonpositive="clip")
 
         ylabel="counts"
         if self.plot_excess:

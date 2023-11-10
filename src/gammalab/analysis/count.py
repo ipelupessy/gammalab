@@ -59,8 +59,7 @@ class Count(ThreadService, ReceivingService, SourceService):
         else:
           cps=0
 
-        message=f"time: {self.total_time:7.2f} | counts: {self.total_count:5.3e} | "\
-                f"average cps: {avgcps:5.2f} | current cps: {cps:5.2f}"
+        message=f"time: {self.total_time:.2f}, cps: {cps:.0f}, average: {avgcps:5.2f}, total: {self.total_count}"
         if not self.silent:
             self.print_message(message, end="\r")
         
