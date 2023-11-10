@@ -1,7 +1,22 @@
 from ..service import SourceService, ThreadService
 from ..wire import FloatWire
 
+import numpy
 import time
+from contextlib import contextmanager
+import signal
+
+@contextmanager
+def timeout(duration, message):
+    def timeout_handler(signum, frame):
+        raise TimeoutError(message)
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(duration)
+    try:
+        yield
+    finally:
+        signal.alarm(0)
+
 
 class SoundDevice(ThreadService, SourceService):
     output_wire_class=FloatWire
@@ -50,6 +65,7 @@ class SoundDevice(ThreadService, SourceService):
         t0=time.time()
         total_samples=0
         stream.start()
+        buffer=numpy.zeros(self.frames_per_buffer,dtype=numpy.float32)
         while not self.stopped:    
             try:
                 _name=sounddevice.query_devices(name)["name"] # this can raise exception if device dissapears
@@ -57,24 +73,36 @@ class SoundDevice(ThreadService, SourceService):
             except:
                 raise Exception("Soundcard acquisition device possibly disconnected")
 
+            buffer[:]=0
             try:
-                data, overflowed=stream.read(self.frames_per_buffer)
+                frames_read=0
+                with timeout(1,"timeout on data acquisition, possible soundcard disconnect"):
+                    while frames_read<self.frames_per_buffer:
+                      available=stream.read_available
+                      request=min(available, self.frames_per_buffer-frames_read)
+                      if request>0:
+                          _data, overflowed=stream.read(request)
+                          buffer[frames_read:frames_read+request]=_data[:,0] # flatten because we have hardcoded nchannels=1
+                          frames_read+=request
+                      time.sleep(self.frames_per_buffer/self.RATE/2)
+                
                 t_wall=time.time()-t0
                 if overflowed:
                     self.print_message("data acquisition overflow")
             except Exception as ex:
                 self.print_message( f"error: {str(ex)}")
                 self.stopped=True
-            if len(data)==0 or data is None:
+            if frames_read==0:
                 self.print_message("no data")
                 self.stopped=True
             else:
-                data=dict(data=data.flatten(), wallclock_time=t_wall) # flatten because we have hardcoded nchannels=1
+                data=dict(data=buffer.copy(), wallclock_time=t_wall)
 
             if (not self.stopped and
                 data is not None):
                 self.send_output(data)
                 total_samples+=len(data["data"])
+
         self.send_output(None)
         t_wall=time.time()-t0
         t_sample=total_samples/self.RATE
