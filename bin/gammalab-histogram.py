@@ -17,7 +17,7 @@ from gammalab.acquisition import SoundCard, FileReplay
 from gammalab.transform import Normalize, SecondOrder
 from gammalab.analysis import PulseDetection, FittedPulseDetection
 from gammalab.analysis import AggregateHistogram
-from gammalab.analysis import Count
+from gammalab.analysis import Count, DoseCount
 from gammalab.backend import PlotHistogram, CountPlot, PulsePlot
 
 def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000., 
@@ -26,7 +26,10 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
         fitpulse=False, fit_threshold=0.95, raw_values=False,
         baseline=0., negative_peaks=False, amplitude=1., plot_count=False,
         histogram_mode="normal", background="", plot_pulses=False,
-        time_normalized=False, plot_excess=False,sound_api="soundcard"):
+        time_normalized=False, plot_excess=False,sound_api="soundcard", dose=False, detector_mass=None):
+
+    if dose and raw_values:
+        raise Exception("Dose estimate cannot be done on raw values (remove --dose or --raw")
 
     if raw_values:
         scale=1.
@@ -34,6 +37,8 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
     else:
         if os.path.isfile("gammalab.ini"):
             offset,scale,drift=read_calibration_file("gammalab.ini")
+        
+        print(f"using offset={offset:5.2f}, scale={scale:5.2f}, drift={drift:5.2f}")
 
     if inputfile is not None:
         source=FileReplay(filename=inputfile, realtime=realtime)
@@ -50,7 +55,6 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
         detect=PulseDetection(threshold=threshold, 
                               outfile=pulse_file,emit_pulse_shapes=True)
     
-    count=Count(outfile=outfile+".counts" if outfile is not None else None)
     histogram=AggregateHistogram(nchannels=int(nchannels),
                                  vmin=threshold*scale, 
                                  vmax=vmax, 
@@ -59,12 +63,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
     
     source.plugs_into(normalize)
     normalize.plugs_into(detect)
-    detect.plugs_into(count)
     
-    if plot_count:
-        countplot=CountPlot(outfile=outfile+".count" if outfile is not None else None)
-        count.plugs_into(countplot)
-
     if plot_pulses:
         pulseplot=PulsePlot(nplot=5,
                             interval=1000)
@@ -72,10 +71,23 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
 
     if raw_values:
         detect.plugs_into(histogram)
+        detect_=detect
     else:
         calibrate=SecondOrder(offset=offset, scale=scale, drift=drift)
         detect.plugs_into(calibrate)
         calibrate.plugs_into(histogram)
+        detect_=calibrate
+
+    if dose:
+        count=DoseCount(outfile=outfile+".dosecounts" if outfile is not None else None, runtime=runtime)
+        detect_.plugs_into(count)
+    else:
+        count=Count(outfile=outfile+".counts" if outfile is not None else None, runtime=runtime)
+        detect_.plugs_into(count)
+
+    if plot_count:
+        countplot=CountPlot(outfile=outfile+".count" if outfile is not None else None)
+        count.plugs_into(countplot)
 
     if do_plot:
         plothistogram=PlotHistogram(xmin=0, 
@@ -103,12 +115,12 @@ def new_argument_parser():
     parser.add_argument(
         '--nchannels',
         dest='nchannels',
-        default=100,
+        default=200,
         type=int,
-        help='number of channels per MeV (bins) in the histogram',
+        help='number of channels (bins) in the histogram',
     )
     parser.add_argument(
-        '--vmax',
+        '--max_energy',
         dest='vmax',
         default=2000,
         type=float,
@@ -190,7 +202,7 @@ def new_argument_parser():
         help='runtime in seconds',
     )
     parser.add_argument(
-        '--do-plot',
+        '--plot',
         dest='do_plot',
         action="store_true",
         help='show histogram plot',
@@ -202,20 +214,20 @@ def new_argument_parser():
         help='plot histogram with logarithmic y-axis',
     )    
     parser.add_argument(
-        '--histogram_mode',
+        '--histogram-mode',
         dest='histogram_mode',
         default="normal",
         type=str,
         help='mode for histogram binning (normal, proportional, semiprop, quadratic)',
     )
     parser.add_argument(
-        '--time_normalized',
+        '--time-normalized',
         dest='time_normalized',
         action="store_true",
         help='plot time normalized histogram',
     )
     parser.add_argument(
-        '--plot_excess',
+        '--plot-excess',
         dest='plot_excess',
         action="store_true",
         help='Plot excess counts in histogram (needs --background)',
@@ -228,26 +240,26 @@ def new_argument_parser():
         help='optional filename for background spectrum in histogram plot (recommended to add --time_normalized)',
     )    
     parser.add_argument(
-        '--plot_count',
+        '--plot-count',
         dest='plot_count',
         action="store_true",
         help='show plot of counts',
     )
     parser.add_argument(
-        '--plot_pulses',
+        '--plot-pulses',
         dest='plot_pulses',
         action="store_true",
         help='Plot sampling of pulse shapes',
     )    
     parser.add_argument(
-        '--input_device_name',
+        '--input-device',
         dest='input_device_name',
         default="",
         type=str,
         help='select input device by (fuzzy matched) name',
     )
     parser.add_argument(
-        '--infile',
+        '--input-file',
         dest='inputfile',
         default=None,
         help='(optional) input file',
@@ -259,11 +271,24 @@ def new_argument_parser():
         help='file input in realtime',
     )       
     parser.add_argument(
-        '--sound_api',
+        '--sound-api',
         dest='sound_api',
         default="SoundCard",
         help='Sound Card API to use [soundcard, sounddevice]',
     )    
+    parser.add_argument(
+        '--dose',
+        dest='dose',
+        action="store_true",
+        help='show dose estimate',
+    )       
+    parser.add_argument(
+        '--detector-mass',
+        dest='detector_mass',
+        default=0.01,
+        type=float,
+        help='detector mass (needed for dose estimate) [0.01] ',
+    )
     return parser
 
 if __name__=="__main__":

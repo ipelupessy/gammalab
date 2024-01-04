@@ -5,10 +5,10 @@ import numpy
 from ..service import ReceivingService, ThreadService, SourceService
 from ..wire import PulseWire, CountWire
       
-class Count(ThreadService, ReceivingService, SourceService):
+class DoseCount(ThreadService, ReceivingService, SourceService):
     input_wire_class=PulseWire
     output_wire_class=CountWire
-    def __init__(self, outfile=None, runtime=None, interval=1., silent=False):
+    def __init__(self, outfile=None, runtime=None, interval=1., silent=False, detector_mass=None):
         super().__init__()
         self.outfile=outfile
         self.runtime=runtime
@@ -18,15 +18,30 @@ class Count(ThreadService, ReceivingService, SourceService):
         self.total_count=0
         self.total_time=0
         self.recent_pulse_times=[] # all pulse times from last interval
+        self.recent_pulse_energies=[] # all pulse energies of last interval
         self.silent=silent
+        self.dose=0.
+        self.detector_mass=detector_mass
+
+    def connect_input(self, service):
+        super().connect_input(service)
+        assert self.input_wire.unit=="keV"
     
     @property
     def nbins(self):
         return int((self.tmax-self.tmin)/self.interval)
         
     def start_process(self):
+        if self.detector_mass is None:
+            self.print_message("detector mass not specified, assuming 0.01 kg")
+            self.detector_mass=0.01
+        self.factor=1000*1.6e-19/(self.detector_mass)*3600/1.e-6  # converts keV/s (calculated below) to J/kg/hr (=uSv/hr)
+        
         self.cps, self.tbins=numpy.histogram([], bins=self.nbins, 
             range=(self.tmin,self.tmax))
+        self.dose_rate=numpy.histogram([], bins=self.nbins, 
+            range=(self.tmin,self.tmax))[0]
+
         super().start_process() 
     
     def process(self, data):      
@@ -40,17 +55,30 @@ class Count(ThreadService, ReceivingService, SourceService):
             self.tmax=self.runtime
 
         _cps=self.cps
+        _dose_rate=self.dose_rate
 
         pulse_times=[d[0] for d in data["pulses"]]
+        pulse_energies=[d[1] for d in data["pulses"]]
         self.recent_pulse_times.extend(pulse_times)
+        self.recent_pulse_energies.extend(pulse_energies)
+        self.recent_pulse_energies=[e for t,e in zip(self.recent_pulse_times, self.recent_pulse_energies) if t>self.total_time-self.interval]
         self.recent_pulse_times=[t for t in self.recent_pulse_times if t>self.total_time-self.interval]
+
         pulse_times=numpy.array(pulse_times)
+        pulse_energies=numpy.array(pulse_energies)
+        
+        self.dose+=pulse_energies.sum()
 
         counts, self.tbins=numpy.histogram(pulse_times, bins=self.nbins, 
             range=(self.tmin,self.tmax))
-
+        dose, dummy=numpy.histogram(pulse_times, bins=self.nbins, 
+            range=(self.tmin,self.tmax), weights=pulse_energies)
+        
         self.cps=counts/self.interval
         self.cps[0:len(_cps)]+=_cps
+
+        self.dose_rate=dose/self.interval
+        self.dose_rate[0:len(_dose_rate)]+=_dose_rate
 
         avgcps=self.total_count/(self.total_time)
         if self.total_time>0:
@@ -58,7 +86,13 @@ class Count(ThreadService, ReceivingService, SourceService):
         else:
           cps=0
 
-        message=f"time: {self.total_time:.2f}, cps: {cps:.0f}, average: {avgcps:5.2f}, total: {self.total_count}"
+        avgdose_rate=self.factor*self.dose/self.total_time
+        if self.total_time>0:
+          dose_rate=self.factor*numpy.sum(self.recent_pulse_energies)/min(self.total_time, self.interval)
+        else:
+          dose_rate=0
+
+        message=f"time: {self.total_time:.2f}, cps: {cps:.0f}, dose rate(uSv/hr): {dose_rate:5.2f}, average DR(uSv/hr): {avgdose_rate:5.2f}"
         if not self.silent:
             self.print_message(message, end="\r")
         
@@ -66,9 +100,8 @@ class Count(ThreadService, ReceivingService, SourceService):
     
     @property            
     def outdata(self):
-        return dict(count_per_sec=self.cps, time_bins=self.tbins, total_time=self.total_time, interval=self.interval)
+        return dict(count_per_sec=self.cps, dose_rate=self.dose_rate, time_bins=self.tbins, total_time=self.total_time, interval=self.interval)
       
-                
     def cleanup(self):
         if self.outfile is not None:
             outfile=self.outfile+".pkl"

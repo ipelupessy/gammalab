@@ -31,7 +31,7 @@ class Interpolate(ThreadService, SourceService, ReceivingService):
         timestamps=[x[0] for x in data["pulses"]]
         signal=[x[1] for x in data["pulses"]]
         calibrated=numpy.interp(signal, self._xp, self._yp)
-        data["pulses"]=zip(timestamps, calibrated)
+        data["pulses"]=list(zip(timestamps, calibrated))
         return data
 
 class Scale(ThreadService, SourceService, ReceivingService):
@@ -50,7 +50,7 @@ class Scale(ThreadService, SourceService, ReceivingService):
     def process(self, data):
         timestamps=[x[0] for x in data["pulses"]]
         scaled=[self.scale*x[1] for x in data["pulses"]]
-        data["pulses"]=zip(timestamps, scaled)
+        data["pulses"]=list(zip(timestamps, scaled))
         return data
 
 class SecondOrder(ThreadService, SourceService, ReceivingService):
@@ -72,5 +72,5 @@ class SecondOrder(ThreadService, SourceService, ReceivingService):
     def process(self, data):
         timestamps=[x[0] for x in data["pulses"]]
         scaled=[self.offset+self.scale*x[1]*(1+self.drift*x[1]) for x in data["pulses"]]
-        data["pulses"]=zip(timestamps, scaled)
+        data["pulses"]=list(zip(timestamps, scaled))
         return data

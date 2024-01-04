@@ -57,7 +57,7 @@ def new_argument_parser():
     parser = argparse.ArgumentParser( formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                       description=__doc__)
     parser.add_argument(
-        '--input_device_name',
+        '--input-device',
         dest='input_device_name',
         default="",
         type=str,
@@ -71,41 +71,41 @@ def new_argument_parser():
         help='runtime in seconds',
     )
     parser.add_argument(
-        '--list_input_devices',
+        '--list-input-devices',
         dest='list_input_devices',
         action="store_true",
         default=False,
         help='list all input devices',
     )
     parser.add_argument(
-        '--list_output_devices',
+        '--list-output-devices',
         dest='list_output_devices',
         action="store_true",
         default=False,
         help='list output soundcard devices',
     )
     parser.add_argument(
-        '--raw_ouput_file',
+        '--output-file',
         dest='raw_output_file',
         default="",
         type=str,
         help='optionally record raw data stream to provided filename (for later analysis) ',
     )
     parser.add_argument(
-        '--output_device_name',
+        '--output-device',
         dest='output_device_name',
         default="",
         type=str,
         help='optional output device for playback (fuzzy matched by name)',
     )
     parser.add_argument(
-        '--infile',
+        '--input-file',
         dest='inputfile',
         default=None,
         help='Optionally playback from input file',
     ) 
     parser.add_argument(
-        '--sound_api',
+        '--sound-api',
         dest='sound_api',
         default="SoundCard",
         help='Sound Card API to use [soundcard, sounddevice]',
