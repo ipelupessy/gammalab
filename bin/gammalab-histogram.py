@@ -104,8 +104,52 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
 def new_argument_parser():
     "Parse command line arguments"
     parser = argparse.ArgumentParser( formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                      description=__doc__)
+                                      description=__doc__, epilog="Note: if a gammalab.ini file is present and --raw not given, the calibration data in the file is used to determine offset,scale and drift")
 
+    parser.add_argument(
+        '--runtime',
+        dest='runtime',
+        default=None,
+        type=float,
+        help='runtime in seconds',
+    )
+    parser.add_argument(
+        '--input-device',
+        dest='input_device_name',
+        default="",
+        type=str,
+        help='select input device by (fuzzy matched) name',
+    )
+    parser.add_argument(
+        '--input-file',
+        dest='inputfile',
+        default=None,
+        help='(optional) analyze from input file',
+    )
+    parser.add_argument(
+        '--plot',
+        dest='do_plot',
+        action="store_true",
+        help='show histogram plot',
+    )
+    parser.add_argument(
+        '--plot-count',
+        dest='plot_count',
+        action="store_true",
+        help='show plot of counts',
+    )
+    parser.add_argument(
+        '--plot-pulses',
+        dest='plot_pulses',
+        action="store_true",
+        help='Plot sampling of pulse shapes',
+    )    
+    parser.add_argument(
+        '--log',
+        dest='log',
+        action="store_true",
+        help='plot histogram with logarithmic y-axis',
+    )
     parser.add_argument(
         '--raw',
         dest='raw_values',
@@ -193,25 +237,6 @@ def new_argument_parser():
         dest='outfile',
         default=None,
         help='output file root',
-    )
-    parser.add_argument(
-        '--runtime',
-        dest='runtime',
-        default=None,
-        type=float,
-        help='runtime in seconds',
-    )
-    parser.add_argument(
-        '--plot',
-        dest='do_plot',
-        action="store_true",
-        help='show histogram plot',
-    )
-    parser.add_argument(
-        '--log',
-        dest='log',
-        action="store_true",
-        help='plot histogram with logarithmic y-axis',
     )    
     parser.add_argument(
         '--histogram-mode',
@@ -238,32 +263,7 @@ def new_argument_parser():
         default="",
         type=str,
         help='optional filename for background spectrum in histogram plot (recommended to add --time_normalized)',
-    )    
-    parser.add_argument(
-        '--plot-count',
-        dest='plot_count',
-        action="store_true",
-        help='show plot of counts',
-    )
-    parser.add_argument(
-        '--plot-pulses',
-        dest='plot_pulses',
-        action="store_true",
-        help='Plot sampling of pulse shapes',
-    )    
-    parser.add_argument(
-        '--input-device',
-        dest='input_device_name',
-        default="",
-        type=str,
-        help='select input device by (fuzzy matched) name',
-    )
-    parser.add_argument(
-        '--input-file',
-        dest='inputfile',
-        default=None,
-        help='(optional) input file',
-    ) 
+    )     
     parser.add_argument(
         '--realtime',
         dest='realtime',
@@ -287,7 +287,7 @@ def new_argument_parser():
         dest='detector_mass',
         default=0.01,
         type=float,
-        help='detector mass (needed for dose estimate) [0.01] ',
+        help='detector mass (only needed for dose estimate) [0.01] ',
     )
     return parser
 

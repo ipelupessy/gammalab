@@ -56,6 +56,14 @@ def new_argument_parser():
     "Parse command line arguments"
     parser = argparse.ArgumentParser( formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                       description=__doc__)
+
+    parser.add_argument(
+        '--runtime',
+        dest='runtime',
+        default=None,
+        type=float,
+        help='runtime in seconds',
+    )
     parser.add_argument(
         '--input-device',
         dest='input_device_name',
@@ -64,11 +72,11 @@ def new_argument_parser():
         help='select input device by (fuzzy matched) name',
     )
     parser.add_argument(
-        '--runtime',
-        dest='runtime',
-        default=None,
-        type=float,
-        help='runtime in seconds',
+        '--output-device',
+        dest='output_device_name',
+        default="",
+        type=str,
+        help='optional output device for playback (fuzzy matched by name)',
     )
     parser.add_argument(
         '--list-input-devices',
@@ -82,7 +90,7 @@ def new_argument_parser():
         dest='list_output_devices',
         action="store_true",
         default=False,
-        help='list output soundcard devices',
+        help='list output devices',
     )
     parser.add_argument(
         '--output-file',
@@ -90,13 +98,6 @@ def new_argument_parser():
         default="",
         type=str,
         help='optionally record raw data stream to provided filename (for later analysis) ',
-    )
-    parser.add_argument(
-        '--output-device',
-        dest='output_device_name',
-        default="",
-        type=str,
-        help='optional output device for playback (fuzzy matched by name)',
     )
     parser.add_argument(
         '--input-file',
