@@ -79,7 +79,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
         detect_=calibrate
 
     if dose:
-        count=DoseCount(outfile=outfile+".dosecounts" if outfile is not None else None, runtime=runtime)
+        count=DoseCount(outfile=outfile+".dosecounts" if outfile is not None else None, runtime=runtime, detector_mass=detector_mass)
         detect_.plugs_into(count)
     else:
         count=Count(outfile=outfile+".counts" if outfile is not None else None, runtime=runtime)
