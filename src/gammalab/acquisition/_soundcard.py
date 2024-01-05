@@ -43,6 +43,7 @@ class SoundCard(ThreadService, SourceService):
         self.print_message( f"opening {str(mic)} for data acquisition")
         name=mic.name
         t0=time.time()
+        t_wall=0.
         total_samples=0
         with mic.recorder(samplerate=self.RATE, blocksize=self.frames_per_buffer, channels=self.CHANNELS) as recorder:
             while not self.stopped:    
@@ -54,7 +55,11 @@ class SoundCard(ThreadService, SourceService):
 
                 try:
                     data=recorder.record(self.frames_per_buffer)
+                    t_prev=t_wall
                     t_wall=time.time()-t0
+                    if t_wall-t_prev>5:
+                        self.print_message("warning: long pause in data acquisition (caused by e.g. process pause or entering sleep mode)")
+                        self.print_message("(this can cause data corruption)")
                 except Exception as ex:
                     self.print_message( f"error: {str(ex)}")
                     self.stopped=True
