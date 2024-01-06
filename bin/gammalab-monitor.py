@@ -11,46 +11,7 @@ try:
 except:
   pass
 
-from gammalab import main
-from gammalab.acquisition import SoundCard, FileReplay
-from gammalab.backend import Monitor
-from gammalab.backend import SaveRaw
-from gammalab.backend import SoundCardPlay
-from gammalab.transform import DownSampleMaxed
-
-def run(input_device_name="", runtime=None, list_devices=False, raw_output_file="",
-        output_device_name="", inputfile=None, sound_api="soundcard"):
-    if list_devices:
-        print("Input devices:")
-        for name, id_ in SoundCard(sound_api=sound_api).devices().items():
-            print(f"{name}: {id_}")
-        print("Output devices:")
-        for name, id_ in SoundCardPlay(sound_api=sound_api).devices().items():
-            print(f"{name}: {id_}")
-        exit(0)
-
-    if inputfile is not None:
-        source=FileReplay(inputfile)
-    else:
-        source=SoundCard(sound_api=sound_api, input_device_name=input_device_name)
-
-    monitor=Monitor()
-    downsample=DownSampleMaxed(factor=8)
-        
-    source.plugs_into(downsample)
-    downsample.plugs_into(monitor)
-
-    if raw_output_file!="":
-        output_file=raw_output_file+"."+datetime.utcnow().strftime("%Y%m%d%H%M%S")
-        save=SaveRaw(output_file)
-        source.plugs_into(save)
-
-    if output_device_name!="":
-        playback=SoundCardPlay(sound_api=sound_api,output_device_name=output_device_name)
-        source.plugs_into(playback)
-
-
-    main(runtime)
+from gammalapp import run
 
 def new_argument_parser():
     "Parse command line arguments"
@@ -108,4 +69,7 @@ def new_argument_parser():
 
 if __name__=="__main__":
     args = new_argument_parser().parse_args()
-    run(**vars(args))
+    args=vars(args)
+    args["monitor"]=True
+    args["detect"]=False
+    run(**args)

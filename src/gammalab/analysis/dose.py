@@ -92,7 +92,7 @@ class DoseCount(ThreadService, ReceivingService, SourceService):
         else:
           dose_rate=0
 
-        message=f"time: {self.total_time:.2f}, dose rate(uGy/hr): {dose_rate:5.2f}, average DR(uGy/hr): {avgdose_rate:5.2f}, total dose(uGy): {avgdose_rate*self.total_time/3600.:6.3f}"
+        message=f"time: {self.total_time:.2f}, dose rate(uGy/hr): {dose_rate:5.2f}, average dr(uGy/hr): {avgdose_rate:5.2f}, total dose(uGy): {avgdose_rate*self.total_time/3600.:6.3f}"
         if not self.silent:
             self.print_message(message, end="\r")
         
