@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='GammaLab',
-    version='0.8.1',
+    version='0.8.2',
     description='Toolkit for soundcard gamma ray spectroscopy',
     author='F.I. Pelupessy',
     url='https://github.com/ipelupessy/gammalab',
