@@ -18,16 +18,16 @@ from gammalab.backend import SaveRaw
 from gammalab.backend import SoundCardPlay
 from gammalab.transform import DownSampleMaxed
 
-def run(input_device_name="", runtime=None, list_input_devices=False, raw_output_file="",
-        list_output_devices=False, output_device_name="", inputfile=None, sound_api="soundcard"):
-    if list_input_devices:
-      for name, id_ in SoundCard(sound_api=sound_api).devices().items():
-        print(f"{name}: {id_}")
-      exit(0)
-    if list_output_devices:
-      for name, id_ in SoundCardPlay(sound_api=sound_api).devices().items():
-        print(f"{name}: {id_}")
-      exit(0)
+def run(input_device_name="", runtime=None, list_devices=False, raw_output_file="",
+        output_device_name="", inputfile=None, sound_api="soundcard"):
+    if list_devices:
+        print("Input devices:")
+        for name, id_ in SoundCard(sound_api=sound_api).devices().items():
+            print(f"{name}: {id_}")
+        print("Output devices:")
+        for name, id_ in SoundCardPlay(sound_api=sound_api).devices().items():
+            print(f"{name}: {id_}")
+        exit(0)
 
     if inputfile is not None:
         source=FileReplay(inputfile)
@@ -79,18 +79,11 @@ def new_argument_parser():
         help='optional output device for playback (fuzzy matched by name)',
     )
     parser.add_argument(
-        '--list-input-devices',
-        dest='list_input_devices',
+        '--list-devices',
+        dest='list_devices',
         action="store_true",
         default=False,
-        help='list all input devices',
-    )
-    parser.add_argument(
-        '--list-output-devices',
-        dest='list_output_devices',
-        action="store_true",
-        default=False,
-        help='list output devices',
+        help='list available input and output devices',
     )
     parser.add_argument(
         '--output-file',
