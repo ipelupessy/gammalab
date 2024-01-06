@@ -35,7 +35,7 @@ class DoseCount(ThreadService, ReceivingService, SourceService):
         if self.detector_mass is None:
             self.print_message("detector mass not specified, assuming 0.01 kg")
             self.detector_mass=0.01
-        self.factor=1000*1.6e-19/(self.detector_mass)*3600/1.e-6  # converts keV/s (calculated below) to J/kg/hr (=uSv/hr)
+        self.factor=1000*1.6e-19/(self.detector_mass)*3600/1.e-6  # converts keV/s (calculated below) to J/kg/hr (=uSv/hr or rather uGy/hr)
         
         self.cps, self.tbins=numpy.histogram([], bins=self.nbins, 
             range=(self.tmin,self.tmax))
@@ -92,7 +92,7 @@ class DoseCount(ThreadService, ReceivingService, SourceService):
         else:
           dose_rate=0
 
-        message=f"time: {self.total_time:.2f}, cps: {cps:.0f}, dose rate(uSv/hr): {dose_rate:5.2f}, average DR(uSv/hr): {avgdose_rate:5.2f}"
+        message=f"time: {self.total_time:.2f}, dose rate(uGy/hr): {dose_rate:5.2f}, average DR(uGy/hr): {avgdose_rate:5.2f}, total dose(uGy): {avgdose_rate*self.total_time/3600.:6.3f}"
         if not self.silent:
             self.print_message(message, end="\r")
         
