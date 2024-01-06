@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-gammalab-histogram makes a histogram of detected peak heights. 
+gammalapp is a utility for acquisition of gamma spectrograph data and common analysis tasks. 
 """
 import os
 import argparse
