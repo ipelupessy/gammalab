@@ -323,6 +323,11 @@ class CountPlot(_Plot):
         self.avgcps=0
         self.blit=True
 
+    def start_process(self):
+        import matplotlib
+        matplotlib.rcParams['toolbar'] = 'None'
+        super().start_process()
+
     def get_data(self):        
         data=None
         while True:
@@ -384,6 +389,11 @@ class PulsePlot(_Plot):
     def __init__(self, nplot=1, interval=250):                
         super().__init__(interval=interval)
         self.nplot=nplot
+
+    def start_process(self):
+        import matplotlib
+        matplotlib.rcParams['toolbar'] = 'None'
+        super().start_process()
 
     def get_data(self):
         data=[]

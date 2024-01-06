@@ -66,8 +66,10 @@ class DoseCount(ThreadService, ReceivingService, SourceService):
 
         pulse_times=numpy.array(pulse_times)
         pulse_energies=numpy.array(pulse_energies)
-        
+                
         self.dose+=pulse_energies.sum()
+        avg_energy=self.dose/self.total_count
+
 
         counts, self.tbins=numpy.histogram(pulse_times, bins=self.nbins, 
             range=(self.tmin,self.tmax))
@@ -92,7 +94,7 @@ class DoseCount(ThreadService, ReceivingService, SourceService):
         else:
           dose_rate=0
 
-        message=f"time: {self.total_time:.2f}, dose rate(uGy/hr): {dose_rate:5.2f}, average dr(uGy/hr): {avgdose_rate:5.2f}, total dose(uGy): {avgdose_rate*self.total_time/3600.:6.3f}"
+        message=f"time: {self.total_time:.2f}, dose rate(uGy/hr): {dose_rate:5.2f}, average dr(uGy/hr): {avgdose_rate:5.2f}, total dose(uGy): {avgdose_rate*self.total_time/3600.:6.3f}, mean pulse E(keV):{avg_energy:5.2f}"
         if not self.silent:
             self.print_message(message, end="\r")
         
