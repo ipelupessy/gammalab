@@ -100,7 +100,36 @@ def write_calibration_file(data, filename="gammalab.ini", order=1, no_offset=Tru
     if label is None:
         label=f"{datetime.now()}"
     config = configparser.ConfigParser()
+    config.read(filename)
     config["calibration"]=dict(data=data, order=order, no_offset=no_offset, label=label)
     with open(filename,'w') as f:
         config.write(f)
     print(f"[util] calibration written to {filename}")
+
+def write_detector_info(soundcard_name=None, detector_mass=None, label=None, filename="gammalab.ini"):
+    config = configparser.ConfigParser()
+    config.read(filename)
+    info=dict()
+    if soundcard_name is not None:
+        info["soundcard_name"]=soundcard_name
+    if detector_mass is not None:
+        info["detector_mass"]=detector_mass
+    if label is not None:
+      info["label"]=label
+
+    config["detector info"]=info
+    with open(filename,'w') as f:
+        config.write(f)
+    print(f"[util] detector info written to {filename}")
+
+def read_detector_info(filename="gammalab.ini"):
+    config = configparser.ConfigParser()
+    config.read(filename)
+    if "detector info" in config.keys():
+        label=config["detector info"].get("label","(no label)")
+        mass=config["detector info"].getfloat("detector_mass",None)
+        name=config["detector info"].get("soundcard_name","")
+    else:
+        return "", "(no label)", None
+    print(f"[util] detector info read from {filename}, labelled {label}")
+    return name,label,mass

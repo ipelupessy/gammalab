@@ -14,7 +14,7 @@ except:
   pass
 
 from gammalab import main
-from gammalab.util import read_calibration_file
+from gammalab.util import read_calibration_file, read_detector_info
 from gammalab.acquisition import SoundCard, FileReplay
 from gammalab.transform import DownSampleMaxed
 from gammalab.transform import Normalize, SecondOrder
@@ -35,7 +35,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
         histogram_mode="normal", background="", plot_pulses=False,
         time_normalized=False, plot_excess=False,sound_api="soundcard", dose=False, 
         detector_mass=None, list_devices=False, raw_output_file="", output_device_name="", 
-        monitor=False, detect=True):
+        monitor=False, detect=True, ini_file="gammalab.ini"):
 
     if list_devices:
         print("Input devices:")
@@ -51,12 +51,19 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
     if dose and raw_values:
         raise Exception("Dose estimate cannot be done on raw values (remove --dose or --raw")
 
+    if os.path.isfile(ini_file):
+        _name, _label, _mass=read_detector_info(ini_file)
+        if input_device_name=="":
+            input_device_name=_name
+        if detector_mass is None:
+            detector_mass=_mass
+
     if raw_values:
         scale=1.
         vmax=1.
     else:
-        if os.path.isfile("gammalab.ini"):
-            offset,scale,drift=read_calibration_file("gammalab.ini")
+        if os.path.isfile(ini_file):
+            offset,scale,drift=read_calibration_file(ini_file)
         
         print(f"using offset={offset:5.2f}, scale={scale:5.2f}, drift={drift:5.2f}")
 
