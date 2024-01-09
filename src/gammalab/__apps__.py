@@ -27,7 +27,7 @@ from gammalab.backend import SoundCardPlay
 from gammalab.backend import Monitor
 
 
-def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000., 
+def gammalab_run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000., 
         drift=0., runtime=None, outfile=None, log=True, do_plot=False,
         input_device_name="", inputfile=None, realtime=True,
         fitpulse=False, fit_threshold=0.95, raw_values=False,
@@ -146,7 +146,7 @@ def run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=5000.,
 
     main(runtime)
 
-def new_argument_parser():
+def gammalab_argument_parser():
     "Parse command line arguments"
     parser = argparse.ArgumentParser( formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                       description=__doc__, epilog="Note: if a gammalab.ini file is present and --raw not given, the calibration data in the file is used to determine offset,scale and drift")
@@ -364,7 +364,55 @@ def new_argument_parser():
     )
     return parser
 
-if __name__=="__main__":
-    args = new_argument_parser().parse_args()
+def gammalab_main():
+    args = gammalab_argument_parser().parse_args()
     run(**vars(args))
 
+
+from gammalab.util import get_calibration_coeff, calibration_pair
+
+def cal_argument_parser():
+    parser = argparse.ArgumentParser(description='Determine scale and drift parameters from calibration data')
+    parser.add_argument(
+        dest='data', 
+        default=None, 
+        nargs="*", 
+        type=calibration_pair,
+        help='calibration data: a list of space sperated <raw value>,<energy> pairs, e.g.: 0.1,100 0.5,500.'
+    )
+
+    parser.add_argument(
+        '--order',
+        dest='order',
+        default=2,
+        type=int,
+        help='order of calibration polynomial fit (1 or 2)',
+    )
+    parser.add_argument(
+        '--no_offset',
+        dest='no_offset',
+        action="store_true",
+        default=False,
+        help='force offset to be 0.',
+    )
+    parser.add_argument(
+        '--write_ini',
+        dest='write_ini',
+        action="store_true",
+        default=False,
+        help='write calibration data to a file (gammalab.ini)',
+    )
+  
+    return parser
+
+def calibration_main():
+    args=cal_argument_parser().parse_args()
+    offset,scale,drift=get_calibration_coeff(**vars(args))
+    print("[gammalab-calibration-calc] Calibration parameters:")
+    print(f" the offset is: {offset}")
+    print(f" the scale is: {scale}")
+    print(f" the drift is: {drift}")
+
+
+if __name__=="__main__":
+    gammalab_main()
