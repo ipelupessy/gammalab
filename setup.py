@@ -29,8 +29,8 @@ setup(
     long_description=open('README.rst').read(),
     entry_points={
       "console_scripts" : [
-       "gammalab = gammalab.__apps__:gammalab_main",
-       "gammalab-calibration-calc = gammalab.__apps__:calibration_main",
+       "gammalab = gammalab.__main__:gammalab_main",
+       "gammalab-calibration-calc = gammalab.__main__:calibration_main",
        ]
     }
 )

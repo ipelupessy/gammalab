@@ -35,7 +35,7 @@ def gammalab_run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=500
         histogram_mode="normal", background="", plot_pulses=False,
         time_normalized=False, plot_excess=False,sound_api="soundcard", dose=False, 
         detector_mass=None, list_devices=False, raw_output_file="", output_device_name="", 
-        monitor=False, detect=True, ini_file="gammalab.ini"):
+        monitor=False, detect=False, ini_file="gammalab.ini"):
 
     if list_devices:
         print("Input devices:")
@@ -45,6 +45,8 @@ def gammalab_run(threshold=0.003, nchannels=500, vmax=2000., offset=0, scale=500
         for name, id_ in SoundCardPlay(sound_api=sound_api).devices().items():
             print(f"  {name}: {id_}")
         exit(0)
+
+    if not monitor: detect=True
 
     detect=detect or do_plot or plot_pulses or plot_count or fitpulse or (outfile is not None) or dose or raw_values
 

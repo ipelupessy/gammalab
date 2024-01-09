@@ -11,7 +11,7 @@ try:
 except:
   pass
 
-from gammalab.__apps__ import gammalab_run
+from gammalab.__main__ import gammalab_run
 
 def new_argument_parser():
     "Parse command line arguments"
