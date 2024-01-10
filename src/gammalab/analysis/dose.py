@@ -102,7 +102,10 @@ class DoseCount(ThreadService, ReceivingService, SourceService):
     
     @property            
     def outdata(self):
-        return dict(count_per_sec=self.cps, dose_rate=self.dose_rate, time_bins=self.tbins, total_time=self.total_time, interval=self.interval)
+        return dict(count_per_sec=self.cps, dose_rate=self.dose_rate,
+                    time_bins=self.tbins, total_time=self.total_time, 
+                    total_dose=1.6e-19*1000*self.dose/self.detector_mass,
+                    interval=self.interval)
       
     def cleanup(self):
         if self.outfile is not None:

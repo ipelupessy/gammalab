@@ -368,7 +368,7 @@ def gammalab_argument_parser():
 
 def gammalab_main():
     args = gammalab_argument_parser().parse_args()
-    run(**vars(args))
+    gammalab_run(**vars(args))
 
 
 from gammalab.util import get_calibration_coeff, calibration_pair
